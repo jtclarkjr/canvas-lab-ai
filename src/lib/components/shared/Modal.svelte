@@ -6,12 +6,14 @@
     title = '',
     eyebrow = '',
     widthClass = 'max-w-lg',
+    showClose = false,
     children
   } = $props<{
     open?: boolean
     title?: string
     eyebrow?: string
     widthClass?: string
+    showClose?: boolean
     children?: () => unknown
   }>()
 
@@ -57,14 +59,16 @@
           {/if}
           <h2 class="text-2xl font-bold text-foreground">{title}</h2>
         </div>
-        <button
-          type="button"
-          class="flex size-10 items-center justify-center rounded-full bg-secondary text-lg text-secondary-foreground transition hover:scale-105"
-          onclick={() => (open = false)}
-          aria-label="Close dialog"
-        >
-          ×
-        </button>
+        {#if showClose}
+          <button
+            type="button"
+            class="flex size-10 items-center justify-center rounded-full bg-secondary text-lg text-secondary-foreground transition hover:scale-105"
+            onclick={() => (open = false)}
+            aria-label="Close dialog"
+          >
+            ×
+          </button>
+        {/if}
       </div>
 
       {@render children?.()}
