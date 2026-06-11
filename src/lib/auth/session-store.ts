@@ -62,10 +62,11 @@ function syncSessionToCookie(session: Session | null) {
 }
 
 export function setCurrentSession(session: Session | null, notify = true) {
+  const previousSession = currentSession
   currentSession = session
   syncSessionToCookie(session)
 
-  if (notify) {
+  if (notify && previousSession !== session) {
     notifySessionListeners(session)
   }
 }

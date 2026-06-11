@@ -118,13 +118,13 @@ export async function signOut() {
   }
 
   if (!hasSupabaseConfig || !supabase) {
-    setCurrentSession(null)
+    setCurrentSession(null, false)
     redirectToLogin()
     return null
   }
 
+  setCurrentSession(null, false)
   await bestEffort(supabase.auth.signOut())
-  setCurrentSession(null)
   setLastSessionError(null)
   redirectToLogin()
   return null
