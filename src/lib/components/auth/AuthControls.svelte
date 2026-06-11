@@ -43,7 +43,7 @@
     {#snippet trigger(popover)}
       <button
         type="button"
-        class="flex size-10 items-center justify-center overflow-hidden rounded-full border border-border/70 bg-card/80 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+        class="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border/70 bg-card/80 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         aria-label={`${userDisplayName} account menu`}
         aria-haspopup="dialog"
         aria-expanded={popover.expanded}
@@ -106,7 +106,7 @@
             {#each themeOptions as option}
               <button
                 type="button"
-                class={`flex size-9 items-center justify-center rounded-full p-0 transition ${
+                class={`flex size-9 cursor-pointer items-center justify-center rounded-full p-0 transition ${
                   theme.current === option
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -132,7 +132,7 @@
 
         <button
           type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
           onclick={() => {
             popoverOpen = false
             void signOut()
@@ -146,7 +146,7 @@
   </Popover>
 {:else}
   <a
-    class="flex size-10 items-center justify-center rounded-full border border-border/70 bg-card/80 text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+    class="flex size-10 cursor-pointer items-center justify-center rounded-full border border-border/70 bg-card/80 text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
     href={loginHref}
     aria-label="Sign in"
     title="Sign in"
