@@ -8,6 +8,8 @@
   import { CircleUserRound, LogOut, Monitor, Moon, Sun } from 'lucide-svelte'
 
   const themeOptions: Theme[] = ['light', 'dark', 'system']
+  const activeThemeIndex = $derived(Math.max(themeOptions.indexOf(theme.current), 0))
+  const themeThumbStyle = $derived(`transform: translateX(${activeThemeIndex * 2.5}rem);`)
 
   const loginHref = $derived(
     `/login?redirect=${encodeURIComponent(`${page.url.pathname}${page.url.search}`)}`
@@ -99,17 +101,22 @@
             Theme
           </p>
           <div
-            class="inline-flex w-fit items-center gap-1 rounded-full border border-border/70 bg-card/80 p-1"
+            class="relative inline-grid w-fit grid-cols-3 items-center rounded-full border border-border/70 bg-card/80 p-1"
             role="group"
             aria-label="Theme"
           >
+            <span
+              class="pointer-events-none absolute left-1 top-1.5 h-8 w-10 rounded-full bg-primary shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
+              style={themeThumbStyle}
+              aria-hidden="true"
+            ></span>
             {#each themeOptions as option}
               <button
                 type="button"
-                class={`flex size-9 cursor-pointer items-center justify-center rounded-full p-0 transition ${
+                class={`relative z-10 flex h-9 w-10 cursor-pointer items-center justify-center rounded-full p-0 transition-colors duration-200 ${
                   theme.current === option
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                    ? 'text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
                 onclick={() => setTheme(option)}
                 aria-label={`Use ${option} theme`}
