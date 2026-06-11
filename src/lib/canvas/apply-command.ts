@@ -1,5 +1,6 @@
 import type { Path, TextElement } from '$lib/canvas/types'
 import type { ApplyCommandOptions, Command } from '$lib/canvas/commands'
+import { textElementToData } from '$lib/canvas/drawing-utils'
 
 const isPath = (element: Path | TextElement): element is Path => 'points' in element
 const isTextElement = (element: Path | TextElement): element is TextElement =>
@@ -49,14 +50,7 @@ export function createApplyCommand({
             id: text.id,
             canvasId,
             type: 'text',
-            data: {
-              text: text.text,
-              color: text.color,
-              fontSize: text.fontSize,
-              isBold: text.isBold,
-              isItalic: text.isItalic,
-              isUnderline: text.isUnderline
-            },
+            data: textElementToData(text),
             x: text.x,
             y: text.y,
             z: Date.now()
@@ -94,14 +88,7 @@ export function createApplyCommand({
               id: element.id,
               canvasId,
               type: 'text',
-              data: {
-                text: element.text,
-                color: element.color,
-                fontSize: element.fontSize,
-                isBold: element.isBold,
-                isItalic: element.isItalic,
-                isUnderline: element.isUnderline
-              },
+              data: textElementToData(element),
               x: element.x,
               y: element.y,
               z: Date.now()
@@ -160,14 +147,7 @@ export function createApplyCommand({
           id: text.id,
           canvasId,
           type: 'text',
-          data: {
-            text: text.text,
-            color: text.color,
-            fontSize: text.fontSize,
-            isBold: text.isBold,
-            isItalic: text.isItalic,
-            isUnderline: text.isUnderline
-          },
+          data: textElementToData(text),
           x: text.x,
           y: text.y,
           z: Date.now()
@@ -221,14 +201,7 @@ export function createApplyCommand({
               id: text.id,
               canvasId,
               type: 'text',
-              data: {
-                text: text.text,
-                color: text.color,
-                fontSize: text.fontSize,
-                isBold: text.isBold,
-                isItalic: text.isItalic,
-                isUnderline: text.isUnderline
-              },
+              data: textElementToData(text),
               x: command.after.x,
               y: command.after.y,
               z: Date.now()
@@ -285,14 +258,7 @@ export function createApplyCommand({
                 id: text.id,
                 canvasId,
                 type: 'text',
-                data: {
-                  text: text.text,
-                  color: text.color,
-                  fontSize: text.fontSize,
-                  isBold: text.isBold,
-                  isItalic: text.isItalic,
-                  isUnderline: text.isUnderline
-                },
+                data: textElementToData(text),
                 x: element.after.x,
                 y: element.after.y,
                 z: Date.now()

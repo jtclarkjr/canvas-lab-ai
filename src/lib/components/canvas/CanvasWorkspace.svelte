@@ -2,7 +2,7 @@
   import { goto, invalidateAll } from '$app/navigation'
   import { REALTIME_SUBSCRIBE_STATES, type RealtimeChannel } from '@supabase/supabase-js'
   import { Home } from 'lucide-svelte'
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import { z } from 'zod'
   import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
   import {
@@ -32,6 +32,7 @@
     Camera,
     DrawFormatting,
     EditingText,
+    ListStyle,
     Path,
     Point,
     TextElement,
@@ -41,11 +42,22 @@
   import {
     calculateTextBounds,
     findTextAtPoint,
+    getTextLineHeight,
     isElementInSelection,
     isPointNearPath,
     pathToSvgPath,
-    screenToCanvas
+    screenToCanvas,
+    TEXT_LINE_HEIGHT,
+    textElementToData
   } from '$lib/canvas/drawing-utils'
+  import {
+    applyLegacyListStyle,
+    continueListOnEnter,
+    getSelectionListStyle,
+    listStartValue,
+    normalizeListText,
+    toggleListStyle
+  } from '$lib/canvas/text-lists'
   import CanvasActionToolbar from '$lib/components/canvas/CanvasActionToolbar.svelte'
   import CanvasOptionsButton from '$lib/components/canvas/CanvasOptionsButton.svelte'
   import CanvasToolbar from '$lib/components/canvas/CanvasToolbar.svelte'
@@ -91,7 +103,8 @@
       fontSize: z.number().default(16),
       isBold: z.boolean().default(false),
       isItalic: z.boolean().default(false),
-      isUnderline: z.boolean().default(false)
+      isUnderline: z.boolean().default(false),
+      listStyle: z.enum(['none', 'bullet', 'number']).catch('none').default('none')
     })
     .nullable()
     .catch(null)
@@ -116,7 +129,7 @@
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
   let titleInputEl = $state<HTMLInputElement | null>(null)
-  let textInputEl = $state<HTMLInputElement | null>(null)
+  let textInputEl = $state<HTMLTextAreaElement | null>(null)
   let dropdownEl = $state<HTMLDivElement | null>(null)
 
   let canvases = $state<Canvas[]>([])
@@ -132,7 +145,8 @@
     isBold: false,
     isItalic: false,
     isUnderline: false,
-    color: '#000000'
+    color: '#000000',
+    listStyle: 'none'
   })
   let drawFormatting = $state<DrawFormatting>({
     width: 2,
@@ -159,6 +173,12 @@
   let isSelecting = $state(false)
   let selectedElementIds = $state<Set<string>>(new Set())
   let editingText = $state<EditingText | null>(null)
+  let editorSelection = $state({ start: 0, end: 0 })
+  const activeListStyle = $derived(
+    editingText
+      ? getSelectionListStyle(editingText.value, editorSelection.start, editorSelection.end)
+      : textFormatting.listStyle
+  )
   let isDraggingSelection = $state(false)
   let dragStartPos = $state<Point | null>(null)
   let undoStack = $state<Command[]>([])
@@ -364,7 +384,7 @@
         const textData = textDataSchema.parse(element.data)
         return {
           id: element.id,
-          text: textData?.text || '',
+          text: applyLegacyListStyle(textData?.text || '', textData?.listStyle),
           x: element.x ?? 0,
           y: element.y ?? 0,
           color: textData?.color || '#000000',
@@ -466,7 +486,7 @@
 
   function commitText(text: EditingText | null) {
     if (!text || !text.id) return
-    const value = text.value.trim()
+    const value = normalizeListText(text.value)
 
     if (!value) {
       const wasCreate = !originalTextValue
@@ -519,14 +539,7 @@
         id: text.id,
         canvasId: activeCanvasId,
         type: 'text',
-        data: {
-          text: value,
-          color: textElement.color,
-          fontSize: textElement.fontSize,
-          isBold: textElement.isBold,
-          isItalic: textElement.isItalic,
-          isUnderline: textElement.isUnderline
-        },
+        data: textElementToData(textElement),
         x: textElement.x,
         y: textElement.y,
         z: Date.now()
@@ -547,6 +560,7 @@
 
   function startTextEditingAtPosition(x: number, y: number, value: string, id?: string) {
     const textId = id ?? crypto.randomUUID()
+    let initialValue = value
 
     if (id) {
       const existing = textElements.find((entry) => entry.id === id)
@@ -554,9 +568,12 @@
     } else {
       originalTextValue = null
       elementOwners.set(textId, userId)
+      if (!value) {
+        initialValue = listStartValue(textFormatting.listStyle)
+      }
       const placeholder: TextElement = {
         id: textId,
-        text: '',
+        text: initialValue,
         x,
         y,
         color: textFormatting.color,
@@ -568,14 +585,84 @@
       setTextElements((previous) => [...previous, placeholder])
     }
 
-    editingText = { id: textId, x, y, value }
+    editingText = { id: textId, x, y, value: initialValue }
 
     queueMicrotask(() => {
       textInputEl?.focus()
-      if (value) {
+      if (id && initialValue) {
         textInputEl?.select()
+      } else if (initialValue) {
+        textInputEl?.setSelectionRange(initialValue.length, initialValue.length)
       }
+      syncEditorSelection()
     })
+  }
+
+  function syncEditorSelection() {
+    if (!textInputEl) return
+    editorSelection = {
+      start: textInputEl.selectionStart ?? 0,
+      end: textInputEl.selectionEnd ?? 0
+    }
+  }
+
+  function applyEditorValue(value: string) {
+    editingText = editingText ? { ...editingText, value } : editingText
+    setTextElements((previous) =>
+      previous.map((entry) => (entry.id === editingText?.id ? { ...entry, text: value } : entry))
+    )
+  }
+
+  async function handleListStyleToggle(style: Exclude<ListStyle, 'none'>) {
+    if (editingText && textInputEl) {
+      const result = toggleListStyle(
+        editingText.value,
+        textInputEl.selectionStart ?? editingText.value.length,
+        textInputEl.selectionEnd ?? editingText.value.length,
+        style
+      )
+      applyEditorValue(result.text)
+      await tick()
+      textInputEl?.setSelectionRange(result.selectionStart, result.selectionEnd)
+      syncEditorSelection()
+      return
+    }
+    textFormatting = {
+      ...textFormatting,
+      listStyle: textFormatting.listStyle === style ? 'none' : style
+    }
+  }
+
+  async function handleTextEditorKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.isComposing && editingText) {
+      if (!event.shiftKey) {
+        event.preventDefault()
+        commitText(editingText)
+        return
+      }
+      const target = event.currentTarget as HTMLTextAreaElement
+      const result = continueListOnEnter(
+        editingText.value,
+        target.selectionStart ?? editingText.value.length,
+        target.selectionEnd ?? editingText.value.length
+      )
+      if (result) {
+        event.preventDefault()
+        applyEditorValue(result.text)
+        await tick()
+        textInputEl?.setSelectionRange(result.caret, result.caret)
+        syncEditorSelection()
+      }
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      if (editingText?.id) {
+        const existing = textElements.find((entry) => entry.id === editingText?.id)
+        if (existing && !normalizeListText(existing.text)) {
+          setTextElements((previous) => previous.filter((entry) => entry.id !== editingText?.id))
+        }
+      }
+      editingText = null
+    }
   }
 
   function handleUndo() {
@@ -765,14 +852,7 @@
           id: text.id,
           canvasId: activeCanvasId,
           type: 'text',
-          data: {
-            text: text.text,
-            color: text.color,
-            fontSize: text.fontSize,
-            isBold: text.isBold,
-            isItalic: text.isItalic,
-            isUnderline: text.isUnderline
-          },
+          data: textElementToData(text),
           x: text.x,
           y: text.y,
           z: Date.now()
@@ -923,7 +1003,8 @@
           isBold: hitText.isBold,
           isItalic: hitText.isItalic,
           isUnderline: hitText.isUnderline,
-          color: hitText.color
+          color: hitText.color,
+          listStyle: textFormatting.listStyle
         }
         startTextEditingAtPosition(hitText.x, hitText.y, hitText.text, hitText.id)
       } else if (!hitText && !wasEditing) {
@@ -957,7 +1038,8 @@
         isBold: hitText.isBold,
         isItalic: hitText.isItalic,
         isUnderline: hitText.isUnderline,
-        color: hitText.color
+        color: hitText.color,
+        listStyle: textFormatting.listStyle
       }
       startTextEditingAtPosition(hitText.x, hitText.y, hitText.text, hitText.id)
       return
@@ -1045,7 +1127,8 @@
       isBold: hitText.isBold,
       isItalic: hitText.isItalic,
       isUnderline: hitText.isUnderline,
-      color: hitText.color
+      color: hitText.color,
+      listStyle: textFormatting.listStyle
     }
 
     startTextEditingAtPosition(hitText.x, hitText.y, hitText.text, hitText.id)
@@ -1589,7 +1672,7 @@
                 ...previous,
                 {
                   id: nextElement.id,
-                  text: textData.text,
+                  text: applyLegacyListStyle(textData.text, textData.listStyle),
                   color: textData.color,
                   fontSize: textData.fontSize,
                   isBold: textData.isBold,
@@ -1627,7 +1710,7 @@
                 entry.id === nextElement.id
                   ? {
                       ...entry,
-                      text: textData.text,
+                      text: applyLegacyListStyle(textData.text, textData.listStyle),
                       color: textData.color,
                       fontSize: textData.fontSize,
                       isBold: textData.isBold,
@@ -1995,6 +2078,7 @@
     isItalic={textFormatting.isItalic}
     isUnderline={textFormatting.isUnderline}
     color={textFormatting.color}
+    listStyle={activeListStyle}
     isVisible={selectedTool === 'text'}
     onFontSizeChange={(fontSize) => {
       textFormatting = { ...textFormatting, fontSize }
@@ -2017,6 +2101,7 @@
     onColorChange={(color) => {
       textFormatting = { ...textFormatting, color }
     }}
+    onListStyleChange={handleListStyleToggle}
   />
 
   <DrawingToolbar
@@ -2120,7 +2205,11 @@
               x={text.x}
               y={text.y}
             >
-              {text.text}
+              {#each text.text.split('\n') as line, lineIndex (lineIndex)}
+                <tspan x={text.x} y={text.y + lineIndex * getTextLineHeight(text.fontSize)}>
+                  {line}
+                </tspan>
+              {/each}
             </text>
           </g>
         {/if}
@@ -2143,39 +2232,29 @@
   </svg>
 
   {#if editingText}
-    <input
+    {@const editorLines = editingText.value.split('\n')}
+    {@const longestEditorLine = Math.max(...editorLines.map((line) => line.length), 1)}
+    {@const editorWidth = Math.max(
+      120,
+      longestEditorLine * textFormatting.fontSize * 0.6 * camera.scale + 16
+    )}
+    <textarea
       bind:this={textInputEl}
       class="absolute border-none bg-transparent caret-current outline-none"
-      style={`left:${camera.x + editingText.x * camera.scale}px;top:${camera.y + editingText.y * camera.scale}px;font-size:${textFormatting.fontSize * camera.scale}px;color:${textFormatting.color};font-weight:${textFormatting.isBold ? 'bold' : 'normal'};font-style:${textFormatting.isItalic ? 'italic' : 'normal'};text-decoration:${textFormatting.isUnderline ? 'underline' : 'none'};min-width:120px;box-shadow:inset 0 0 0 1px rgba(59,130,246,.2);padding:0;margin:0`}
+      style={`left:${camera.x + editingText.x * camera.scale}px;top:${camera.y + editingText.y * camera.scale}px;font-size:${textFormatting.fontSize * camera.scale}px;line-height:${TEXT_LINE_HEIGHT};color:${textFormatting.color};font-weight:${textFormatting.isBold ? 'bold' : 'normal'};font-style:${textFormatting.isItalic ? 'italic' : 'normal'};text-decoration:${textFormatting.isUnderline ? 'underline' : 'none'};width:${editorWidth}px;resize:none;overflow:hidden;white-space:pre;box-shadow:inset 0 0 0 1px rgba(59,130,246,.2);padding:0;margin:0`}
+      rows={editorLines.length}
+      wrap="off"
       value={editingText.value}
       oninput={(event) => {
-        const value = (event.currentTarget as HTMLInputElement).value
-        editingText = editingText ? { ...editingText, value } : editingText
-        setTextElements((previous) =>
-          previous.map((entry) =>
-            entry.id === editingText?.id ? { ...entry, text: value } : entry
-          )
-        )
+        applyEditorValue((event.currentTarget as HTMLTextAreaElement).value)
+        syncEditorSelection()
       }}
       onblur={handleTextInputBlur}
-      onkeydown={(event) => {
-        if (event.key === 'Enter' && editingText) {
-          event.preventDefault()
-          commitText(editingText)
-        } else if (event.key === 'Escape') {
-          event.preventDefault()
-          if (editingText?.id) {
-            const existing = textElements.find((entry) => entry.id === editingText?.id)
-            if (existing && !existing.text) {
-              setTextElements((previous) =>
-                previous.filter((entry) => entry.id !== editingText?.id)
-              )
-            }
-          }
-          editingText = null
-        }
-      }}
-    />
+      onkeydown={handleTextEditorKeydown}
+      onkeyup={syncEditorSelection}
+      onpointerup={syncEditorSelection}
+      onselect={syncEditorSelection}
+    ></textarea>
   {/if}
 
   <LiveCursors {cursors} />

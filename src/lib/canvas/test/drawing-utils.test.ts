@@ -1,27 +1,50 @@
 import { describe, expect, it } from 'vite-plus/test'
 import {
+  calculateTextBounds,
   findTextAtPoint,
+  getTextLineHeight,
   isElementInSelection,
   isPointNearPath
 } from '$lib/canvas/drawing-utils'
 import type { Path, TextElement } from '$lib/canvas/types'
 
+function makeText(overrides: Partial<TextElement> = {}): TextElement {
+  return {
+    id: 'text-1',
+    text: 'hello',
+    x: 10,
+    y: 20,
+    color: '#111111',
+    fontSize: 18,
+    isBold: false,
+    isItalic: false,
+    isUnderline: false,
+    ...overrides
+  }
+}
+
 describe('drawing utils', () => {
   it('finds text elements by bounding box hit test', () => {
-    const text: TextElement = {
-      id: 'text-1',
-      text: 'hello',
-      x: 10,
-      y: 20,
-      color: '#111111',
-      fontSize: 18,
-      isBold: false,
-      isItalic: false,
-      isUnderline: false
-    }
+    const text = makeText()
 
     expect(findTextAtPoint({ x: 15, y: 25 }, [text])?.id).toBe('text-1')
     expect(findTextAtPoint({ x: 200, y: 200 }, [text])).toBeNull()
+  })
+
+  it('finds multiline text elements on lines below the first', () => {
+    const text = makeText({ text: 'first\nsecond\nthird' })
+    const secondLineY = 20 + getTextLineHeight(18) + 2
+
+    expect(findTextAtPoint({ x: 15, y: secondLineY }, [text])?.id).toBe('text-1')
+    expect(findTextAtPoint({ x: 15, y: 20 + 3 * getTextLineHeight(18) + 30 }, [text])).toBeNull()
+  })
+
+  it('calculates multiline text bounds from the longest line', () => {
+    const text = makeText({ text: 'a\nlonger line', fontSize: 16 })
+    const bounds = calculateTextBounds(text)
+
+    expect(bounds.width).toBe('longer line'.length * 16 * 0.6 + 8)
+    expect(bounds.height).toBe(getTextLineHeight(16) + 16 + 8)
   })
 
   it('detects paths inside selection rectangles', () => {

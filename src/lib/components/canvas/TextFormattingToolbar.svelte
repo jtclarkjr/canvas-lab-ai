@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Bold, Italic, Minus, Palette, Plus, Underline } from 'lucide-svelte'
+  import { Bold, Italic, List, ListOrdered, Minus, Palette, Plus, Underline } from 'lucide-svelte'
+  import type { ListStyle } from '$lib/canvas/types'
 
   let {
     fontSize,
@@ -7,11 +8,13 @@
     isItalic,
     isUnderline,
     color,
+    listStyle,
     onFontSizeChange,
     onBoldToggle,
     onItalicToggle,
     onUnderlineToggle,
     onColorChange,
+    onListStyleChange,
     isVisible
   } = $props<{
     fontSize: number
@@ -19,11 +22,13 @@
     isItalic: boolean
     isUnderline: boolean
     color: string
+    listStyle: ListStyle
     onFontSizeChange: (size: number) => void
     onBoldToggle: () => void
     onItalicToggle: () => void
     onUnderlineToggle: () => void
     onColorChange: (color: string) => void
+    onListStyleChange: (style: Exclude<ListStyle, 'none'>) => void
     isVisible: boolean
   }>()
 
@@ -107,6 +112,32 @@
       title="Underline"
     >
       <Underline class="size-4" />
+    </button>
+    <button
+      type="button"
+      class={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
+        listStyle === 'bullet'
+          ? 'bg-primary text-white'
+          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+      }`}
+      onmousedown={preventEditorBlur}
+      onclick={() => onListStyleChange('bullet')}
+      title="Bullet list"
+    >
+      <List class="size-4" />
+    </button>
+    <button
+      type="button"
+      class={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
+        listStyle === 'number'
+          ? 'bg-primary text-white'
+          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+      }`}
+      onmousedown={preventEditorBlur}
+      onclick={() => onListStyleChange('number')}
+      title="Numbered list"
+    >
+      <ListOrdered class="size-4" />
     </button>
 
     <div class="relative">

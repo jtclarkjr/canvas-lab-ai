@@ -5,6 +5,30 @@ import type {
   TextElement
 } from '$lib/canvas/types'
 
+export const TEXT_LINE_HEIGHT = 1.25
+
+export function getTextLineHeight(fontSize: number): number {
+  return fontSize * TEXT_LINE_HEIGHT
+}
+
+export function textElementToData(text: TextElement): {
+  text: string
+  color: string
+  fontSize: number
+  isBold: boolean
+  isItalic: boolean
+  isUnderline: boolean
+} {
+  return {
+    text: text.text,
+    color: text.color,
+    fontSize: text.fontSize,
+    isBold: text.isBold,
+    isItalic: text.isItalic,
+    isUnderline: text.isUnderline
+  }
+}
+
 function distanceToSegment(point: Point, start: Point, end: Point): number {
   const dx = end.x - start.x
   const dy = end.y - start.y
@@ -72,10 +96,9 @@ export function findTextAtPoint(
   for (let i = textElements.length - 1; i >= 0; i -= 1) {
     const text = textElements[i]
     if (!text || !text.text) continue
-    const width = Math.max(text.text.length, 1) * text.fontSize * 0.6
-    const height = text.fontSize
-    const withinX = point.x >= text.x && point.x <= text.x + width
-    const withinY = point.y >= text.y && point.y <= text.y + height
+    const bounds = calculateTextBounds(text)
+    const withinX = point.x >= bounds.x && point.x <= bounds.x + bounds.width
+    const withinY = point.y >= bounds.y && point.y <= bounds.y + bounds.height
     if (withinX && withinY) {
       return text
     }
@@ -107,8 +130,10 @@ export function pathToSvgPath(points: Point[]): string {
 }
 
 export function calculateTextBounds(text: TextElement) {
-  const width = Math.max(text.text.length, 1) * text.fontSize * 0.6 + 8
-  const height = text.fontSize + 8
+  const lines = text.text.split('\n')
+  const longestLine = Math.max(...lines.map((line) => line.length), 1)
+  const width = longestLine * text.fontSize * 0.6 + 8
+  const height = (lines.length - 1) * getTextLineHeight(text.fontSize) + text.fontSize + 8
   return {
     x: text.x - 4,
     y: text.y - 4,

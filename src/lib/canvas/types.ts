@@ -10,6 +10,8 @@ export type Path = {
   opacity: number
 }
 
+export type ListStyle = 'none' | 'bullet' | 'number'
+
 export type TextElement = {
   id: string
   text: string
@@ -28,6 +30,7 @@ export type TextFormatting = {
   isItalic: boolean
   isUnderline: boolean
   color: string
+  listStyle: ListStyle
 }
 
 export type DrawStyle = 'freeform' | 'straight'
