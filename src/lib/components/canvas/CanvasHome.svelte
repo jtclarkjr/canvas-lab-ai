@@ -122,17 +122,19 @@
   <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
     <button
       type="button"
-      class="group relative aspect-[3/4] overflow-hidden rounded-lg border-2 border-dashed border-slate-300 bg-white shadow-sm transition hover:border-primary hover:shadow-md disabled:opacity-50"
+      class="group relative aspect-[3/4] overflow-hidden rounded-lg border-2 border-dashed border-border bg-card shadow-sm transition hover:border-primary hover:bg-accent/40 hover:shadow-md disabled:opacity-50"
       onclick={() => void handleCreate()}
       disabled={isCreating}
     >
       <div class="flex h-full flex-col items-center justify-center gap-3 p-4">
         <div
-          class="flex size-12 items-center justify-center rounded-full bg-slate-100 transition group-hover:bg-primary/10"
+          class="flex size-12 items-center justify-center rounded-full bg-muted transition group-hover:bg-primary/10"
         >
-          <Plus class="size-6 text-slate-600 transition group-hover:text-primary" />
+          <Plus class="size-6 text-muted-foreground transition group-hover:text-primary" />
         </div>
-        <p class="m-0 text-sm font-medium text-slate-600 transition group-hover:text-primary">
+        <p
+          class="m-0 text-sm font-medium text-muted-foreground transition group-hover:text-primary"
+        >
           Create new canvas
         </p>
       </div>
@@ -140,17 +142,15 @@
 
     {#if isLoading}
       {#each Array.from({ length: 4 }) as _, index (index)}
-        <div
-          class="aspect-[3/4] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
-        >
+        <div class="aspect-[3/4] overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           <div
-            class="flex h-3/4 items-center justify-center border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4"
+            class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
           >
-            <div class="size-20 animate-pulse rounded-lg bg-slate-100"></div>
+            <div class="size-20 animate-pulse rounded-lg bg-secondary"></div>
           </div>
           <div class="flex h-1/4 flex-col justify-center gap-2 px-4">
-            <div class="h-4 w-3/4 animate-pulse rounded bg-slate-100"></div>
-            <div class="h-3 w-1/3 animate-pulse rounded bg-slate-100"></div>
+            <div class="h-4 w-3/4 animate-pulse rounded bg-secondary"></div>
+            <div class="h-3 w-1/3 animate-pulse rounded bg-secondary"></div>
           </div>
         </div>
       {/each}
@@ -160,11 +160,11 @@
           href={`/canvas/${canvas.id}`}
           out:scale={{ duration: 200, start: 0.92, opacity: 0 }}
           animate:flip={{ duration: 250 }}
-          class="group relative aspect-[3/4] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
+          class="group relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:border-primary/50 hover:shadow-md"
         >
           <button
             type="button"
-            class="absolute right-2 top-2 z-10 hidden size-8 items-center justify-center rounded-lg bg-white opacity-0 shadow-md transition hover:bg-red-50 md:flex md:pointer-events-none md:group-focus-within:pointer-events-auto md:group-hover:pointer-events-auto md:group-focus-within:opacity-100 md:group-hover:opacity-100"
+            class="absolute right-2 top-2 z-10 hidden size-8 items-center justify-center rounded-lg bg-card/95 text-muted-foreground opacity-0 shadow-md transition hover:bg-destructive/10 hover:text-destructive md:flex md:pointer-events-none md:group-focus-within:pointer-events-auto md:group-hover:pointer-events-auto md:group-focus-within:opacity-100 md:group-hover:opacity-100"
             onclick={(event) => {
               event.preventDefault()
               event.stopPropagation()
@@ -172,22 +172,26 @@
             }}
             title="Delete canvas"
           >
-            <Trash2 class="size-4 text-slate-600 hover:text-red-600" />
+            <Trash2 class="size-4" />
           </button>
 
           <div
-            class="flex h-3/4 items-center justify-center border-b border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4"
+            class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
           >
-            <div class="rounded-lg bg-white p-4 shadow-inner">
-              <FileText class="size-12 text-slate-300" />
+            <div class="rounded-lg bg-background/80 p-4 shadow-inner">
+              <FileText class="size-12 text-muted-foreground/50" />
             </div>
           </div>
 
           <div class="flex h-1/4 flex-col justify-center gap-1 px-4">
-            <h2 class="m-0 truncate text-sm font-medium text-slate-900 group-hover:text-primary">
+            <h2
+              class="m-0 truncate text-sm font-medium text-card-foreground group-hover:text-primary"
+            >
               {canvas.title}
             </h2>
-            <p class="m-0 text-xs text-slate-500">{formatCanvasDate(canvas.createdAt)}</p>
+            <p class="m-0 text-xs text-muted-foreground">
+              {formatCanvasDate(canvas.createdAt)}
+            </p>
           </div>
         </a>
       {/each}
@@ -195,7 +199,7 @@
   </div>
 
   {#if !isLoading && session.data?.user && canvases.length === 0}
-    <div class="py-12 text-center text-slate-500">
+    <div class="py-12 text-center text-muted-foreground">
       No canvases yet. Create your first one to get started.
     </div>
   {/if}
@@ -217,7 +221,7 @@
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
       <button
         type="button"
-        class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+        class="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-secondary"
         onclick={() => {
           isDeleteDialogOpen = false
         }}
