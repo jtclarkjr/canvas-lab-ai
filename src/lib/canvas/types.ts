@@ -1,3 +1,5 @@
+import type { CanvasRole } from '$lib/canvas/roles'
+
 export type Tool = 'select' | 'hand' | 'pencil' | 'eraser' | 'text'
 
 export type Point = { x: number; y: number }
@@ -54,4 +56,31 @@ export type Camera = {
   x: number
   y: number
   scale: number
+}
+
+export type WorkspaceMember = {
+  name: string
+  color: string
+}
+
+export type DisplayMember = {
+  id: string
+  name: string
+  color: string
+}
+
+export type CanvasWorkspaceStoreInput = {
+  canvasId: string
+  userId: string
+  userEmail?: string | null
+  role?: CanvasRole
+}
+
+export type RealtimeCanvasElementRow = {
+  id: string
+  type: string
+  data: unknown
+  x?: number | null
+  y?: number | null
+  created_by?: string | null
 }

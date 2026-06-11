@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { CanvasElement } from '$lib/canvas/schema'
-import type { Path, Point, TextElement } from '$lib/canvas/types'
+import type { Path, Point, RealtimeCanvasElementRow, TextElement } from '$lib/canvas/types'
 import { applyLegacyListStyle } from '$lib/canvas/text-lists'
 
 const pointSchema = z.object({ x: z.number(), y: z.number() })
@@ -41,8 +41,6 @@ export const realtimeRowSchema = z
   .catch(null)
 
 export const deletedRowSchema = z.object({ id: z.string() }).nullable().catch(null)
-
-export type RealtimeCanvasElementRow = NonNullable<z.infer<typeof realtimeRowSchema>>
 
 export function canvasElementOwnerEntries(items: CanvasElement[]): Array<[string, string | null]> {
   return items.map((element) => [element.id, element.createdBy ?? null])
