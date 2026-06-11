@@ -135,6 +135,10 @@
     @apply border border-border/70;
   }
 
+  .popover-shell {
+    @apply rounded-lg border border-border/50 bg-popover p-3 text-popover-foreground shadow-xl;
+  }
+
   .toolbar-pill {
     @apply rounded-full border border-slate-800/80 bg-black/60 text-slate-200 shadow-lg shadow-black/40 backdrop-blur;
   }
