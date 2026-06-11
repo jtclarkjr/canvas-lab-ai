@@ -2,10 +2,12 @@ import { json, type RequestHandler } from '@sveltejs/kit'
 import {
   canvasRowSchema,
   deleteCanvasResponseSchema,
+  getCanvasResponseSchema,
   updateCanvasInputSchema,
   updateCanvasResponseSchema
 } from '$lib/canvas/schema'
 import type { CanvasRow } from '$lib/canvas/schema'
+import { requireCanvasRole } from '$lib/server/canvas-access'
 import {
   handleApiError,
   notFound,
@@ -23,11 +25,41 @@ const toCanvas = (row: CanvasRow) => ({
   createdAt: row.created_at
 })
 
+export const GET: RequestHandler = async (event) =>
+  withRateLimit(async () => {
+    try {
+      const supabase = getSupabase()
+      const user = withAuth(event.locals.user)
+
+      const { canvas, role } = await requireCanvasRole(
+        supabase,
+        event.params.canvasId!,
+        user.id,
+        'reader'
+      )
+
+      return json(
+        getCanvasResponseSchema.parse({
+          item: { ...toCanvas(canvas), role }
+        })
+      )
+    } catch (error) {
+      return handleApiError(error, event.request)
+    }
+  })({ request: event.request })
+
 export const PATCH: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
+
+      await requireCanvasRole(
+        supabase,
+        event.params.canvasId!,
+        user.id,
+        'admin'
+      )
 
       const payload = await parseJsonBody(event.request)
       const input = parseInput(updateCanvasInputSchema, payload)
@@ -36,7 +68,6 @@ export const PATCH: RequestHandler = async (event) =>
         .from('canvases')
         .update({ title: input.title })
         .eq('id', event.params.canvasId!)
-        .eq('created_by', user.id)
         .select()
         .single()
 
@@ -62,6 +93,13 @@ export const DELETE: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
+
+      await requireCanvasRole(
+        supabase,
+        event.params.canvasId!,
+        user.id,
+        'owner'
+      )
 
       const { data, error } = await supabase
         .from('canvases')

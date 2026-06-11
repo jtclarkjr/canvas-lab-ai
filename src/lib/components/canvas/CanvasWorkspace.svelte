@@ -1,12 +1,14 @@
 <script lang="ts">
-  import { goto } from '$app/navigation'
+  import { goto, invalidateAll } from '$app/navigation'
   import { REALTIME_SUBSCRIBE_STATES, type RealtimeChannel } from '@supabase/supabase-js'
   import { Home } from 'lucide-svelte'
   import { onMount } from 'svelte'
   import { z } from 'zod'
-  import { supabase } from '$lib/auth/session-store'
+  import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
   import {
+    ApiClientError,
     deleteElement as deleteElementApi,
+    listAccessRequests,
     listCanvases,
     listElements,
     updateCanvas,
@@ -24,7 +26,8 @@
     getInverseCommand,
     type Command
   } from '$lib/canvas/commands'
-  import type { Canvas, CanvasElement, UpsertElementInput } from '$lib/canvas/schema'
+  import type { AccessRequest, Canvas, CanvasElement, UpsertElementInput } from '$lib/canvas/schema'
+  import type { CanvasRole } from '$lib/canvas/roles'
   import type {
     Camera,
     DrawFormatting,
@@ -44,15 +47,24 @@
     screenToCanvas
   } from '$lib/canvas/drawing-utils'
   import CanvasActionToolbar from '$lib/components/canvas/CanvasActionToolbar.svelte'
+  import CanvasOptionsButton from '$lib/components/canvas/CanvasOptionsButton.svelte'
   import CanvasToolbar from '$lib/components/canvas/CanvasToolbar.svelte'
   import DrawingToolbar from '$lib/components/canvas/DrawingToolbar.svelte'
   import LiveCursors from '$lib/components/canvas/LiveCursors.svelte'
+  import ShareDialog from '$lib/components/canvas/ShareDialog.svelte'
   import TextFormattingToolbar from '$lib/components/canvas/TextFormattingToolbar.svelte'
+  import { toast } from '$lib/stores/toast.svelte'
 
-  let { canvasId, userId, userEmail } = $props<{
+  let {
+    canvasId,
+    userId,
+    userEmail,
+    role = 'owner'
+  } = $props<{
     canvasId: string
     userId: string
     userEmail?: string | null
+    role?: CanvasRole
   }>()
 
   type CursorEventPayload = {
@@ -89,7 +101,8 @@
       type: z.string(),
       data: z.unknown(),
       x: z.number().nullable().optional(),
-      y: z.number().nullable().optional()
+      y: z.number().nullable().optional(),
+      created_by: z.string().nullable().optional()
     })
     .nullable()
     .catch(null)
@@ -154,6 +167,21 @@
   const cursorColor = $derived(colorFromId(userId))
   let cursors = $state<Record<string, CursorEventPayload>>({})
   let members = $state<Record<string, { name: string; color: string }>>({})
+
+  const canEdit = $derived(role !== 'reader')
+  const canManageCanvas = $derived(role === 'owner' || role === 'admin')
+  let shareDialogOpen = $state(false)
+  let pendingRequests = $state<AccessRequest[]>([])
+  // Element ownership for the editor role; not reactive on purpose — it is
+  // only consulted inside event handlers.
+  let elementOwners = new Map<string, string | null>()
+
+  function canModifyElement(id: string) {
+    if (role === 'owner' || role === 'admin') {
+      return true
+    }
+    return role === 'editor' && elementOwners.get(id) === userId
+  }
 
   let pendingDrag: { elementId: string; startPos: Point } | null = null
   let originalElementPositions = {
@@ -315,6 +343,8 @@
   }
 
   function syncElements(items: CanvasElement[]) {
+    elementOwners = new Map(items.map((element) => [element.id, element.createdBy ?? null]))
+
     const loadedPaths = items
       .filter((element) => element.type === 'path')
       .map((element) => {
@@ -354,6 +384,16 @@
       const response = await listElements(id)
       syncElements(response.items)
     } catch (error) {
+      if (
+        error instanceof ApiClientError &&
+        error.status === 403 &&
+        error.code === 'canvas_access_denied'
+      ) {
+        // Access was revoked mid-session; re-run the page load so the
+        // request-access screen takes over.
+        void invalidateAll()
+        return
+      }
       canvasesError = error instanceof Error ? error.message : 'Failed to load canvas elements.'
     }
   }
@@ -396,7 +436,7 @@
 
   function beginTitleEdit() {
     const canvas = currentCanvas()
-    if (!canvas) {
+    if (!canvas || !canManageCanvas) {
       return
     }
 
@@ -513,6 +553,7 @@
       originalTextValue = existing ? { ...existing } : null
     } else {
       originalTextValue = null
+      elementOwners.set(textId, userId)
       const placeholder: TextElement = {
         id: textId,
         text: '',
@@ -550,6 +591,7 @@
   }
 
   function deleteSelectedElements() {
+    selectedElementIds = new Set([...selectedElementIds].filter((id) => canModifyElement(id)))
     if (selectedElementIds.size === 0) return
 
     const elementsToDelete: Array<{
@@ -773,7 +815,7 @@
       }
     }
 
-    selectedElementIds = nextSelected
+    selectedElementIds = new Set([...nextSelected].filter((id) => canModifyElement(id)))
     isSelecting = false
     selectionStart = null
     selectionEnd = null
@@ -789,6 +831,7 @@
 
     if (currentPath.length > 0) {
       const pathId = crypto.randomUUID()
+      elementOwners.set(pathId, userId)
       const pathData = {
         points: currentPath,
         color: drawFormatting.color,
@@ -831,6 +874,7 @@
 
   function handleSvgPointerDown(event: PointerEvent) {
     if (!event.isPrimary) return
+    if (!canEdit) return
 
     if (selectedTool === 'pencil') {
       event.preventDefault()
@@ -847,7 +891,7 @@
       ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
       const point = screenToCanvasPoint(event.clientX, event.clientY)
       const pathToDelete = paths.find((path) => isPointNearPath(point, path, 10))
-      if (pathToDelete) {
+      if (pathToDelete && canModifyElement(pathToDelete.id)) {
         addCommand(createDeleteElementCommand(pathToDelete, 'path', userId))
         setPaths((previous) => previous.filter((entry) => entry.id !== pathToDelete.id))
         deleteElement.mutate(
@@ -873,7 +917,7 @@
         commitText(editingText)
       }
 
-      if (hitText) {
+      if (hitText && canModifyElement(hitText.id)) {
         textFormatting = {
           fontSize: hitText.fontSize,
           isBold: hitText.isBold,
@@ -882,7 +926,7 @@
           color: hitText.color
         }
         startTextEditingAtPosition(hitText.x, hitText.y, hitText.text, hitText.id)
-      } else if (!wasEditing) {
+      } else if (!hitText && !wasEditing) {
         startTextEditingAtPosition(point.x, point.y, '')
       }
       return
@@ -898,7 +942,7 @@
     const hitText = findTextAtPoint(point, textElements)
     const isDoubleClick = checkDoubleClick(point)
 
-    if (isDoubleClick && hitText) {
+    if (isDoubleClick && hitText && canModifyElement(hitText.id)) {
       selectedElementIds = new Set()
 
       if (editingText?.value.trim()) {
@@ -923,7 +967,10 @@
 
     const hitPath = paths.find((path) => isPointNearPath(point, path, 10 / camera.scale))
 
-    const hitElementId = hitText?.id || hitPath?.id
+    const hitId = hitText?.id || hitPath?.id
+    // Elements the user cannot modify behave like empty canvas: editors can
+    // only select, drag, and delete their own elements.
+    const hitElementId = hitId && canModifyElement(hitId) ? hitId : undefined
 
     if (hitElementId) {
       ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
@@ -978,9 +1025,10 @@
   }
 
   function handleSvgDoubleClick(event: MouseEvent) {
+    if (!canEdit) return
     const point = screenToCanvasPoint(event.clientX, event.clientY)
     const hitText = findTextAtPoint(point, textElements)
-    if (!hitText) return
+    if (!hitText || !canModifyElement(hitText.id)) return
 
     event.preventDefault()
     event.stopPropagation()
@@ -1282,6 +1330,146 @@
   })
 
   $effect(() => {
+    if (!canEdit && selectedTool !== 'hand') {
+      selectedTool = 'hand'
+    }
+  })
+
+  async function refreshPendingRequests(id: string) {
+    try {
+      const response = await listAccessRequests(id, 'pending')
+      pendingRequests = response.items
+    } catch {
+      // Non-fatal: the badge just stays stale until the dialog is opened.
+    }
+  }
+
+  $effect(() => {
+    const client = supabase
+    const id = activeCanvasId
+    if (!client || !id || !canManageCanvas) {
+      pendingRequests = []
+      return
+    }
+
+    void refreshPendingRequests(id)
+
+    let cancelled = false
+
+    const channel = client
+      .channel(`canvas:${id}:access-requests`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'canvas_access_requests',
+          filter: `canvas_id=eq.${id}`
+        },
+        () => {
+          void refreshPendingRequests(id).then(() => {
+            toast.show({
+              title: 'New access request',
+              description: 'Someone wants to join this canvas.',
+              action: {
+                label: 'Review',
+                onClick: () => (shareDialogOpen = true)
+              }
+            })
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'canvas_access_requests',
+          filter: `canvas_id=eq.${id}`
+        },
+        (payload) => {
+          const next = payload.new as { id?: string; status?: string }
+          if (next.id && next.status !== 'pending') {
+            pendingRequests = pendingRequests.filter((entry) => entry.id !== next.id)
+          }
+        }
+      )
+
+    // RLS limits delivery to owner/admins, so the realtime socket must carry
+    // this user's JWT before subscribing.
+    void ensureSessionInitialized().then((session) => {
+      if (cancelled) return
+      if (session?.access_token) {
+        client.realtime.setAuth(session.access_token)
+      }
+      channel.subscribe()
+    })
+
+    return () => {
+      cancelled = true
+      void client.removeChannel(channel)
+    }
+  })
+
+  $effect(() => {
+    const client = supabase
+    const id = activeCanvasId
+    if (!client || !id || role === 'owner') {
+      return
+    }
+
+    let cancelled = false
+
+    // React immediately when this user's membership is changed or revoked.
+    // DELETE events ignore the canvas_id filter, so both handlers re-check
+    // the payload before reloading.
+    const channel = client
+      .channel(`canvas:${id}:membership`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'canvas_members',
+          filter: `canvas_id=eq.${id}`
+        },
+        (payload) => {
+          const next = payload.new as { user_id?: string }
+          if (next.user_id === userId) {
+            void invalidateAll()
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'canvas_members'
+        },
+        (payload) => {
+          const previous = payload.old as { user_id?: string; canvas_id?: string }
+          if (previous.user_id === userId && previous.canvas_id === id) {
+            void invalidateAll()
+          }
+        }
+      )
+
+    void ensureSessionInitialized().then((session) => {
+      if (cancelled) return
+      if (session?.access_token) {
+        client.realtime.setAuth(session.access_token)
+      }
+      channel.subscribe()
+    })
+
+    return () => {
+      cancelled = true
+      void client.removeChannel(channel)
+    }
+  })
+
+  $effect(() => {
     const nextCanvasId = activeCanvasId
     if (!nextCanvasId || nextCanvasId === lastLoadedCanvasId) {
       return
@@ -1343,6 +1531,10 @@
         (payload) => {
           const nextElement = realtimeRowSchema.parse(payload.new)
           if (!nextElement) return
+
+          if (!elementOwners.has(nextElement.id)) {
+            elementOwners.set(nextElement.id, nextElement.created_by ?? null)
+          }
 
           if (nextElement.type === 'path') {
             const pathData = pathDataSchema.parse(nextElement.data)
@@ -1647,6 +1839,7 @@
       </a>
       <CanvasToolbar
         {selectedTool}
+        readOnly={!canEdit}
         onToolChange={(tool) => {
           if (selectedTool === 'text' && tool !== 'text' && editingText) {
             commitText(editingText)
@@ -1673,7 +1866,7 @@
             }}
           />
         </div>
-      {:else}
+      {:else if canManageCanvas}
         <button
           type="button"
           class="toolbar-pill px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition hover:border-slate-700 hover:bg-slate-900"
@@ -1681,6 +1874,10 @@
         >
           {currentCanvas()?.title ?? 'Select Canvas'}
         </button>
+      {:else}
+        <span class="toolbar-pill px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+          {currentCanvas()?.title ?? 'Canvas'}
+        </span>
       {/if}
 
       <div bind:this={dropdownEl} class="relative">
@@ -1728,24 +1925,45 @@
     </div>
   </div>
 
-  <div class="pointer-events-auto fixed right-6 top-6 z-30 flex -space-x-2">
-    {#each displayMembers().slice(0, 5) as member (member.id)}
-      <span
-        class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800 text-[11px] font-bold shadow-inner shadow-black/30"
-        style={`background-color:${member.color}`}
-        title={member.name}
-      >
-        {member.name.trim().slice(0, 2).toUpperCase() || 'ME'}
-      </span>
-    {/each}
-    {#if displayMembers().length > 5}
-      <span
-        class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800 bg-slate-700 text-[11px] font-bold text-white shadow-inner shadow-black/30"
-      >
-        +{displayMembers().length - 5}
-      </span>
-    {/if}
+  <div class="pointer-events-auto fixed right-6 top-6 z-30 flex items-center gap-3">
+    <div class="flex -space-x-2">
+      {#each displayMembers().slice(0, 5) as member (member.id)}
+        <span
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800 text-[11px] font-bold shadow-inner shadow-black/30"
+          style={`background-color:${member.color}`}
+          title={member.name}
+        >
+          {member.name.trim().slice(0, 2).toUpperCase() || 'ME'}
+        </span>
+      {/each}
+      {#if displayMembers().length > 5}
+        <span
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-800 bg-slate-700 text-[11px] font-bold text-white shadow-inner shadow-black/30"
+        >
+          +{displayMembers().length - 5}
+        </span>
+      {/if}
+    </div>
+
+    <CanvasOptionsButton
+      canvasId={activeCanvasId || canvasId}
+      {role}
+      pendingCount={pendingRequests.length}
+      onShare={() => (shareDialogOpen = true)}
+    />
   </div>
+
+  <ShareDialog
+    bind:open={shareDialogOpen}
+    canvasId={activeCanvasId || canvasId}
+    canvasTitle={currentCanvas()?.title ?? ''}
+    {role}
+    currentUserId={userId}
+    {pendingRequests}
+    onRequestResolved={(requestId) => {
+      pendingRequests = pendingRequests.filter((entry) => entry.id !== requestId)
+    }}
+  />
 
   <TextFormattingToolbar
     fontSize={textFormatting.fontSize}
@@ -1820,7 +2038,7 @@
     onpointercancel={handleSvgPointerUp}
     onpointerleave={handleSvgPointerUp}
     ondblclick={handleSvgDoubleClick}
-    style={`pointer-events:${['select', 'pencil', 'eraser', 'text'].includes(selectedTool) ? 'auto' : 'none'};user-select:none;-webkit-user-select:none;touch-action:none`}
+    style={`pointer-events:${canEdit && ['select', 'pencil', 'eraser', 'text'].includes(selectedTool) ? 'auto' : 'none'};user-select:none;-webkit-user-select:none;touch-action:none`}
   >
     <g transform={`translate(${camera.x}, ${camera.y}) scale(${camera.scale})`}>
       {#each paths as path (path.id)}
@@ -1938,14 +2156,16 @@
 
   <LiveCursors {cursors} />
 
-  <CanvasActionToolbar
-    selectedCount={selectedElementIds.size}
-    canUndo={undoStack.length > 0}
-    canRedo={redoStack.length > 0}
-    onDelete={deleteSelectedElements}
-    onUndo={handleUndo}
-    onRedo={handleRedo}
-  />
+  {#if canEdit}
+    <CanvasActionToolbar
+      selectedCount={selectedElementIds.size}
+      canUndo={undoStack.length > 0}
+      canRedo={redoStack.length > 0}
+      onDelete={deleteSelectedElements}
+      onUndo={handleUndo}
+      onRedo={handleRedo}
+    />
+  {/if}
 
   <div class="pointer-events-auto fixed bottom-6 right-6 z-30 flex flex-col gap-2">
     <button

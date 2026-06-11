@@ -3,20 +3,27 @@
   import { slide } from 'svelte/transition'
   import type { Tool } from '$lib/canvas/types'
 
-  let { selectedTool, onToolChange } = $props<{
+  let {
+    selectedTool,
+    onToolChange,
+    readOnly = false
+  } = $props<{
     selectedTool: Tool
     onToolChange: (tool: Tool) => void
+    readOnly?: boolean
   }>()
 
   let isExpanded = $state(false)
 
-  const tools = [
+  const allTools = [
     { id: 'select' as Tool, icon: MousePointer2, label: 'Pointer' },
     { id: 'hand' as Tool, icon: Hand, label: 'Hand' },
     { id: 'pencil' as Tool, icon: Pencil, label: 'Pencil' },
     { id: 'eraser' as Tool, icon: Eraser, label: 'Eraser' },
     { id: 'text' as Tool, icon: Type, label: 'Text' }
   ]
+
+  const tools = $derived(readOnly ? allTools.filter((tool) => tool.id === 'hand') : allTools)
 
   function currentTool() {
     return tools.find((tool) => tool.id === selectedTool) ?? tools[0]

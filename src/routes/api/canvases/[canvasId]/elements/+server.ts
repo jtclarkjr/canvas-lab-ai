@@ -6,9 +6,11 @@ import {
   upsertElementResponseSchema
 } from '$lib/canvas/schema'
 import type { CanvasElementRow } from '$lib/canvas/schema'
-import { ensureUserOwnsCanvas } from '$lib/server/canvas-access'
+import { requireCanvasRole } from '$lib/server/canvas-access'
 import {
+  forbidden,
   handleApiError,
+  notFound,
   parseInput,
   parseJsonBody,
   withAuth
@@ -25,6 +27,7 @@ const toElement = (row: CanvasElementRow) => ({
   x: row.x,
   y: row.y,
   z: row.z,
+  createdBy: row.created_by ?? null,
   updatedBy: row.updated_by,
   updatedAt: row.updated_at
 })
@@ -40,7 +43,7 @@ export const GET: RequestHandler = async (event) =>
         return json({ message: 'Canvas id is required.' }, { status: 400 })
       }
 
-      await ensureUserOwnsCanvas(supabase, canvasId, user.id)
+      await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
       const { data, error } = await supabase
         .from('canvas_elements')
@@ -75,14 +78,29 @@ export const POST: RequestHandler = async (event) =>
         return json({ message: 'Canvas id is required.' }, { status: 400 })
       }
 
-      await ensureUserOwnsCanvas(supabase, canvasId, user.id)
+      const { role } = await requireCanvasRole(
+        supabase,
+        canvasId,
+        user.id,
+        'editor'
+      )
 
       const payload = await parseJsonBody(event.request)
       const input = parseInput(upsertElementInputSchema, payload)
 
-      const row = {
-        id: input.id,
-        canvas_id: canvasId,
+      const existing = input.id
+        ? await supabase
+            .from('canvas_elements')
+            .select('id, canvas_id, created_by')
+            .eq('id', input.id)
+            .maybeSingle()
+        : null
+
+      if (existing?.error) {
+        throw existing.error
+      }
+
+      const updates = {
         type: input.type,
         data: (input.data ?? null) as Json | null,
         x: input.x,
@@ -92,11 +110,44 @@ export const POST: RequestHandler = async (event) =>
         updated_at: new Date().toISOString()
       }
 
-      const { data, error } = await supabase
-        .from('canvas_elements')
-        .upsert(row)
-        .select()
-        .single()
+      let result
+      if (existing?.data) {
+        // An element id can only be reused within its own canvas; otherwise a
+        // caller could hijack an element belonging to another canvas.
+        if (existing.data.canvas_id !== canvasId) {
+          throw notFound('Element not found.', {
+            code: 'element_not_found',
+            details: { elementId: input.id }
+          })
+        }
+
+        if (role === 'editor' && existing.data.created_by !== user.id) {
+          throw forbidden('You can only edit elements you created.', {
+            code: 'element_forbidden',
+            details: { elementId: input.id }
+          })
+        }
+
+        result = await supabase
+          .from('canvas_elements')
+          .update(updates)
+          .eq('id', existing.data.id)
+          .select()
+          .single()
+      } else {
+        result = await supabase
+          .from('canvas_elements')
+          .insert({
+            id: input.id,
+            canvas_id: canvasId,
+            created_by: user.id,
+            ...updates
+          })
+          .select()
+          .single()
+      }
+
+      const { data, error } = result
 
       if (error || !data) {
         throw error ?? new Error('Failed to upsert canvas element')

@@ -2,6 +2,7 @@ import { z, ZodError } from 'zod'
 
 export const apiErrorSchema = z.object({
   message: z.string(),
+  code: z.string().optional(),
   issues: z.record(z.string(), z.array(z.string())).optional()
 })
 
@@ -9,13 +10,20 @@ export type ApiError = z.infer<typeof apiErrorSchema>
 
 export class ApiClientError extends Error {
   status: number
+  code?: string
   issues?: ApiError['issues']
 
-  constructor(message: string, status: number, issues?: ApiError['issues']) {
+  constructor(
+    message: string,
+    status: number,
+    issues?: ApiError['issues'],
+    code?: string
+  ) {
     super(message)
     this.name = 'ApiClientError'
     this.status = status
     this.issues = issues
+    this.code = code
   }
 }
 
@@ -42,7 +50,8 @@ export async function parseResponse<T>(
       throw new ApiClientError(
         apiError.data.message,
         response.status,
-        apiError.data.issues
+        apiError.data.issues,
+        apiError.data.code
       )
     }
 

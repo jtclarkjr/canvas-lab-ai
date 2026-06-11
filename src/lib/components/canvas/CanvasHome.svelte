@@ -4,10 +4,18 @@
   import { flip } from 'svelte/animate'
   import { createCanvas, deleteCanvas, listCanvases } from '$lib/canvas/api'
   import Modal from '$lib/components/shared/Modal.svelte'
+  import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
   import type { Canvas } from '$lib/canvas/schema'
   import { session } from '$lib/stores/session.svelte'
 
   let canvases = $state<Canvas[]>([])
+
+  const ownedCanvases = $derived(
+    canvases.filter((canvas) => !canvas.role || canvas.role === 'owner')
+  )
+  const sharedCanvases = $derived(
+    canvases.filter((canvas) => canvas.role && canvas.role !== 'owner')
+  )
   let isLoading = $state(false)
   let isCreating = $state(false)
   let isDeleteDialogOpen = $state(false)
@@ -155,7 +163,7 @@
         </div>
       {/each}
     {:else}
-      {#each canvases as canvas (canvas.id)}
+      {#each ownedCanvases as canvas (canvas.id)}
         <a
           href={`/canvas/${canvas.id}`}
           out:scale={{ duration: 200, start: 0.92, opacity: 0 }}
@@ -197,6 +205,45 @@
       {/each}
     {/if}
   </div>
+
+  {#if !isLoading && sharedCanvases.length > 0}
+    <div class="grid gap-4">
+      <h2 class="m-0 text-2xl font-semibold tracking-tight text-foreground">Shared with me</h2>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {#each sharedCanvases as canvas (canvas.id)}
+          <a
+            href={`/canvas/${canvas.id}`}
+            out:scale={{ duration: 200, start: 0.92, opacity: 0 }}
+            animate:flip={{ duration: 250 }}
+            class="group relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:border-primary/50 hover:shadow-md"
+          >
+            <div class="absolute right-2 top-2 z-10">
+              <RoleBadge role={canvas.role ?? 'reader'} />
+            </div>
+
+            <div
+              class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
+            >
+              <div class="rounded-lg bg-background/80 p-4 shadow-inner">
+                <FileText class="size-12 text-muted-foreground/50" />
+              </div>
+            </div>
+
+            <div class="flex h-1/4 flex-col justify-center gap-1 px-4">
+              <h2
+                class="m-0 truncate text-sm font-medium text-card-foreground group-hover:text-primary"
+              >
+                {canvas.title}
+              </h2>
+              <p class="m-0 text-xs text-muted-foreground">
+                {formatCanvasDate(canvas.createdAt)}
+              </p>
+            </div>
+          </a>
+        {/each}
+      </div>
+    </div>
+  {/if}
 
   {#if !isLoading && session.data?.user && canvases.length === 0}
     <div class="py-12 text-center text-muted-foreground">

@@ -4,6 +4,7 @@
   import { dev } from '$app/environment'
   import { injectAnalytics } from '@vercel/analytics/sveltekit'
   import AuthControls from '$lib/components/auth/AuthControls.svelte'
+  import ToastViewport from '$lib/components/shared/ToastViewport.svelte'
   import { session } from '$lib/stores/session.svelte'
   import { theme } from '$lib/stores/theme.svelte'
   import { page } from '$app/state'
@@ -29,6 +30,8 @@
   <link rel="icon" href={favicon} />
   <title>Canvas App</title>
 </svelte:head>
+
+<ToastViewport />
 
 {#if hideHeader}
   {@render children()}

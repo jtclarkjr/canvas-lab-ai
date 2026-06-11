@@ -75,6 +75,13 @@ export function withAuth<U>(user: U | null | undefined): U {
   return user
 }
 
+export function forbidden(
+  message = 'Forbidden.',
+  options: Omit<Partial<AppErrorOptions>, 'status' | 'message'> = {}
+) {
+  return new AppError({ status: 403, message, ...options })
+}
+
 export function notFound(
   message: string,
   options: Omit<Partial<AppErrorOptions>, 'status' | 'message'> = {}
@@ -100,6 +107,7 @@ export function internalServerError(
 export function serializeApiError(error: AppError) {
   return {
     message: error.message,
+    ...(error.code ? { code: error.code } : null),
     ...(error.issues ? { issues: error.issues } : null)
   }
 }
