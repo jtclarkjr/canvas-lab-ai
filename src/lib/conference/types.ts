@@ -39,7 +39,23 @@ export type ConferenceParticipant = {
   isSpeaking: boolean
   micEnabled: boolean
   camEnabled: boolean
+  // Mirrors the participant's `captions` attribute: when anyone in the
+  // room wants captions, every unmuted participant transcribes their mic.
+  wantsCaptions: boolean
   color: string
   videoTrack: VideoTrack | null
   audioTrack: AudioTrack | null
+}
+
+// One rendered caption line. `text` is the speaker's original language;
+// `translated` is filled in per-viewer once a final segment is translated.
+export type CaptionSegment = {
+  id: string
+  speakerIdentity: string
+  speakerName: string
+  speakerColor: string
+  text: string
+  translated: string | null
+  final: boolean
+  receivedAt: number
 }

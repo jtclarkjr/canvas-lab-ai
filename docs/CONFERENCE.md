@@ -108,6 +108,42 @@ WebRTC conferencing.
   through hidden `<audio>` sinks so speaker switching works and the
   featured `<video>` stays muted.
 
+## Live captions (fullscreen)
+
+- Toggle: the CC button in the fullscreen control bar; a language picker
+  appears beside it (English first, 日本語 second; see
+  `CAPTION_LANGUAGES` in `src/lib/conference/captions.ts`). The language
+  choice persists in localStorage; captions default to off each call.
+- Architecture: each participant transcribes their **own** microphone with
+  OpenAI's realtime transcription API (`gpt-4o-mini-transcribe` preferred —
+  it streams deltas over WebRTC with server VAD; the token endpoint falls
+  back across models and returns the one used; `gpt-realtime-whisper`
+  rejects `turn_detection` config and gets it omitted).
+  The browser connects to OpenAI directly over WebRTC using a short-lived
+  client secret minted by `POST …/conference/captions/token` — the
+  project's `OPENAI_API_KEY` never leaves the server. Two hard-won
+  gotchas: (1) after the data channel opens the client must re-assert the
+  transcription config with a `session.update` event, or the session
+  connects but never emits transcripts; (2) the transcription leg uses its
+  own `getUserMedia` capture — cloning the call's published mic track
+  yields silent audio on a second peer connection in some browsers
+  (Safari). Whisper-family models emit `…transcription.segment` events
+  (handled alongside `delta`/`completed`). Segments are published to the
+  room on the LiveKit data topic `captions` (the call token grants
+  `canPublishData` and `canUpdateOwnMetadata`). Failures (and only
+  failures) log to the console under `[captions]`.
+- Coordination: a participant's captions preference rides on their LiveKit
+  participant attributes (`captions: on/off`). While anyone in the room has
+  captions on, every unmuted participant transcribes their mic, so all
+  speakers are captioned for whoever wants them. No one transcribes when
+  nobody has captions enabled (cost control).
+- Translation is per-viewer: final segments go through
+  `POST …/conference/captions/translate` (gpt-4o-mini, returns the text
+  unchanged when already in the target language). Interim text shows
+  italicized in the original language until the final lands.
+- Privacy note: with captions on, call audio is streamed to OpenAI for
+  transcription.
+
 ## Agents later
 
 LiveKit agents join these rooms as ordinary participants: mint them a token

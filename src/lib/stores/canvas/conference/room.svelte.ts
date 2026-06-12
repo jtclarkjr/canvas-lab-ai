@@ -20,6 +20,12 @@ type ConferenceRoomInput = {
   onRosterChanged: () => void
   // Resets call-scoped UI state (view mode, panels, settings dialog).
   onCallEnded: () => void
+  // Data-channel messages from other participants (captions ride here).
+  onDataReceived?: (
+    payload: Uint8Array,
+    participantIdentity: string | undefined,
+    topic: string | undefined
+  ) => void
 }
 
 type LiveKitModule = typeof import('livekit-client')
@@ -63,7 +69,8 @@ export function createConferenceRoomStore({
   getEnabled,
   devices,
   onRosterChanged,
-  onCallEnded
+  onCallEnded,
+  onDataReceived
 }: ConferenceRoomInput) {
   let room: Room | null = null
   let roomCanvasId: string | null = null
@@ -102,6 +109,7 @@ export function createConferenceRoomStore({
       isSpeaking: p.isSpeaking,
       micEnabled: p.isMicrophoneEnabled,
       camEnabled: p.isCameraEnabled,
+      wantsCaptions: p.attributes?.captions === 'on',
       color: participantColor(p.metadata, p.identity),
       videoTrack:
         p.getTrackPublication(livekit.Track.Source.Camera)?.videoTrack ?? null,
@@ -165,11 +173,15 @@ export function createConferenceRoomStore({
         livekit.RoomEvent.TrackMuted,
         livekit.RoomEvent.TrackUnmuted,
         livekit.RoomEvent.LocalTrackPublished,
-        livekit.RoomEvent.LocalTrackUnpublished
+        livekit.RoomEvent.LocalTrackUnpublished,
+        livekit.RoomEvent.ParticipantAttributesChanged
       ] as const
       for (const event of resyncEvents) {
         r.on(event, syncFromRoom)
       }
+      r.on(livekit.RoomEvent.DataReceived, (payload, participant, _kind, topic) => {
+        onDataReceived?.(payload, participant?.identity, topic)
+      })
       r.on(livekit.RoomEvent.ParticipantConnected, onRosterChanged)
       r.on(livekit.RoomEvent.ParticipantDisconnected, onRosterChanged)
       r.on(livekit.RoomEvent.ActiveSpeakersChanged, (speakers) => {
@@ -364,6 +376,25 @@ export function createConferenceRoomStore({
     await room?.startAudio().catch(() => {})
   }
 
+  function publishData(topic: string, payload: unknown) {
+    const r = room
+    if (!r) {
+      return
+    }
+    void r.localParticipant
+      .publishData(new TextEncoder().encode(JSON.stringify(payload)), {
+        reliable: true,
+        topic
+      })
+      .catch(() => {
+        // Dropped data during a reconnect is acceptable for captions.
+      })
+  }
+
+  async function setLocalAttributes(attributes: Record<string, string>) {
+    await room?.localParticipant.setAttributes(attributes).catch(() => {})
+  }
+
   // Leave any live call when the active canvas switches
   // (CanvasTitleSwitcher keeps these components mounted).
   let currentCanvasId: string | null = null
@@ -428,7 +459,9 @@ export function createConferenceRoomStore({
     toggleCam,
     applyDevice,
     pin,
-    startAudio
+    startAudio,
+    publishData,
+    setLocalAttributes
   }
 }
 

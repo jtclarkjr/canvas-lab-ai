@@ -56,7 +56,10 @@ export const POST: RequestHandler = async (event) =>
         roomJoin: true,
         canPublish: true,
         canSubscribe: true,
-        canPublishData: true
+        canPublishData: true,
+        // Lets the client set participant attributes (the captions on/off
+        // flag rides on them).
+        canUpdateOwnMetadata: true
       })
 
       return json(

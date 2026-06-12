@@ -1,10 +1,12 @@
 import { getContext, setContext } from 'svelte'
+import type { CaptionLanguageCode } from '$lib/conference/captions'
 import type {
   ConferenceFullscreenPanel,
   ConferenceViewMode,
   Corner,
   DeviceKind
 } from '$lib/conference/types'
+import { createConferenceCaptionsStore } from '$lib/stores/canvas/conference/captions.svelte'
 import { createConferenceDevicesStore } from '$lib/stores/canvas/conference/devices.svelte'
 import { createConferenceRoomStore } from '$lib/stores/canvas/conference/room.svelte'
 import { createConferenceStatusStore } from '$lib/stores/canvas/conference/status.svelte'
@@ -53,7 +55,16 @@ export function createCanvasConferenceStore({
     onCallEnded: () => {
       view.resetForCallEnd()
       devices.setSettingsOpen(false)
-    }
+    },
+    onDataReceived: (payload, participantIdentity, topic) =>
+      captions.handleData(payload, participantIdentity, topic)
+  })
+
+  const captions = createConferenceCaptionsStore({
+    getCanvasId,
+    getEnabled,
+    room,
+    devices
   })
 
   return {
@@ -145,7 +156,24 @@ export function createCanvasConferenceStore({
     setViewMode: (value: ConferenceViewMode) => view.setViewMode(value),
     toggleFullscreenPanel: (
       panel: Exclude<ConferenceFullscreenPanel, 'none'>
-    ) => view.toggleFullscreenPanel(panel)
+    ) => view.toggleFullscreenPanel(panel),
+
+    // Captions
+    get captionsEnabled() {
+      return captions.enabled
+    },
+    get captionsLanguage() {
+      return captions.language
+    },
+    get captionsState() {
+      return captions.sttState
+    },
+    get captionSegments() {
+      return captions.segments
+    },
+    toggleCaptions: () => captions.toggle(),
+    setCaptionsLanguage: (code: CaptionLanguageCode) =>
+      captions.setLanguage(code)
   }
 }
 

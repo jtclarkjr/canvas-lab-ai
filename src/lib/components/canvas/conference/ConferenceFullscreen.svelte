@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
   import {
+    Captions,
     Loader2,
     MessageSquare,
     Mic,
@@ -15,6 +16,7 @@
     Volume2,
     X
   } from 'lucide-svelte'
+  import { CAPTION_LANGUAGES, type CaptionLanguageCode } from '$lib/conference/captions'
   import { useCanvasChatStore } from '$lib/stores/canvas/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/canvas/conference/index.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
@@ -22,6 +24,33 @@
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()
+
+  // Caption lines fade out after a quiet spell; a coarse clock is enough.
+  let now = $state(Date.now())
+  $effect(() => {
+    if (!store.captionsEnabled) {
+      return
+    }
+    const timer = setInterval(() => {
+      now = Date.now()
+    }, 1000)
+    return () => clearInterval(timer)
+  })
+
+  const CAPTION_VISIBLE_MS = 8000
+  const visibleCaptions = $derived(
+    store.captionSegments
+      .filter((segment) => now - segment.receivedAt < CAPTION_VISIBLE_MS)
+      .slice(-2)
+  )
+
+  const CAPTIONS_STATUS_LABELS = {
+    running: 'Listening…',
+    connecting: 'Starting captions…',
+    error: 'Captions unavailable',
+    off: 'Waiting for audio…'
+  } as const
+  const captionsStatusLabel = $derived(CAPTIONS_STATUS_LABELS[store.captionsState])
 
   // Escape exits full screen back to the PiP — unless the settings modal is
   // open, in which case Escape belongs to the modal.
@@ -65,6 +94,28 @@
   aria-label="Call"
   data-camera-exempt
 >
+  <!-- Live captions, Meet-style: above the control bar, never interactive. -->
+  {#if store.captionsEnabled}
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-24 z-10 flex justify-center px-6"
+      aria-live="polite"
+    >
+      <div class="max-w-2xl rounded-2xl bg-black/65 px-4 py-2.5 backdrop-blur">
+        {#each visibleCaptions as segment (segment.id)}
+          <p class="text-sm leading-snug text-white">
+            <span class="font-bold" style={`color:${segment.speakerColor}`}>
+              {segment.speakerName}:
+            </span>
+            <span class={segment.final ? '' : 'italic opacity-80'}>
+              {segment.translated ?? segment.text}
+            </span>
+          </p>
+        {:else}
+          <p class="text-xs font-medium text-white/70">{captionsStatusLabel}</p>
+        {/each}
+      </div>
+    </div>
+  {/if}
   <div class="flex min-h-0 flex-1">
     <!-- Tile grid -->
     <div class="min-h-0 flex-1 overflow-y-auto p-4">
@@ -267,6 +318,40 @@
           <VideoOff class="size-5" />
         {/if}
       </button>
+
+      <button
+        type="button"
+        class={`flex size-11 items-center justify-center rounded-full transition ${
+          store.captionsEnabled
+            ? 'bg-primary/15 text-primary'
+            : 'bg-secondary text-foreground hover:bg-muted'
+        }`}
+        onclick={() => store.toggleCaptions()}
+        title={store.captionsEnabled ? 'Turn off captions' : 'Turn on captions'}
+        aria-label={store.captionsEnabled ? 'Turn off captions' : 'Turn on captions'}
+        aria-pressed={store.captionsEnabled}
+      >
+        {#if store.captionsState === 'connecting'}
+          <Loader2 class="size-5 animate-spin" />
+        {:else}
+          <Captions class="size-5" />
+        {/if}
+      </button>
+
+      {#if store.captionsEnabled}
+        <select
+          class="h-11 rounded-full border border-border bg-secondary px-3 text-sm text-foreground outline-none"
+          value={store.captionsLanguage}
+          onchange={(event) =>
+            store.setCaptionsLanguage(event.currentTarget.value as CaptionLanguageCode)}
+          aria-label="Caption language"
+          title="Caption language"
+        >
+          {#each CAPTION_LANGUAGES as entry (entry.code)}
+            <option value={entry.code}>{entry.label}</option>
+          {/each}
+        </select>
+      {/if}
 
       <button
         type="button"
