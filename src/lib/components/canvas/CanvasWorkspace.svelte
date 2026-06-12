@@ -77,7 +77,9 @@
     onToolChange={workspace.handleToolChange}
   />
 
-  <SceneModeSwitcher mode={workspace.mode} onModeChange={workspace.handleModeChange} />
+  {#if workspace.canEdit}
+    <SceneModeSwitcher mode={workspace.mode} onModeChange={workspace.handleModeChange} />
+  {/if}
 
   <CanvasPresenceActions
     canvasId={workspace.canvasIdForActions}

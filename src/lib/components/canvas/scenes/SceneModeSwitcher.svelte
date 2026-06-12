@@ -17,7 +17,7 @@
 
 <!-- Bottom-left: top-center belongs to the drawing/text formatting
      toolbars, which would overlap the switcher there. -->
-<div class="fixed bottom-6 left-6 z-20">
+<div class="fixed bottom-6 left-6 z-30">
   <div class="toolbar-pill relative grid grid-cols-2 p-1">
     <span
       class="pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/2)] rounded-full bg-primary shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
