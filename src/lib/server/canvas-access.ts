@@ -87,3 +87,28 @@ export async function requireCanvasRole(
 
   return { canvas, role, isPublicViewer: false }
 }
+
+// Members-only gate: like requireCanvasRole, but public read-only viewers
+// of a public canvas are rejected. Used by member features (canvas chat).
+export async function requireCanvasMember(
+  supabase: SupabaseClient<Database>,
+  canvasId: string,
+  userId: string,
+  min: CanvasRole
+): Promise<{ canvas: CanvasRow; role: CanvasRole }> {
+  const { canvas, role, isPublicViewer } = await requireCanvasRole(
+    supabase,
+    canvasId,
+    userId,
+    min
+  )
+
+  if (isPublicViewer) {
+    throw forbidden('This feature is only available to canvas members.', {
+      code: 'insufficient_role',
+      details: { canvasId }
+    })
+  }
+
+  return { canvas, role }
+}

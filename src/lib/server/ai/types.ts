@@ -39,3 +39,12 @@ export type DocumentChatInput = {
   contextDocuments: ContextDocumentRef[]
   loadContextDocument: LoadContextDocument
 }
+
+export type CanvasAssistantInput = {
+  resolved: ResolvedModel
+  webSearch: boolean
+  messages: UIMessage[]
+  // Saved documents from all scenes of the canvas, readable on demand.
+  contextDocuments: ContextDocumentRef[]
+  loadContextDocument: LoadContextDocument
+}

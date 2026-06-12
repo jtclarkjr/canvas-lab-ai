@@ -5,19 +5,22 @@ import type { ContextDocumentRef, LoadContextDocument } from '../types'
 type CreateReadContextDocumentToolInput = {
   contextDocuments: ContextDocumentRef[]
   loadContextDocument: LoadContextDocument
+  // Override when the context list isn't user-selected (e.g. the canvas
+  // assistant exposes every saved document on the canvas).
+  description?: string
 }
 
-// Lets the agent decide which of the user-selected saved documents are
+// Lets the agent decide which of the available saved documents are
 // actually useful: titles are listed in the system prompt, and the agent
 // reads only the ones it judges relevant. The loader is injected by the
 // route so this module stays storage-agnostic.
 export function createReadContextDocumentTool({
   contextDocuments,
-  loadContextDocument
+  loadContextDocument,
+  description = 'Read one of the saved context documents the user selected for this task. Only call this for documents that look relevant.'
 }: CreateReadContextDocumentToolInput) {
   return tool({
-    description:
-      'Read one of the saved context documents the user selected for this task. Only call this for documents that look relevant.',
+    description,
     inputSchema: z.object({
       documentId: z
         .string()

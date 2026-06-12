@@ -11,6 +11,7 @@
   import CanvasTextEditor from '$lib/components/canvas/CanvasTextEditor.svelte'
   import CanvasTitleSwitcher from '$lib/components/canvas/CanvasTitleSwitcher.svelte'
   import CanvasZoomControls from '$lib/components/canvas/CanvasZoomControls.svelte'
+  import CanvasChat from '$lib/components/canvas/chat/CanvasChat.svelte'
   import DrawingToolbar from '$lib/components/canvas/DrawingToolbar.svelte'
   import LiveCursors from '$lib/components/canvas/LiveCursors.svelte'
   import RequestEditAccessBanner from '$lib/components/canvas/RequestEditAccessBanner.svelte'
@@ -225,6 +226,12 @@
     onZoomOut={workspace.zoomOut}
     onReset={workspace.resetView}
   />
+
+  <!-- Chat is members-only: public read-only viewers don't get the
+       launcher (matching the API and RLS gates). -->
+  {#if !workspace.isPublicViewer && userId}
+    <CanvasChat canvasId={workspace.canvasIdForActions} {userId} />
+  {/if}
 
   {#if workspace.isPublicViewer || workspace.role === 'reader'}
     <RequestEditAccessBanner

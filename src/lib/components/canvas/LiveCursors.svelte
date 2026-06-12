@@ -33,7 +33,10 @@
   }
 </script>
 
-<div class="pointer-events-none absolute inset-0 z-50">
+<!-- z-20: cursors point at canvas content, so they sit above the canvas
+     and scene cards (z-10) but below UI chrome — toolbars (z-30), the chat
+     window (z-40), and dialogs (z-50). -->
+<div class="pointer-events-none absolute inset-0 z-20">
   <div class="absolute inset-0">
     {#each cursorEntries() as [id, cursor] (id)}
       <div class="absolute" style={getCursorStyle(cursor)}>

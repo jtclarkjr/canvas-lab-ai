@@ -42,6 +42,6 @@ describe('model catalog', () => {
     }
 
     expect(isKnownModelId(defaultModelId)).toBe(true)
-    expect(getModelOption(defaultModelId)?.provider).toBe('anthropic')
+    expect(getModelOption(defaultModelId)?.provider).toBe('openai')
   })
 })

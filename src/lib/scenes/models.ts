@@ -24,7 +24,7 @@ export const modelOptions: ModelOption[] = [
   { id: 'openai/gpt-5.4-mini', label: 'GPT-5.4-mini', provider: 'openai' }
 ]
 
-export const defaultModelId = 'anthropic/claude-opus-4-8'
+export const defaultModelId = 'openai/gpt-5.4-mini'
 
 export function getModelOption(id: string): ModelOption | null {
   return modelOptions.find((option) => option.id === id) ?? null

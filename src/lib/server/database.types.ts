@@ -365,6 +365,93 @@ export interface Database {
           }
         ]
       }
+      canvas_chat_messages: {
+        Row: {
+          id: string
+          canvas_id: string
+          content: string
+          metadata: Json | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          canvas_id: string
+          content: string
+          metadata?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          canvas_id?: string
+          content?: string
+          metadata?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_chat_messages_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_chat_messages_created_by_fkey'
+            columns: ['created_by']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      canvas_assistant_messages: {
+        Row: {
+          id: string
+          canvas_id: string
+          user_id: string
+          role: string
+          parts: Json
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          canvas_id: string
+          user_id: string
+          role: string
+          parts?: Json
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          canvas_id?: string
+          user_id?: string
+          role?: string
+          parts?: Json
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_assistant_messages_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_assistant_messages_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
