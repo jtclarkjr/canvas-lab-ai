@@ -381,7 +381,10 @@
 
 <div class="flex h-full min-h-0">
   {#if showLibrary}
-    <aside class="hidden w-60 shrink-0 border-r border-border/50 md:block">
+    <aside
+      transition:slide={{ axis: 'x', duration: 280 }}
+      class="hidden w-60 shrink-0 overflow-hidden border-r border-border/50 md:block"
+    >
       <DocumentListPanel
         {documents}
         {activeDocumentId}

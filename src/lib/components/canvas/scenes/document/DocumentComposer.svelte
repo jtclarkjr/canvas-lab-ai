@@ -63,7 +63,7 @@
 </script>
 
 <div class={floating ? 'w-full' : 'border-t border-border/50 px-5 py-3'}>
-  <div class="surface-card flex flex-col gap-2 rounded-2xl p-3">
+  <div class="document-composer-shell surface-card flex flex-col gap-2 rounded-2xl p-3">
     <textarea
       bind:this={textareaEl}
       bind:value={prompt}
@@ -73,7 +73,7 @@
       placeholder={disabled
         ? 'You have view-only access to this scene'
         : 'Ask for changes, or describe a new document…'}
-      class="max-h-52 w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+      class="document-composer-input max-h-52 w-full resize-none bg-transparent text-sm outline-none"
       {disabled}
     ></textarea>
 
@@ -121,3 +121,26 @@
     </div>
   </div>
 </div>
+
+<style>
+  .document-composer-shell {
+    --document-composer-foreground: var(--foreground);
+    --document-composer-placeholder: var(--muted-foreground);
+  }
+
+  :global(.dark) .document-composer-shell {
+    --document-composer-foreground: #f8fafc;
+    --document-composer-placeholder: #a8b3c2;
+
+    background: #1f2937;
+    border-color: rgb(148 163 184 / 0.28);
+  }
+
+  .document-composer-input {
+    color: var(--document-composer-foreground);
+  }
+
+  .document-composer-input::placeholder {
+    color: var(--document-composer-placeholder);
+  }
+</style>

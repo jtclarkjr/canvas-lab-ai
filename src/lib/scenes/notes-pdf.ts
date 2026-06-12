@@ -30,6 +30,9 @@ export async function exportAnnotatedNotesPdf({
     backgroundColor: '#ffffff',
     scale,
     logging: false,
+    onclone: (_documentClone, referenceElement) => {
+      referenceElement.classList.add('notes-export-light')
+    },
     ignoreElements: (element) =>
       element === annotationsSvg || element.tagName === 'TEXTAREA'
   })

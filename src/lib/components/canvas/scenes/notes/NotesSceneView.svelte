@@ -127,10 +127,10 @@
        so the annotations stay anchored to the text while scrolling. The
        tool cursor applies to this section only, not the whole dialog. -->
   <div
-    class="min-h-0 flex-1 overflow-y-auto bg-white"
+    class="min-h-0 flex-1 overflow-y-auto bg-background text-foreground"
     style={canModify ? `cursor:${getWorkspaceCursorStyle(false, notes.selectedTool)}` : undefined}
   >
-    <div bind:this={contentEl} class="relative min-h-full">
+    <div bind:this={contentEl} class="notes-surface relative min-h-full">
       <div class="notes-prose">
         <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized via DOMPurify in renderMarkdown -->
         {@html renderedHtml}
@@ -163,14 +163,32 @@
 </div>
 
 <style>
-  /* Self-contained prose styles with explicit hex colors: the injected
-     markdown must not inherit theme variables (html2canvas, used by the
-     PDF export, cannot parse oklch() values). */
+  .notes-surface {
+    --notes-page: var(--background);
+    --notes-foreground: var(--foreground);
+    --notes-muted-surface: var(--muted);
+    --notes-muted-foreground: var(--muted-foreground);
+    --notes-border: var(--border);
+    --notes-link: var(--primary);
+
+    background: var(--notes-page);
+    color: var(--notes-foreground);
+  }
+
+  .notes-surface:global(.notes-export-light) {
+    --notes-page: #ffffff;
+    --notes-foreground: #0f172a;
+    --notes-muted-surface: #f1f5f9;
+    --notes-muted-foreground: #475569;
+    --notes-border: #e2e8f0;
+    --notes-link: #2563eb;
+  }
+
   .notes-prose {
     padding: 2rem;
     font-size: 0.9375rem;
     line-height: 1.65;
-    color: #0f172a;
+    color: var(--notes-foreground);
     word-wrap: break-word;
   }
 
@@ -224,18 +242,18 @@
 
   .notes-prose :global(code) {
     border-radius: 4px;
-    background: #f1f5f9;
+    background: var(--notes-muted-surface);
     padding: 0.1rem 0.35rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.85em;
-    color: #0f172a;
+    color: var(--notes-foreground);
   }
 
   .notes-prose :global(pre) {
     margin: 0 0 0.75rem;
     overflow-x: auto;
     border-radius: 8px;
-    background: #f1f5f9;
+    background: var(--notes-muted-surface);
     padding: 0.75rem 1rem;
   }
 
@@ -246,20 +264,20 @@
 
   .notes-prose :global(blockquote) {
     margin: 0 0 0.75rem;
-    border-left: 3px solid #cbd5e1;
+    border-left: 3px solid var(--notes-border);
     padding-left: 0.75rem;
-    color: #475569;
+    color: var(--notes-muted-foreground);
   }
 
   .notes-prose :global(a) {
-    color: #2563eb;
+    color: var(--notes-link);
     text-decoration: underline;
   }
 
   .notes-prose :global(hr) {
     margin: 1.25rem 0;
     border: 0;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--notes-border);
   }
 
   .notes-prose :global(table) {
@@ -269,7 +287,7 @@
 
   .notes-prose :global(th),
   .notes-prose :global(td) {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--notes-border);
     padding: 0.3rem 0.6rem;
     text-align: left;
   }
