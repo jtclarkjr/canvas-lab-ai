@@ -195,6 +195,170 @@ export interface Database {
           }
         ]
       }
+      canvas_scenes: {
+        Row: {
+          id: string
+          canvas_id: string
+          type: string
+          title: string
+          x: number
+          y: number
+          width: number
+          height: number
+          settings: Json
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          canvas_id: string
+          type?: string
+          title?: string
+          x?: number
+          y?: number
+          width?: number
+          height?: number
+          settings?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          canvas_id?: string
+          type?: string
+          title?: string
+          x?: number
+          y?: number
+          width?: number
+          height?: number
+          settings?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_scenes_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      canvas_scene_documents: {
+        Row: {
+          id: string
+          scene_id: string
+          canvas_id: string
+          kind: string
+          status: string
+          title: string
+          content: Json
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          scene_id: string
+          canvas_id: string
+          kind?: string
+          status?: string
+          title?: string
+          content?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          scene_id?: string
+          canvas_id?: string
+          kind?: string
+          status?: string
+          title?: string
+          content?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_scene_documents_scene_id_fkey'
+            columns: ['scene_id']
+            isOneToOne: false
+            referencedRelation: 'canvas_scenes'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_scene_documents_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      canvas_scene_messages: {
+        Row: {
+          id: string
+          scene_id: string
+          canvas_id: string
+          document_id: string | null
+          role: string
+          parts: Json
+          metadata: Json | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          scene_id: string
+          canvas_id: string
+          document_id?: string | null
+          role: string
+          parts?: Json
+          metadata?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          scene_id?: string
+          canvas_id?: string
+          document_id?: string | null
+          role?: string
+          parts?: Json
+          metadata?: Json | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_scene_messages_scene_id_fkey'
+            columns: ['scene_id']
+            isOneToOne: false
+            referencedRelation: 'canvas_scenes'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_scene_messages_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

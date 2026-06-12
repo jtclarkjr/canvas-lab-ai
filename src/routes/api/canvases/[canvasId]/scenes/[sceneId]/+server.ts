@@ -1,0 +1,117 @@
+import { json, type RequestHandler } from '@sveltejs/kit'
+import {
+  sceneResponseSchema,
+  sceneRowSchema,
+  updateSceneInputSchema
+} from '$lib/scenes/schema'
+import { getSceneType } from '$lib/scenes/registry'
+import { requireCanvasRole } from '$lib/server/canvas-access'
+import { assertSceneModify, requireScene } from '$lib/server/scene-access'
+import { sceneRowToScene } from '$lib/scenes/mapping'
+import {
+  badRequest,
+  handleApiError,
+  parseInput,
+  parseJsonBody,
+  withAuth
+} from '$lib/server/api-error'
+import { withRateLimit } from '$lib/server/rate-limit'
+import { getSupabase } from '$lib/server/supabase'
+import type { Json } from '$lib/server/database.types'
+
+export const PATCH: RequestHandler = async (event) =>
+  withRateLimit(async () => {
+    try {
+      const supabase = getSupabase()
+      const user = withAuth(event.locals.user)
+      const { canvasId, sceneId } = event.params
+
+      if (!canvasId || !sceneId) {
+        return json({ message: 'Canvas and scene ids are required.' }, { status: 400 })
+      }
+
+      const { role } = await requireCanvasRole(
+        supabase,
+        canvasId,
+        user.id,
+        'editor'
+      )
+      const scene = await requireScene(supabase, canvasId, sceneId)
+      assertSceneModify(role, scene, user.id)
+
+      const payload = await parseJsonBody(event.request)
+      const input = parseInput(updateSceneInputSchema, payload)
+
+      if (input.type !== undefined && !getSceneType(input.type)) {
+        throw badRequest('Unknown scene type.', {
+          code: 'unknown_scene_type',
+          details: { type: input.type }
+        })
+      }
+
+      const { data, error } = await supabase
+        .from('canvas_scenes')
+        .update({
+          ...(input.type !== undefined ? { type: input.type } : null),
+          ...(input.title !== undefined ? { title: input.title } : null),
+          ...(input.x !== undefined ? { x: input.x } : null),
+          ...(input.y !== undefined ? { y: input.y } : null),
+          ...(input.width !== undefined ? { width: input.width } : null),
+          ...(input.height !== undefined ? { height: input.height } : null),
+          ...(input.settings !== undefined
+            ? { settings: input.settings as Json }
+            : null),
+          updated_by: user.id
+        })
+        .eq('id', scene.id)
+        .select()
+        .single()
+
+      if (error || !data) {
+        throw error ?? new Error('Failed to update scene')
+      }
+
+      return json(
+        sceneResponseSchema.parse({ item: sceneRowToScene(sceneRowSchema.parse(data)) })
+      )
+    } catch (error) {
+      return handleApiError(error, event.request)
+    }
+  })({ request: event.request })
+
+export const DELETE: RequestHandler = async (event) =>
+  withRateLimit(async () => {
+    try {
+      const supabase = getSupabase()
+      const user = withAuth(event.locals.user)
+      const { canvasId, sceneId } = event.params
+
+      if (!canvasId || !sceneId) {
+        return json({ message: 'Canvas and scene ids are required.' }, { status: 400 })
+      }
+
+      const { role } = await requireCanvasRole(
+        supabase,
+        canvasId,
+        user.id,
+        'editor'
+      )
+      const scene = await requireScene(supabase, canvasId, sceneId)
+      assertSceneModify(role, scene, user.id)
+
+      const { error } = await supabase
+        .from('canvas_scenes')
+        .delete()
+        .eq('id', scene.id)
+
+      if (error) {
+        throw error
+      }
+
+      return json(
+        sceneResponseSchema.parse({ item: sceneRowToScene(sceneRowSchema.parse(scene)) })
+      )
+    } catch (error) {
+      return handleApiError(error, event.request)
+    }
+  })({ request: event.request })

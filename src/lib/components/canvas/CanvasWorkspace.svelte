@@ -12,6 +12,9 @@
   import LiveCursors from '$lib/components/canvas/LiveCursors.svelte'
   import ShareDialog from '$lib/components/canvas/ShareDialog.svelte'
   import TextFormattingToolbar from '$lib/components/canvas/TextFormattingToolbar.svelte'
+  import SceneCardLayer from '$lib/components/canvas/scenes/SceneCardLayer.svelte'
+  import SceneDialog from '$lib/components/canvas/scenes/SceneDialog.svelte'
+  import SceneModeSwitcher from '$lib/components/canvas/scenes/SceneModeSwitcher.svelte'
 
   let {
     canvasId,
@@ -69,10 +72,12 @@
     canManageCanvas={workspace.canManageCanvas}
     isLoadingCanvases={workspace.isLoadingCanvases}
     selectedTool={workspace.selectedTool}
-    readOnly={!workspace.canEdit}
+    readOnly={!workspace.canEdit || workspace.mode === 'scenes'}
     onTitleSave={workspace.saveTitle}
     onToolChange={workspace.handleToolChange}
   />
+
+  <SceneModeSwitcher mode={workspace.mode} onModeChange={workspace.handleModeChange} />
 
   <CanvasPresenceActions
     canvasId={workspace.canvasIdForActions}
@@ -122,11 +127,11 @@
     onHighlighterOpacityChange={workspace.setHighlighterOpacity}
   />
 
-  {#if workspace.canvasesError}
+  {#if workspace.canvasesError || workspace.scenesError}
     <div
       class="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full bg-red-600 px-4 py-2 text-sm text-white shadow-lg"
     >
-      {workspace.canvasesError}
+      {workspace.canvasesError ?? workspace.scenesError}
     </div>
   {/if}
 
@@ -142,6 +147,17 @@
     handlers={workspace.sceneHandlers}
   />
 
+  <SceneCardLayer
+    scenes={workspace.scenes}
+    camera={workspace.camera}
+    mode={workspace.mode}
+    canEdit={workspace.canEdit}
+    canModifyScene={workspace.canModifyScene}
+    activity={workspace.sceneActivity}
+    handlers={workspace.sceneCardHandlers}
+    onCreateScene={() => void workspace.createScene('document')}
+  />
+
   <CanvasTextEditor
     bind:textInputEl
     camera={workspace.camera}
@@ -155,7 +171,7 @@
 
   <LiveCursors cursors={workspace.cursors} />
 
-  {#if workspace.canEdit}
+  {#if workspace.canEdit && workspace.mode === 'editor'}
     <CanvasActionToolbar
       selectedCount={workspace.selectedCount}
       canUndo={workspace.canUndo}
@@ -172,4 +188,26 @@
     onZoomOut={workspace.zoomOut}
     onReset={workspace.resetView}
   />
+
+  {#if workspace.openScene}
+    {@const open = workspace.openScene}
+    {#key open.scene.id}
+      <SceneDialog
+        canvasId={workspace.canvasIdForActions}
+        scene={open.scene}
+        {userId}
+        originRect={open.originRect}
+        canModify={workspace.canModifyScene(open.scene.id)}
+        documentRevision={workspace.sceneDocumentRevisions[open.scene.id] ?? 0}
+        liveMessages={workspace.sceneLiveMessages[open.scene.id] ?? []}
+        remoteActivity={workspace.sceneActivity[open.scene.id] ?? null}
+        remoteStreamingText={workspace.sceneStreamingText[open.scene.id] ?? ''}
+        onClose={workspace.closeOpenScene}
+        onPatchScene={(patch) => workspace.patchScene(open.scene.id, patch)}
+        onDeleteScene={() => void workspace.deleteScene(open.scene.id)}
+        onBroadcastActivity={(kind, textDelta) =>
+          workspace.broadcastSceneActivity(open.scene.id, kind, textDelta)}
+      />
+    {/key}
+  {/if}
 </div>

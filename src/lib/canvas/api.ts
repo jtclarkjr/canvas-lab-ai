@@ -1,4 +1,4 @@
-import { ApiClientError, parseResponse } from '$lib/api-client'
+import { ApiClientError, getApiHeaders, parseResponse } from '$lib/api-client'
 import {
   accessRequestResponseSchema,
   addMemberInputSchema,
@@ -42,20 +42,7 @@ import {
   type UpsertElementResponse,
   type UserSearchResponse
 } from '$lib/canvas/schema'
-import { getAccessToken } from '$lib/auth/session-service'
-
 export { ApiClientError }
-
-async function getApiHeaders(headers: HeadersInit) {
-  const nextHeaders = new Headers(headers)
-  const accessToken = await getAccessToken()
-
-  if (accessToken) {
-    nextHeaders.set('authorization', `Bearer ${accessToken}`)
-  }
-
-  return nextHeaders
-}
 
 export async function listCanvases(): Promise<ListCanvasesResponse> {
   const response = await fetch('/api/canvases', {

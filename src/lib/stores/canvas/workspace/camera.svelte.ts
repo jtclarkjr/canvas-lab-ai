@@ -11,6 +11,12 @@ type WorkspaceCameraInput = {
 
 const cameraFallback: Camera = { x: 0, y: 0, scale: 1 }
 
+// Overlays (scene dialogs etc.) opt out of camera gestures: events that
+// originate inside them must scroll/drag the overlay, not pan the canvas.
+function isCameraExempt(target: EventTarget | null) {
+  return target instanceof Element && target.closest('[data-camera-exempt]') !== null
+}
+
 export function createWorkspaceCameraStore({
   getActiveCanvasId,
   getRootElement,
@@ -62,6 +68,7 @@ export function createWorkspaceCameraStore({
   function handleViewportPointerDown(event: PointerEvent) {
     if (getSelectedTool() !== 'hand') return
     if (event.pointerType === 'mouse' && event.button !== 0) return
+    if (isCameraExempt(event.target)) return
     if ((event.target as Element).closest('button, a, input, [role="button"]')) return
 
     if (event.pointerType !== 'mouse') {
@@ -97,6 +104,7 @@ export function createWorkspaceCameraStore({
   }
 
   function handleTouchStart(event: TouchEvent) {
+    if (isCameraExempt(event.target)) return
     if (event.touches.length === 1 && getSelectedTool() === 'hand') {
       event.preventDefault()
       const touch = event.touches[0]
@@ -229,6 +237,9 @@ export function createWorkspaceCameraStore({
     if (!rootEl) return
 
     const wheelHandler = (event: WheelEvent) => {
+      // Let overlays (scene dialog editor/chat) scroll natively.
+      if (isCameraExempt(event.target)) return
+
       event.preventDefault()
       const rect = rootEl?.getBoundingClientRect()
       if (!rect) return

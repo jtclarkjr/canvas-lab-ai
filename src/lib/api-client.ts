@@ -1,4 +1,5 @@
 import { z, ZodError } from 'zod'
+import { getAccessToken } from '$lib/auth/session-service'
 
 export const apiErrorSchema = z.object({
   message: z.string(),
@@ -63,4 +64,15 @@ export async function parseResponse<T>(
 
 export function isSchemaError(error: unknown): error is ZodError {
   return error instanceof ZodError
+}
+
+export async function getApiHeaders(headers: HeadersInit) {
+  const nextHeaders = new Headers(headers)
+  const accessToken = await getAccessToken()
+
+  if (accessToken) {
+    nextHeaders.set('authorization', `Bearer ${accessToken}`)
+  }
+
+  return nextHeaders
 }

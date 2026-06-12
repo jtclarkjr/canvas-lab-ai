@@ -13,6 +13,7 @@
     label = 'Options',
     role = 'dialog',
     align = 'center',
+    side = 'bottom',
     trigger,
     children
   } = $props<{
@@ -21,6 +22,7 @@
     label?: string
     role?: 'dialog' | 'menu'
     align?: 'start' | 'center' | 'end'
+    side?: 'top' | 'bottom'
     trigger?: (props: PopoverRenderProps) => unknown
     children?: () => unknown
   }>()
@@ -84,7 +86,9 @@
       {role}
       aria-label={label}
       class={cn(
-        'popover-shell absolute top-full z-30 mt-2 min-w-[260px]',
+        'popover-shell absolute z-30 min-w-[260px]',
+        side === 'bottom' && 'top-full mt-2',
+        side === 'top' && 'bottom-full mb-2',
         align === 'start' && 'left-0',
         align === 'center' && 'left-1/2 -translate-x-1/2',
         align === 'end' && 'right-0'

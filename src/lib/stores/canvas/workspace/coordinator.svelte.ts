@@ -18,6 +18,12 @@ import type {
   TextElement,
   Tool
 } from '$lib/canvas/types'
+import type { SceneMessage } from '$lib/scenes/schema'
+import type { WorkspaceMode } from '$lib/scenes/types'
+import { createWorkspaceModeStore } from '$lib/stores/canvas/scenes/mode.svelte'
+import { createWorkspaceRealtimeScenesStore } from '$lib/stores/canvas/scenes/realtime-scenes.svelte'
+import { createWorkspaceSceneActivityStore } from '$lib/stores/canvas/scenes/scene-activity.svelte'
+import { createWorkspaceScenesStore } from '$lib/stores/canvas/scenes/scenes.svelte'
 import { createWorkspaceAccessStore } from '$lib/stores/canvas/workspace/access.svelte'
 import { createWorkspaceCameraStore } from '$lib/stores/canvas/workspace/camera.svelte'
 import { createWorkspaceCanvasesStore } from '$lib/stores/canvas/workspace/canvases.svelte'
@@ -58,6 +64,10 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   let editingText = $state<EditingText | null>(null)
   let editorSelection = $state({ start: 0, end: 0 })
   let elementOwners = new Map<string, string | null>()
+  // Chat messages arriving over realtime, keyed by scene id, so viewers of
+  // an open scene see other users' conversations appear live.
+  let sceneLiveMessages = $state<Record<string, SceneMessage[]>>({})
+  let toolBeforeScenesMode: Tool = 'select'
 
   let lastLoadedCanvasId = ''
 
@@ -93,6 +103,38 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     setElementOwner: (id, ownerId) => elementOwners.set(id, ownerId),
     setPaths,
     setTextElements
+  })
+  const modeStore = createWorkspaceModeStore({
+    getActiveCanvasId: () => activeCanvasId
+  })
+  const scenesStore = createWorkspaceScenesStore({
+    getActiveCanvasId: () => activeCanvasId,
+    getUserId: () => userId,
+    getRole: () => role,
+    getRootElement: () => rootEl,
+    getCameraScale: () => cameraStore.camera.scale,
+    screenToCanvasPoint
+  })
+  const sceneActivityStore = createWorkspaceSceneActivityStore({
+    getActiveCanvasId: () => activeCanvasId,
+    getUserId: () => userId
+  })
+  createWorkspaceRealtimeScenesStore({
+    getActiveCanvasId: () => activeCanvasId,
+    isSceneBusy: scenesStore.isSceneBusy,
+    setScenes: scenesStore.setScenes,
+    onSceneDeleted: scenesStore.handleSceneDeletedRemotely,
+    onDocumentEvent: scenesStore.bumpDocumentRevision,
+    onMessageInsert: (message) => {
+      const existing = sceneLiveMessages[message.sceneId] ?? []
+      sceneLiveMessages = {
+        ...sceneLiveMessages,
+        [message.sceneId]: [
+          ...existing.filter((entry) => entry.id !== message.id),
+          message
+        ]
+      }
+    }
   })
 
   function setProps(next: CanvasWorkspaceStoreInput) {
@@ -290,17 +332,54 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     selectedTool = tool
   }
 
+  function handleModeChange(nextMode: WorkspaceMode) {
+    if (nextMode === modeStore.mode) {
+      return
+    }
+
+    if (nextMode === 'scenes') {
+      toolBeforeScenesMode = selectedTool
+      if (editingText) {
+        textEditorStore.commitText(editingText)
+      }
+    }
+
+    modeStore.setMode(nextMode)
+
+    if (nextMode === 'editor' && canEdit()) {
+      selectedTool = toolBeforeScenesMode
+    }
+  }
+
+  // Canvas shortcuts (undo/redo/delete) must not fire while a scene dialog
+  // is open — typing or pressing Delete there targets the scene, not the
+  // drawing layer behind it.
+  function handleWorkspaceKeydown(event: KeyboardEvent) {
+    if (scenesStore.openScene) {
+      return
+    }
+    keyboardStore.handleWorkspaceKeydown(event)
+  }
+
   function mount() {
     void canvasesStore.loadCanvasesList()
-    window.addEventListener('keydown', keyboardStore.handleWorkspaceKeydown)
+    window.addEventListener('keydown', handleWorkspaceKeydown)
 
     return () => {
-      window.removeEventListener('keydown', keyboardStore.handleWorkspaceKeydown)
+      window.removeEventListener('keydown', handleWorkspaceKeydown)
     }
   }
 
   $effect(() => {
     if (!canEdit() && selectedTool !== 'hand') {
+      selectedTool = 'hand'
+    }
+  })
+
+  // Scenes mode keeps the drawing layer passive: the hand tool turns off
+  // the SVG's pointer events, so panning/zooming keep working untouched.
+  $effect(() => {
+    if (modeStore.mode === 'scenes' && selectedTool !== 'hand') {
       selectedTool = 'hand'
     }
   })
@@ -318,8 +397,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     selectionEnd = null
     currentPath = []
     editingText = null
+    sceneLiveMessages = {}
+    scenesStore.closeScene()
+    modeStore.loadModeState(nextCanvasId)
     cameraStore.loadCameraState(nextCanvasId)
     void loadCanvasElements(nextCanvasId)
+    void scenesStore.loadScenes(nextCanvasId)
   })
 
   $effect(() => {
@@ -339,6 +422,14 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     mount,
     saveTitle: canvasesStore.saveTitle,
     handleToolChange,
+    handleModeChange,
+    createScene: scenesStore.createSceneAtViewportCenter,
+    patchScene: scenesStore.patchScene,
+    deleteScene: scenesStore.deleteScene,
+    canModifyScene: scenesStore.canModifyScene,
+    openSceneById: scenesStore.openSceneById,
+    closeOpenScene: scenesStore.closeScene,
+    broadcastSceneActivity: sceneActivityStore.broadcastActivity,
     handleListStyleToggle: textEditorStore.handleListStyleToggle,
     setTextFontSize: formattingStore.setTextFontSize,
     toggleTextBold: formattingStore.toggleTextBold,
@@ -445,6 +536,53 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
         pointerUp: sceneStore.handleSvgPointerUp,
         doubleClick: sceneStore.handleSvgDoubleClick
       }
+    },
+    get mode() {
+      return modeStore.mode
+    },
+    get scenes() {
+      return scenesStore.scenes
+    },
+    get scenesError() {
+      return scenesStore.error
+    },
+    get openScene() {
+      const open = scenesStore.openScene
+      if (!open) {
+        return null
+      }
+
+      const scene = scenesStore.getScene(open.sceneId)
+      if (!scene) {
+        return null
+      }
+
+      return { scene, originRect: open.originRect }
+    },
+    get sceneCardHandlers() {
+      return {
+        pointerDown: scenesStore.handleCardPointerDown,
+        pointerMove: scenesStore.handleCardPointerMove,
+        pointerUp: scenesStore.handleCardPointerUp,
+        pointerCancel: scenesStore.handleCardPointerCancel,
+        open: scenesStore.handleCardOpen,
+        resizePointerDown: scenesStore.handleResizePointerDown,
+        resizePointerMove: scenesStore.handleResizePointerMove,
+        resizePointerUp: scenesStore.handleResizePointerUp,
+        resizePointerCancel: scenesStore.handleResizePointerCancel
+      }
+    },
+    get sceneActivity() {
+      return sceneActivityStore.activity
+    },
+    get sceneStreamingText() {
+      return sceneActivityStore.streamingText
+    },
+    get sceneLiveMessages() {
+      return sceneLiveMessages
+    },
+    get sceneDocumentRevisions() {
+      return scenesStore.documentRevisions
     },
     get cursors() {
       return presenceStore.cursors
