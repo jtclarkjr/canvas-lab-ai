@@ -75,6 +75,12 @@ vp dlx sv check
 vp run fmt:sv
 ```
 
+## Technical Docs
+
+- [Canvas workspace architecture](docs/CANVAS_WORKSPACE.md)
+- [Text editor and rich text architecture](docs/TEXT_EDITOR_ARCHITECTURE.md)
+- [Role-based access control](docs/RBAC.md)
+
 ## Project Structure
 
 ```
