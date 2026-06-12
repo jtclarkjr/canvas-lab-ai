@@ -39,11 +39,17 @@ export function latestWriteDocumentInput(
   return latest
 }
 
+type MessageAuthor = {
+  id: string
+  name: string
+}
+
 type PersistDocumentChatInput = {
   supabase: SupabaseClient<Database>
   scene: SceneRow
   documentId: string
   userId: string
+  author: MessageAuthor
   modelId: string
   messages: UIMessage[]
   responseMessage: UIMessage
@@ -57,6 +63,7 @@ export async function persistDocumentChat({
   scene,
   documentId,
   userId,
+  author,
   modelId,
   messages,
   responseMessage
@@ -79,7 +86,9 @@ export async function persistDocumentChat({
             document_id: documentId,
             role: 'user',
             parts: lastUserMessage.parts as unknown as Json,
-            metadata: null,
+            // Author display info is denormalized so realtime INSERT
+            // payloads (which can't join profiles) carry attribution.
+            metadata: { author } as Json,
             created_by: userId,
             created_at: new Date(finishedAt - 1000).toISOString()
           }
@@ -92,7 +101,8 @@ export async function persistDocumentChat({
       document_id: documentId,
       role: 'assistant',
       parts: responseMessage.parts as unknown as Json,
-      metadata: { modelId } as Json,
+      // author on an assistant message = the user who requested the turn.
+      metadata: { modelId, author } as Json,
       created_by: userId,
       created_at: new Date(finishedAt).toISOString()
     }

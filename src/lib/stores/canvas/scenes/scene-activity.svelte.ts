@@ -13,6 +13,7 @@ type ActivityEntry = SceneActivity & { timestamp: number }
 type WorkspaceSceneActivityInput = {
   getActiveCanvasId: () => string
   getUserId: () => string
+  getUserName: () => string
 }
 
 // Broadcast channel that lets every canvas participant watch scene work
@@ -20,7 +21,8 @@ type WorkspaceSceneActivityInput = {
 // text deltas relayed to viewers who have the same scene open.
 export function createWorkspaceSceneActivityStore({
   getActiveCanvasId,
-  getUserId
+  getUserId,
+  getUserName
 }: WorkspaceSceneActivityInput) {
   let activity = $state<Record<string, ActivityEntry>>({})
   let streamingText = $state<Record<string, string>>({})
@@ -47,6 +49,7 @@ export function createWorkspaceSceneActivityStore({
     sendActivity({
       sceneId: pendingSceneId,
       userId: getUserId(),
+      userName: getUserName(),
       kind: 'generating',
       ...(textDelta ? { textDelta } : null)
     })
@@ -78,7 +81,7 @@ export function createWorkspaceSceneActivityStore({
       pendingDelta = ''
     }
 
-    sendActivity({ sceneId, userId: getUserId(), kind })
+    sendActivity({ sceneId, userId: getUserId(), userName: getUserName(), kind })
   }
 
   function applyRemoteActivity(entry: ActivityEntry) {

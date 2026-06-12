@@ -8,6 +8,40 @@ export type DisplayMessage = {
   id: string
   role: 'user' | 'assistant' | 'system'
   parts: unknown[]
+  metadata?: unknown
+}
+
+export type MessageAuthorInfo = {
+  id: string
+  name: string
+}
+
+// Author/model attribution rides on message metadata (stamped server-side
+// at persist time; local messages have none and belong to the viewer).
+export function messageAuthor(message: DisplayMessage): MessageAuthorInfo | null {
+  const metadata = message.metadata
+  if (typeof metadata !== 'object' || metadata === null) {
+    return null
+  }
+  const author = (metadata as { author?: unknown }).author
+  if (
+    typeof author === 'object' &&
+    author !== null &&
+    typeof (author as { id?: unknown }).id === 'string' &&
+    typeof (author as { name?: unknown }).name === 'string'
+  ) {
+    return author as MessageAuthorInfo
+  }
+  return null
+}
+
+export function messageModelId(message: DisplayMessage): string | null {
+  const metadata = message.metadata
+  if (typeof metadata !== 'object' || metadata === null) {
+    return null
+  }
+  const modelId = (metadata as { modelId?: unknown }).modelId
+  return typeof modelId === 'string' ? modelId : null
 }
 
 export function asParts(parts: unknown[]): ChatPartLike[] {

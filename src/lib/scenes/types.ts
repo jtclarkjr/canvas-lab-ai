@@ -39,6 +39,7 @@ export type SceneActivityKind = 'generating' | 'drawing' | 'idle'
 export type SceneActivity = {
   sceneId: string
   userId: string
+  userName?: string
   kind: SceneActivityKind
   textDelta?: string
 }

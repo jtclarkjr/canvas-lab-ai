@@ -117,7 +117,8 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   })
   const sceneActivityStore = createWorkspaceSceneActivityStore({
     getActiveCanvasId: () => activeCanvasId,
-    getUserId: () => userId
+    getUserId: () => userId,
+    getUserName: () => userEmail ?? 'A collaborator'
   })
   createWorkspaceRealtimeScenesStore({
     getActiveCanvasId: () => activeCanvasId,

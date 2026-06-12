@@ -156,6 +156,11 @@ export const sceneMessageRowSchema = z.object({
   created_at: z.string()
 })
 
+export const messageAuthorSchema = z.object({
+  id: z.string(),
+  name: z.string()
+})
+
 export const sceneMessageSchema = z.object({
   id: z.string(),
   sceneId: z.string(),
@@ -163,6 +168,7 @@ export const sceneMessageSchema = z.object({
   role: sceneMessageRoleSchema,
   parts: z.array(z.unknown()),
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
+  author: messageAuthorSchema.nullable().optional(),
   createdBy: z.string().nullable().optional(),
   createdAt: z.string().optional()
 })
@@ -218,6 +224,7 @@ export type MarkdownDocumentContent = z.infer<
 export type DocumentAnnotations = z.infer<typeof documentAnnotationsSchema>
 export type SceneMessageRow = z.infer<typeof sceneMessageRowSchema>
 export type SceneMessage = z.infer<typeof sceneMessageSchema>
+export type MessageAuthor = z.infer<typeof messageAuthorSchema>
 export type ListSceneMessagesResponse = z.infer<
   typeof listSceneMessagesResponseSchema
 >

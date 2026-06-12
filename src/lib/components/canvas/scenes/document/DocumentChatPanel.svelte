@@ -19,6 +19,7 @@
     buildBody,
     canModify,
     canSend,
+    currentUserId,
     liveMessages,
     remoteActivity,
     remoteStreamingText,
@@ -40,6 +41,7 @@
     buildBody: () => Record<string, unknown>
     canModify: boolean
     canSend: boolean
+    currentUserId: string
     liveMessages: SceneMessage[]
     remoteActivity: SceneActivity | null
     remoteStreamingText: string
@@ -87,7 +89,8 @@
       .map((message: SceneMessage) => ({
         id: message.id,
         role: message.role,
-        parts: message.parts
+        parts: message.parts,
+        metadata: { ...message.metadata, author: message.author ?? undefined }
       }))
     return [...own, ...remote]
   })
@@ -104,7 +107,8 @@
         ...(remote.map((message: SceneMessage) => ({
           id: message.id,
           role: message.role,
-          parts: message.parts
+          parts: message.parts,
+          metadata: { ...message.metadata, author: message.author ?? undefined }
         })) as unknown as UIMessage[])
       ]
     }
@@ -184,8 +188,10 @@
   <div class="min-h-0 flex-1">
     <DocumentMessageList
       messages={displayMessages}
+      {currentUserId}
       {remoteStreamingText}
       isRemoteGenerating={remoteActivity?.kind === 'generating'}
+      remoteGeneratorName={remoteActivity?.userName ?? ''}
     />
   </div>
 

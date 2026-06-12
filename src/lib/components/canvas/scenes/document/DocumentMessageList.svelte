@@ -1,8 +1,12 @@
 <script lang="ts">
   import { BookOpen, FileCheck2, Globe, LoaderCircle, Sparkles } from 'lucide-svelte'
+  import { colorFromId } from '$lib/canvas/helpers/color-from-id'
+  import { getModelOption } from '$lib/scenes/models'
   import {
     asParts,
     isWebSearchPart,
+    messageAuthor,
+    messageModelId,
     partText,
     readContextPart,
     sourceUrlPart,
@@ -12,13 +16,35 @@
 
   let {
     messages,
+    currentUserId,
     remoteStreamingText = '',
-    isRemoteGenerating = false
+    isRemoteGenerating = false,
+    remoteGeneratorName = ''
   } = $props<{
     messages: DisplayMessage[]
+    currentUserId: string
     remoteStreamingText?: string
     isRemoteGenerating?: boolean
+    remoteGeneratorName?: string
   }>()
+
+  // Attribution lines: collaborators see who wrote each prompt and which
+  // model (and requester) produced each response.
+  function userLabel(message: DisplayMessage) {
+    const author = messageAuthor(message)
+    if (!author || author.id === currentUserId) {
+      return { name: 'You', color: null as string | null }
+    }
+    return { name: author.name, color: colorFromId(author.id) }
+  }
+
+  function assistantLabel(message: DisplayMessage) {
+    const modelId = messageModelId(message)
+    const model = modelId ? (getModelOption(modelId)?.label ?? modelId) : null
+    const author = messageAuthor(message)
+    const requester = author && author.id !== currentUserId ? author.name : null
+    return { model, requester }
+  }
 
   let scrollEl = $state<HTMLDivElement | null>(null)
 
@@ -35,7 +61,23 @@
 <div bind:this={scrollEl} class="flex h-full flex-col gap-3 overflow-y-auto px-5 py-4">
   {#each messages as message (message.id)}
     {#if message.role !== 'system'}
-      <div class={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div class={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
+        {#if message.role === 'user'}
+          {@const label = userLabel(message)}
+          <span
+            class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground"
+            style={label.color ? `color:${label.color}` : undefined}
+          >
+            {label.name}
+          </span>
+        {:else}
+          {@const label = assistantLabel(message)}
+          <span class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground">
+            AI{label.model ? ` · ${label.model}` : ''}{label.requester
+              ? ` · for ${label.requester}`
+              : ''}
+          </span>
+        {/if}
         <div
           class={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
             message.role === 'user'
@@ -105,7 +147,7 @@
       >
         <span class="mb-1 flex items-center gap-1.5 text-xs text-primary">
           <Sparkles class="size-3 animate-pulse" />
-          A collaborator is generating…
+          {remoteGeneratorName || 'A collaborator'} is generating…
         </span>
         {#if remoteStreamingText}
           <p class="whitespace-pre-wrap">{remoteStreamingText}</p>

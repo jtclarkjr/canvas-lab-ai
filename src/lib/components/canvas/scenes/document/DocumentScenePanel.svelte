@@ -227,7 +227,11 @@
         const messages = history.items.map((message) => ({
           id: message.id,
           role: message.role,
-          parts: message.parts
+          parts: message.parts,
+          metadata: {
+            ...message.metadata,
+            author: message.author ?? undefined
+          }
         })) as unknown as UIMessage[]
 
         messagesCache.set(documentId, messages)
@@ -500,6 +504,7 @@
               {buildBody}
               {canModify}
               canSend={activeDocumentId !== null}
+              currentUserId={userId}
               liveMessages={liveMessagesForActiveDocument}
               {remoteActivity}
               {remoteStreamingText}

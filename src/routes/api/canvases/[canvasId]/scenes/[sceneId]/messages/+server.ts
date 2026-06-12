@@ -46,11 +46,42 @@ export const GET: RequestHandler = async (event) =>
         throw error
       }
 
+      const rows = (data ?? []).map((row) => sceneMessageRowSchema.parse(row))
+
+      // Resolve fresh author display names from profiles (also covers
+      // messages persisted before authors were stamped into metadata).
+      const authorIds = [
+        ...new Set(
+          rows
+            .map((row) => row.created_by)
+            .filter((id): id is string => id !== null)
+        )
+      ]
+      const authorNames = new Map<string, string>()
+      if (authorIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, email')
+          .in('id', authorIds)
+        for (const profile of profiles ?? []) {
+          authorNames.set(profile.id, profile.display_name || profile.email)
+        }
+      }
+
       return json(
         listSceneMessagesResponseSchema.parse({
-          items: (data ?? []).map((row) =>
-            sceneMessageRowToMessage(sceneMessageRowSchema.parse(row))
-          )
+          items: rows.map((row) => {
+            const message = sceneMessageRowToMessage(row)
+            const resolvedName = row.created_by
+              ? authorNames.get(row.created_by)
+              : undefined
+            return {
+              ...message,
+              author: resolvedName
+                ? { id: row.created_by as string, name: resolvedName }
+                : message.author
+            }
+          })
         })
       )
     } catch (error) {

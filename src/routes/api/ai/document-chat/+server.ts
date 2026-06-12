@@ -161,6 +161,10 @@ export const POST: RequestHandler = async (event) =>
               scene,
               documentId: input.documentId,
               userId: user.id,
+              author: {
+                id: user.id,
+                name: user.name ?? user.email ?? 'Someone'
+              },
               modelId: input.modelId,
               messages: updatedMessages,
               responseMessage

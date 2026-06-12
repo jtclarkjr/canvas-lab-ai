@@ -80,7 +80,10 @@
   <div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
     <span>{sceneType?.label ?? scene.type}</span>
     {#if activityLabel}
-      <span class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+      <span
+        class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary"
+        title={`${activity?.userName ?? 'A collaborator'} is ${activityLabel.toLowerCase()}`}
+      >
         <Sparkles class="size-3 animate-pulse" />
         {activityLabel}
       </span>

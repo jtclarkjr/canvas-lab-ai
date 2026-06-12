@@ -37,6 +37,21 @@ export const sceneDocumentRowToDocument = (row: SceneDocumentRow) => ({
   updatedAt: row.updated_at
 })
 
+// Author attribution is stamped into metadata at persist time so realtime
+// payloads (which cannot join profiles) still carry a display name.
+function authorFromMetadata(metadata: SceneMessageRow['metadata']) {
+  const author = metadata?.author
+  if (
+    typeof author === 'object' &&
+    author !== null &&
+    typeof (author as { id?: unknown }).id === 'string' &&
+    typeof (author as { name?: unknown }).name === 'string'
+  ) {
+    return author as { id: string; name: string }
+  }
+  return null
+}
+
 export const sceneMessageRowToMessage = (row: SceneMessageRow) => ({
   id: row.id,
   sceneId: row.scene_id,
@@ -44,6 +59,7 @@ export const sceneMessageRowToMessage = (row: SceneMessageRow) => ({
   role: row.role,
   parts: row.parts,
   metadata: row.metadata,
+  author: authorFromMetadata(row.metadata),
   createdBy: row.created_by,
   createdAt: row.created_at
 })
