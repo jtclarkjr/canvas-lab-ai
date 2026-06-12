@@ -45,7 +45,9 @@
 </script>
 
 <div
-  class="glass-card group pointer-events-auto absolute flex cursor-grab flex-col overflow-hidden p-3 transition-shadow hover:shadow-[0_18px_60px_rgba(15,23,42,0.2)] active:cursor-grabbing"
+  class={`glass-card group pointer-events-auto absolute flex ${
+    canModify ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+  } flex-col overflow-hidden p-3 transition-shadow hover:shadow-[0_18px_60px_rgba(15,23,42,0.2)]`}
   style={cardStyle}
   data-scene-id={scene.id}
   role="button"
@@ -68,7 +70,7 @@
     </span>
     <button
       type="button"
-      class="hidden size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
+      class="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
       onclick={(event) => handlers.open(event, scene.id)}
       title="Open scene"
       aria-label="Open scene"

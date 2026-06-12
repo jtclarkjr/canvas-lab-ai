@@ -5,7 +5,7 @@
 
 {#if toast.items.length > 0}
   <div
-    class="pointer-events-none fixed bottom-6 left-1/2 z-[60] flex w-full max-w-sm -translate-x-1/2 flex-col gap-2 px-4"
+    class="pointer-events-none fixed right-4 bottom-6 z-[60] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2 sm:right-6 sm:w-full"
   >
     {#each toast.items as item (item.id)}
       <div
