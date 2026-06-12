@@ -4,6 +4,8 @@
   import type { Canvas, CanvasElement } from '$lib/canvas/schema'
   import type { Scene } from '$lib/scenes/schema'
   import { createCanvasWorkspaceStore } from '$lib/stores/canvas/workspace/index.svelte'
+  import { provideCanvasChatStore } from '$lib/stores/canvas/chat/canvas-chat.svelte'
+  import { provideCanvasConferenceStore } from '$lib/stores/canvas/conference/index.svelte'
   import { useSceneDocumentsStore } from '$lib/stores/canvas/scenes/documents.svelte'
   import CanvasActionToolbar from '$lib/components/canvas/CanvasActionToolbar.svelte'
   import CanvasPresenceActions from '$lib/components/canvas/CanvasPresenceActions.svelte'
@@ -12,6 +14,7 @@
   import CanvasTitleSwitcher from '$lib/components/canvas/CanvasTitleSwitcher.svelte'
   import CanvasZoomControls from '$lib/components/canvas/CanvasZoomControls.svelte'
   import CanvasChat from '$lib/components/canvas/chat/CanvasChat.svelte'
+  import CanvasConference from '$lib/components/canvas/conference/CanvasConference.svelte'
   import DrawingToolbar from '$lib/components/canvas/DrawingToolbar.svelte'
   import LiveCursors from '$lib/components/canvas/LiveCursors.svelte'
   import RequestEditAccessBanner from '$lib/components/canvas/RequestEditAccessBanner.svelte'
@@ -66,6 +69,21 @@
   }
 
   const workspace = createCanvasWorkspaceStore(currentWorkspaceInput())
+
+  // Provided here (not in wrapper components) because sibling subtrees
+  // consume them: the call button in CanvasPresenceActions, the PiP box,
+  // and the call's fullscreen view, which embeds the chat panel.
+  provideCanvasChatStore({
+    getCanvasId: () => workspace.canvasIdForActions,
+    getUserId: () => userId,
+    getEnabled: () => !workspace.isPublicViewer && Boolean(userId)
+  })
+
+  provideCanvasConferenceStore({
+    getCanvasId: () => workspace.canvasIdForActions,
+    getUserId: () => userId,
+    getEnabled: () => !workspace.isPublicViewer && Boolean(userId)
+  })
 
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
@@ -232,6 +250,10 @@
   {#if !workspace.isPublicViewer && userId}
     <CanvasChat canvasId={workspace.canvasIdForActions} {userId} />
   {/if}
+
+  <!-- Calls are members-only too; the conference store self-gates all
+       network traffic via getEnabled. -->
+  <CanvasConference />
 
   {#if workspace.isPublicViewer || workspace.role === 'reader'}
     <RequestEditAccessBanner

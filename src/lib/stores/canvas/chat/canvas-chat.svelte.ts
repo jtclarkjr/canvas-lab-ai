@@ -33,11 +33,15 @@ const assistantMessagesCache = new Map<string, UIMessage[]>()
 type CanvasChatStoreInput = {
   getCanvasId: () => string
   getUserId: () => string
+  // Gates realtime traffic when the store is provided above the
+  // members-only render guard (e.g. for public viewers).
+  getEnabled?: () => boolean
 }
 
 export function createCanvasChatStore({
   getCanvasId,
-  getUserId
+  getUserId,
+  getEnabled
 }: CanvasChatStoreInput) {
   let open = $state(false)
   let hasOpened = $state(false)
@@ -305,7 +309,7 @@ export function createCanvasChatStore({
   $effect(() => {
     const client = supabase
     const canvasId = getCanvasId()
-    if (!client || !canvasId) {
+    if (!client || !canvasId || (getEnabled && !getEnabled())) {
       return
     }
 
@@ -397,6 +401,13 @@ export function createCanvasChatStore({
     retry,
     dismissFailed,
     retryChatLoad: () => ensureChatLoaded({ force: true }),
+    // For surfaces showing the chat outside the window (the call's
+    // fullscreen chat panel): load without flipping `open`, and clear the
+    // unread badge while the messages are actually visible there.
+    ensureLoaded: () => ensureChatLoaded(),
+    markChatRead: () => {
+      unreadCount = 0
+    },
     snapshotAssistantMessages
   }
 }

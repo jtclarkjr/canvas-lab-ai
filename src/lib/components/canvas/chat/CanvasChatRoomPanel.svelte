@@ -3,11 +3,17 @@
   import { useCanvasChatStore, type ChatEntry } from '$lib/stores/canvas/chat/canvas-chat.svelte'
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
 
-  let { userId } = $props<{ userId: string }>()
+  // alwaysVisible: hosts outside the chat window (the call's fullscreen
+  // chat panel) control their own visibility, so the auto-scroll behavior
+  // shouldn't wait on the window being open.
+  let { userId, alwaysVisible = false } = $props<{
+    userId: string
+    alwaysVisible?: boolean
+  }>()
 
   const store = useCanvasChatStore()
 
-  const visible = $derived(store.open && store.activeTab === 'chat')
+  const visible = $derived(alwaysVisible || (store.open && store.activeTab === 'chat'))
 
   let scrollEl = $state<HTMLDivElement | null>(null)
   let atBottom = true

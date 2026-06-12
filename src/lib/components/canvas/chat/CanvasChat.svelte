@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { provideCanvasChatStore } from '$lib/stores/canvas/chat/canvas-chat.svelte'
+  import { useCanvasChatStore } from '$lib/stores/canvas/chat/canvas-chat.svelte'
+  import { useCanvasConferenceStoreOptional } from '$lib/stores/canvas/conference/index.svelte'
   import CanvasChatLauncher from '$lib/components/canvas/chat/CanvasChatLauncher.svelte'
   import CanvasChatWindow from '$lib/components/canvas/chat/CanvasChatWindow.svelte'
 
@@ -8,9 +9,15 @@
     userId: string
   }>()
 
-  const store = provideCanvasChatStore({
-    getCanvasId: () => canvasId,
-    getUserId: () => userId
+  // Provided from CanvasWorkspace so the call's fullscreen view can embed
+  // the chat panel too.
+  const store = useCanvasChatStore()
+
+  // The call PiP anchors above the chat window when both sit bottom-right;
+  // this one-way bridge tells the conference store when chat is open.
+  const conference = useCanvasConferenceStoreOptional()
+  $effect(() => {
+    conference?.setChatOpen(store.open)
   })
 
   let launcherEl = $state<HTMLButtonElement | null>(null)
