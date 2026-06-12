@@ -2,7 +2,7 @@
   import { Chat } from '@ai-sdk/svelte'
   import { DefaultChatTransport, type UIMessage } from 'ai'
   import { getApiHeaders } from '$lib/api-client'
-  import type { SceneDocument, SceneMessage } from '$lib/scenes/schema'
+  import type { SceneDocumentListItem, SceneMessage } from '$lib/scenes/schema'
   import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
   import {
     asParts,
@@ -55,7 +55,7 @@
     onModelChange: (modelId: string) => void
     webSearch: boolean
     onWebSearchToggle: () => void
-    savedDocuments: SceneDocument[]
+    savedDocuments: SceneDocumentListItem[]
     contextDocumentIds: string[]
     onToggleContext: (documentId: string) => void
   }>()

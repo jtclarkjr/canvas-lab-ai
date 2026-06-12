@@ -3,6 +3,7 @@
   import type { CanvasRole } from '$lib/canvas/roles'
   import type { Canvas } from '$lib/canvas/schema'
   import { createCanvasWorkspaceStore } from '$lib/stores/canvas/workspace/index.svelte'
+  import { useSceneDocumentsStore } from '$lib/stores/canvas/scenes/documents.svelte'
   import CanvasActionToolbar from '$lib/components/canvas/CanvasActionToolbar.svelte'
   import CanvasPresenceActions from '$lib/components/canvas/CanvasPresenceActions.svelte'
   import CanvasScene from '$lib/components/canvas/CanvasScene.svelte'
@@ -36,6 +37,13 @@
     initialCanvases?: Canvas[]
   }>()
 
+  // svelte-ignore state_referenced_locally -- route usage provides context;
+  // this fallback only supports isolated component renders/tests.
+  const sceneDocumentsStore = useSceneDocumentsStore({
+    canvasId,
+    initialItemsBySceneId: {}
+  })
+
   function currentWorkspaceInput() {
     return {
       canvasId,
@@ -44,7 +52,8 @@
       role,
       isPublicViewer,
       canvasTitle,
-      initialCanvases
+      initialCanvases,
+      sceneDocumentsStore
     }
   }
 

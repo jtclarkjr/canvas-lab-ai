@@ -13,20 +13,21 @@
   import {
     createSceneDocument,
     deleteSceneDocument,
-    listSceneDocuments,
     listSceneMessages,
     updateSceneDocument
   } from '$lib/scenes/api'
+  import { reconcileActiveDocumentId } from '$lib/scenes/document-selection'
   import {
     markdownDocumentContentSchema,
     type Scene,
-    type SceneDocument,
+    type SceneDocumentListItem,
     type SceneMessage
   } from '$lib/scenes/schema'
   import { defaultModelId, isKnownModelId } from '$lib/scenes/models'
   import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
   import type { DraftToolPart } from '$lib/scenes/chat-parts'
   import { toast } from '$lib/stores/toast.svelte'
+  import { useSceneDocumentsStore } from '$lib/stores/canvas/scenes/documents.svelte'
   import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
   import DocumentChatPanel from '$lib/components/canvas/scenes/document/DocumentChatPanel.svelte'
   import DocumentComposer from '$lib/components/canvas/scenes/document/DocumentComposer.svelte'
@@ -35,10 +36,8 @@
   import DocumentListPanel from '$lib/components/canvas/scenes/document/DocumentListPanel.svelte'
   import NotesSceneView from '$lib/components/canvas/scenes/notes/NotesSceneView.svelte'
 
-  // Module-level caches so reopening a scene shows its documents and chat
-  // instantly (no skeleton/blank flash); fresh data still loads in the
-  // background and replaces the cache for next time.
-  const documentsCache = new Map<string, SceneDocument[]>()
+  // Module-level cache so reopening a document's chat thread mounts
+  // instantly; fresh data still loads in the background for the next mount.
   const messagesCache = new Map<string, UIMessage[]>()
 
   let {
@@ -67,7 +66,13 @@
     onBroadcastActivity: (kind: SceneActivityKind, textDelta?: string) => void
   }>()
 
-  let documents = $state<SceneDocument[]>([])
+  // svelte-ignore state_referenced_locally -- route usage provides context;
+  // this fallback only supports isolated component renders/tests.
+  const sceneDocuments = useSceneDocumentsStore({
+    canvasId,
+    initialItemsBySceneId: {}
+  })
+
   let activeDocumentId = $state<string | null>(null)
   let initialMessages = $state<UIMessage[] | null>(null)
   let view = $state<'chat' | 'editor' | 'notes'>('chat')
@@ -87,17 +92,23 @@
   // The write_document call currently streaming, mirrored into the editor
   // pane so the document appears there live instead of in the chat.
   let liveDraft = $state<DraftToolPart | null>(null)
-  let documentPendingDelete = $state<SceneDocument | null>(null)
+  let documentPendingDelete = $state<SceneDocumentListItem | null>(null)
   let confirmDeleteDocumentOpen = $state(false)
-  let documentsLoaded = $state(false)
   // First prompt typed in the blank state — sent automatically once the
   // lazily-created draft's chat mounts.
   let localPendingPrompt = $state<string | null>(null)
   let creatingDraft = false
+  let loadingDocumentId = $state<string | null>(null)
   // Gates the hide-chat toggle: only meaningful once a conversation exists.
   let conversationStarted = $state(false)
 
+  const documents = $derived(
+    sceneDocuments.getItems(scene.id).filter((document) => document.kind === 'markdown')
+  )
   const activeDocument = $derived(
+    activeDocumentId ? sceneDocuments.getFullDocument(activeDocumentId) : null
+  )
+  const activeDocumentItem = $derived(
     documents.find((document) => document.id === activeDocumentId) ?? null
   )
   const savedDocuments = $derived(documents.filter((document) => document.status === 'saved'))
@@ -110,37 +121,19 @@
     error = cause instanceof Error ? cause.message : fallback
   }
 
-  function hasContent(document: SceneDocument) {
-    if (document.title.trim() !== '') {
-      return true
-    }
-    const parsed = markdownDocumentContentSchema.safeParse(document.content)
-    return parsed.success && parsed.data.markdown.trim() !== ''
+  async function refreshDocumentItems() {
+    await sceneDocuments.refreshScene(scene.id)
   }
 
-  function applyDocuments(items: SceneDocument[]) {
-    // Notes live in their own view (kind 'notes'), not in the library.
-    documents = items.filter((item) => item.kind === 'markdown')
-
-    // Keep the current selection; otherwise pick the latest draft with
-    // actual content. No auto-selection of empty drafts or saved docs —
-    // a fresh open starts blank.
-    if (!documents.some((document) => document.id === activeDocumentId)) {
-      const draft = documents.find(
-        (document) => document.status === 'draft' && hasContent(document)
-      )
-      activeDocumentId = draft?.id ?? null
+  async function loadDocument(documentId: string, options: { force?: boolean } = {}) {
+    loadingDocumentId = documentId
+    try {
+      await sceneDocuments.loadFullDocument(scene.id, documentId, options)
+    } finally {
+      if (loadingDocumentId === documentId) {
+        loadingDocumentId = null
+      }
     }
-
-    contextDocumentIds = contextDocumentIds.filter((id) =>
-      documents.some((document) => document.id === id && document.status === 'saved')
-    )
-  }
-
-  async function loadDocuments() {
-    const response = await listSceneDocuments(canvasId, scene.id)
-    documentsCache.set(scene.id, response.items)
-    applyDocuments(response.items)
   }
 
   // Drafts are created lazily: only when the first prompt is sent, never
@@ -157,7 +150,8 @@
         title: '',
         content: {}
       })
-      documents = [response.item, ...documents]
+      sceneDocuments.upsertFromFullDocument(response.item)
+      sceneDocuments.scheduleRevalidation()
       activeDocumentId = response.item.id
     } finally {
       creatingDraft = false
@@ -165,28 +159,15 @@
   }
 
   onMount(() => {
-    // Cache-first: reopening a scene restores its state instantly.
-    const cached = documentsCache.get(scene.id)
-    if (cached) {
-      applyDocuments(cached)
-      documentsLoaded = true
-    }
-
-    void (async () => {
-      try {
-        await loadDocuments()
-      } catch (cause) {
-        reportError(cause, 'Failed to load the document workspace.')
-      } finally {
-        documentsLoaded = true
-      }
-    })()
+    void refreshDocumentItems().catch((cause) =>
+      reportError(cause, 'Failed to load the document workspace.')
+    )
   })
 
   // A prompt arriving from the blank-scene entry screen needs a draft to
-  // chat against — create it once documents have loaded.
+  // chat against.
   $effect(() => {
-    if (documentsLoaded && initialPrompt && !activeDocumentId && canModify) {
+    if (initialPrompt && !activeDocumentId && canModify) {
       void createBlankDraft().catch((cause) => reportError(cause, 'Failed to create a draft.'))
     }
   })
@@ -195,6 +176,35 @@
     localPendingPrompt = text
     void createBlankDraft().catch((cause) => reportError(cause, 'Failed to create a draft.'))
   }
+
+  $effect(() => {
+    const nextActiveDocumentId = reconcileActiveDocumentId(activeDocumentId, documents)
+    if (nextActiveDocumentId !== activeDocumentId) {
+      activeDocumentId = nextActiveDocumentId
+      if (!nextActiveDocumentId) {
+        localPendingPrompt = null
+        liveDraft = null
+      }
+    }
+
+    const nextContextDocumentIds = contextDocumentIds.filter((id) =>
+      documents.some((document) => document.id === id && document.status === 'saved')
+    )
+    if (nextContextDocumentIds.length !== contextDocumentIds.length) {
+      contextDocumentIds = nextContextDocumentIds
+    }
+  })
+
+  $effect(() => {
+    const documentId = activeDocumentId
+    if (!documentId || sceneDocuments.getFullDocument(documentId)) {
+      return
+    }
+
+    void loadDocument(documentId).catch((cause) =>
+      reportError(cause, 'Failed to load the document.')
+    )
+  })
 
   // Each document keeps its own chat thread: (re)load history whenever the
   // active document changes; the chat panel below is keyed on it.
@@ -253,7 +263,14 @@
   // Realtime document events from other collaborators are refetch signals.
   $effect(() => {
     if (documentRevision > 0) {
-      void loadDocuments().catch((cause) => reportError(cause, 'Failed to refresh documents.'))
+      void refreshDocumentItems().catch((cause) =>
+        reportError(cause, 'Failed to refresh documents.')
+      )
+      if (activeDocumentId) {
+        void loadDocument(activeDocumentId, { force: true }).catch((cause) =>
+          reportError(cause, 'Failed to refresh the document.')
+        )
+      }
     }
   })
 
@@ -275,6 +292,13 @@
       : [...contextDocumentIds, documentId]
   }
 
+  function handleSelectDocument(documentId: string) {
+    activeDocumentId = documentId
+    localPendingPrompt = null
+    liveDraft = null
+    view = 'chat'
+  }
+
   // "New draft" switches to the blank state; the row is created when the
   // first prompt is sent.
   function handleNewDraft() {
@@ -286,10 +310,14 @@
   async function handlePromote(documentId: string) {
     const title = documents.find((doc) => doc.id === documentId)?.title
     try {
-      await updateSceneDocument(canvasId, scene.id, documentId, {
+      const response = await updateSceneDocument(canvasId, scene.id, documentId, {
         status: 'saved'
       })
-      await loadDocuments()
+      sceneDocuments.upsertFromFullDocument(response.item)
+      sceneDocuments.scheduleRevalidation()
+      void refreshDocumentItems().catch((cause) =>
+        reportError(cause, 'Failed to refresh documents.')
+      )
       toast.show({
         title: 'Saved to library',
         description: title || 'Untitled document'
@@ -313,7 +341,14 @@
 
     try {
       await deleteSceneDocument(canvasId, scene.id, pending.id)
-      await loadDocuments()
+      sceneDocuments.removeDocument(scene.id, pending.id)
+      sceneDocuments.scheduleRevalidation()
+      if (activeDocumentId === pending.id) {
+        activeDocumentId = null
+      }
+      void refreshDocumentItems().catch((cause) =>
+        reportError(cause, 'Failed to refresh documents.')
+      )
       toast.show({
         title: 'Document deleted',
         description: pending.title || 'Untitled document'
@@ -327,7 +362,7 @@
   // fire after the active selection has already changed, and must never
   // write the old draft's text into the newly selected document.
   async function handleSaveDocument(documentId: string, title: string, markdown: string) {
-    const target = documents.find((document) => document.id === documentId)
+    const target = sceneDocuments.getFullDocument(documentId)
     if (!target) {
       return
     }
@@ -335,7 +370,7 @@
     isSavingDocument = true
     try {
       const parsed = markdownDocumentContentSchema.safeParse(target.content)
-      await updateSceneDocument(canvasId, scene.id, documentId, {
+      const response = await updateSceneDocument(canvasId, scene.id, documentId, {
         title,
         content: {
           docType: parsed.success ? parsed.data.docType : undefined,
@@ -346,7 +381,11 @@
             : null)
         }
       })
-      await loadDocuments()
+      sceneDocuments.upsertFromFullDocument(response.item)
+      sceneDocuments.scheduleRevalidation()
+      void refreshDocumentItems().catch((cause) =>
+        reportError(cause, 'Failed to refresh documents.')
+      )
     } catch (cause) {
       reportError(cause, 'Failed to save the document.')
     } finally {
@@ -356,7 +395,12 @@
 
   function handleTurnFinished() {
     conversationStarted = true
-    void loadDocuments().catch((cause) => reportError(cause, 'Failed to refresh documents.'))
+    void refreshDocumentItems().catch((cause) => reportError(cause, 'Failed to refresh documents.'))
+    if (activeDocumentId) {
+      void loadDocument(activeDocumentId, { force: true }).catch((cause) =>
+        reportError(cause, 'Failed to refresh the document.')
+      )
+    }
   }
 
   function handleMessagesSnapshot(messages: UIMessage[]) {
@@ -367,7 +411,9 @@
 
   // The document section only exists once there is something to show — a
   // streaming draft, an active document, or the notes view.
-  const showWorkPane = $derived(liveDraft !== null || activeDocument !== null)
+  const showWorkPane = $derived(
+    liveDraft !== null || activeDocument !== null || activeDocumentItem !== null
+  )
 
   $effect(() => {
     if (!showWorkPane && chatCollapsed) {
@@ -389,7 +435,7 @@
         {documents}
         {activeDocumentId}
         {canModify}
-        onSelect={(id) => (activeDocumentId = id)}
+        onSelect={handleSelectDocument}
         onNewDraft={handleNewDraft}
         onPromote={(id) => void handlePromote(id)}
         onDelete={requestDeleteDocument}
@@ -469,9 +515,9 @@
         </button>
       {/if}
 
-      {#if activeDocument}
+      {#if activeDocumentItem}
         <span class="ml-auto truncate text-xs text-muted-foreground">
-          Working on: {activeDocument.title || 'Untitled draft'}
+          Working on: {activeDocument?.title || activeDocumentItem.title || 'Untitled draft'}
         </span>
       {/if}
     </div>
@@ -605,6 +651,11 @@
                 onBack={() => (view = 'chat')}
               />
             {/key}
+          {:else if activeDocumentItem}
+            <div class="flex h-full flex-col gap-3 px-5 py-4" aria-hidden="true">
+              <div class="h-8 w-3/5 animate-pulse rounded-xl bg-muted/80"></div>
+              <div class="h-full min-h-0 animate-pulse rounded-xl bg-muted/50"></div>
+            </div>
           {/if}
         </div>
       {/if}

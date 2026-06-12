@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BookOpen, Check } from 'lucide-svelte'
   import Popover from '$lib/components/shared/Popover.svelte'
-  import type { SceneDocument } from '$lib/scenes/schema'
+  import type { SceneDocumentListItem } from '$lib/scenes/schema'
 
   let {
     savedDocuments,
@@ -10,7 +10,7 @@
     disabled = false,
     side = 'bottom'
   } = $props<{
-    savedDocuments: SceneDocument[]
+    savedDocuments: SceneDocumentListItem[]
     selectedIds: string[]
     onToggle: (documentId: string) => void
     disabled?: boolean

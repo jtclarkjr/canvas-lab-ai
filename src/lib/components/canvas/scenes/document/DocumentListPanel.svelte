@@ -1,10 +1,10 @@
 <script lang="ts">
   import { BookMarked, FilePen, Plus, Trash2 } from 'lucide-svelte'
-  import type { SceneDocument } from '$lib/scenes/schema'
+  import type { SceneDocumentListItem } from '$lib/scenes/schema'
 
   let { documents, activeDocumentId, canModify, onSelect, onNewDraft, onPromote, onDelete } =
     $props<{
-      documents: SceneDocument[]
+      documents: SceneDocumentListItem[]
       activeDocumentId: string | null
       canModify: boolean
       onSelect: (documentId: string) => void
@@ -13,11 +13,11 @@
       onDelete: (documentId: string) => void
     }>()
 
-  const drafts = $derived(documents.filter((doc: SceneDocument) => doc.status === 'draft'))
-  const saved = $derived(documents.filter((doc: SceneDocument) => doc.status === 'saved'))
+  const drafts = $derived(documents.filter((doc: SceneDocumentListItem) => doc.status === 'draft'))
+  const saved = $derived(documents.filter((doc: SceneDocumentListItem) => doc.status === 'saved'))
 </script>
 
-{#snippet documentRow(document: SceneDocument)}
+{#snippet documentRow(document: SceneDocumentListItem)}
   <div
     class={`group flex items-center gap-1 rounded-lg border px-2 py-1.5 transition ${
       document.id === activeDocumentId

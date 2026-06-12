@@ -16,6 +16,7 @@ import {
   withAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
+import { listSceneDocumentItemsForScene } from '$lib/server/scene-documents'
 import { getSupabase } from '$lib/server/supabase'
 import type { Json } from '$lib/server/database.types'
 
@@ -37,6 +38,17 @@ export const GET: RequestHandler = async (event) =>
       const status = statusParam
         ? sceneDocumentStatusSchema.parse(statusParam)
         : null
+      const metadataOnly = event.url.searchParams.get('metadata') === '1'
+
+      if (metadataOnly) {
+        return json(
+          await listSceneDocumentItemsForScene(
+            supabase,
+            sceneId,
+            status ?? undefined
+          )
+        )
+      }
 
       let query = supabase
         .from('canvas_scene_documents')

@@ -48,6 +48,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   let role = $state<CanvasRole>(input.role ?? 'owner')
   let isPublicViewer = $state(input.isPublicViewer ?? false)
   let canvasTitle = $state(input.canvasTitle ?? '')
+  const sceneDocumentsStore = input.sceneDocumentsStore
 
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
@@ -130,7 +131,10 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     isSceneBusy: scenesStore.isSceneBusy,
     setScenes: scenesStore.setScenes,
     onSceneDeleted: scenesStore.handleSceneDeletedRemotely,
-    onDocumentEvent: scenesStore.bumpDocumentRevision,
+    onDocumentEvent: (sceneId) => {
+      scenesStore.bumpDocumentRevision(sceneId)
+      sceneDocumentsStore.handleDocumentEvent(sceneId)
+    },
     onMessageInsert: (message) => {
       const existing = sceneLiveMessages[message.sceneId] ?? []
       sceneLiveMessages = {

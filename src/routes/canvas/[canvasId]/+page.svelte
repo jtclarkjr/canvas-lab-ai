@@ -3,6 +3,8 @@
   import RequestAccessScreen from '$lib/components/canvas/RequestAccessScreen.svelte'
   import type { CanvasRole } from '$lib/canvas/roles'
   import type { Canvas } from '$lib/canvas/schema'
+  import { provideSceneDocumentsStore } from '$lib/stores/canvas/scenes/documents.svelte'
+  import type { SceneDocumentListItem } from '$lib/scenes/schema'
 
   let { data } = $props<{
     data: {
@@ -10,6 +12,7 @@
       userId?: string
       userEmail?: string
       canvasList?: { items: Canvas[] }
+      sceneDocumentListsBySceneId?: Record<string, SceneDocumentListItem[]>
       access?:
         | { state: 'member'; role: CanvasRole; canvasTitle: string }
         | { state: 'public-viewer'; canvasTitle: string }
@@ -17,6 +20,17 @@
         | { state: 'not-found' }
     }
   }>()
+
+  // svelte-ignore state_referenced_locally -- seeds the context store once;
+  // the effect below syncs fresh route data after invalidation.
+  const sceneDocumentsStore = provideSceneDocumentsStore({
+    canvasId: data.canvasId,
+    initialItemsBySceneId: data.sceneDocumentListsBySceneId ?? {}
+  })
+
+  $effect(() => {
+    sceneDocumentsStore.setCanvas(data.canvasId, data.sceneDocumentListsBySceneId ?? {})
+  })
 </script>
 
 {#if data.access?.state === 'no-access'}

@@ -2,6 +2,7 @@ import { getApiHeaders, parseResponse } from '$lib/api-client'
 import {
   createSceneDocumentInputSchema,
   createSceneInputSchema,
+  listSceneDocumentItemsResponseSchema,
   listSceneDocumentsResponseSchema,
   listSceneMessagesResponseSchema,
   listScenesResponseSchema,
@@ -11,6 +12,7 @@ import {
   updateSceneInputSchema,
   type CreateSceneDocumentInput,
   type CreateSceneInput,
+  type ListSceneDocumentItemsResponse,
   type ListSceneDocumentsResponse,
   type ListSceneMessagesResponse,
   type ListScenesResponse,
@@ -110,6 +112,30 @@ export async function listSceneDocuments(
     response,
     (payload) => listSceneDocumentsResponseSchema.parse(payload),
     'Failed to load scene documents.'
+  )
+}
+
+export async function listSceneDocumentItems(
+  canvasId: string,
+  sceneId: string,
+  status?: SceneDocumentStatus
+): Promise<ListSceneDocumentItemsResponse> {
+  const query = new URLSearchParams({ metadata: '1' })
+  if (status) {
+    query.set('status', status)
+  }
+
+  const response = await fetch(
+    `/api/canvases/${canvasId}/scenes/${sceneId}/documents?${query}`,
+    {
+      headers: await getApiHeaders({ accept: 'application/json' })
+    }
+  )
+
+  return parseResponse(
+    response,
+    (payload) => listSceneDocumentItemsResponseSchema.parse(payload),
+    'Failed to load scene document list.'
   )
 }
 

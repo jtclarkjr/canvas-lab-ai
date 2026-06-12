@@ -3,6 +3,7 @@ import {
   createSceneDocumentInputSchema,
   createSceneInputSchema,
   documentChatRequestSchema,
+  listSceneDocumentItemsResponseSchema,
   updateSceneDocumentInputSchema,
   updateSceneInputSchema
 } from '$lib/scenes/schema'
@@ -43,6 +44,27 @@ describe('scenes schema', () => {
     expect(() =>
       updateSceneDocumentInputSchema.parse({ status: 'archived' })
     ).toThrow()
+  })
+
+  it('parses document list items without requiring content', () => {
+    const response = listSceneDocumentItemsResponseSchema.parse({
+      items: [
+        {
+          id: 'doc-1',
+          sceneId: 'scene-1',
+          canvasId: 'canvas-1',
+          kind: 'markdown',
+          status: 'saved',
+          title: 'Spec',
+          createdBy: 'user-1',
+          updatedBy: 'user-2',
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-02T00:00:00.000Z'
+        }
+      ]
+    })
+
+    expect(response.items[0].title).toBe('Spec')
   })
 
   it('validates document chat requests', () => {

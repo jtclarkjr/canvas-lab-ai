@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowUp, Globe } from 'lucide-svelte'
-  import type { SceneDocument } from '$lib/scenes/schema'
+  import type { SceneDocumentListItem } from '$lib/scenes/schema'
   import ContextPicker from '$lib/components/canvas/scenes/document/ContextPicker.svelte'
   import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
 
@@ -25,7 +25,7 @@
     onModelChange: (modelId: string) => void
     webSearch: boolean
     onWebSearchToggle: () => void
-    savedDocuments: SceneDocument[]
+    savedDocuments: SceneDocumentListItem[]
     contextDocumentIds: string[]
     onToggleContext: (documentId: string) => void
     onSend: (text: string) => void

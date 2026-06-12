@@ -1,4 +1,7 @@
 import type {
+  SceneDocument,
+  SceneDocumentListItem,
+  SceneDocumentListItemRow,
   SceneDocumentRow,
   SceneMessageRow,
   SceneRow
@@ -35,6 +38,36 @@ export const sceneDocumentRowToDocument = (row: SceneDocumentRow) => ({
   updatedBy: row.updated_by,
   createdAt: row.created_at,
   updatedAt: row.updated_at
+})
+
+export const sceneDocumentRowToListItem = (
+  row: SceneDocumentListItemRow
+): SceneDocumentListItem => ({
+  id: row.id,
+  sceneId: row.scene_id,
+  canvasId: row.canvas_id,
+  kind: row.kind,
+  status: row.status,
+  title: row.title,
+  createdBy: row.created_by,
+  updatedBy: row.updated_by,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at
+})
+
+export const sceneDocumentToListItem = (
+  document: SceneDocument
+): SceneDocumentListItem => ({
+  id: document.id,
+  sceneId: document.sceneId,
+  canvasId: document.canvasId,
+  kind: document.kind,
+  status: document.status,
+  title: document.title,
+  createdBy: document.createdBy,
+  updatedBy: document.updatedBy,
+  createdAt: document.createdAt,
+  updatedAt: document.updatedAt
 })
 
 // Author attribution is stamped into metadata at persist time so realtime

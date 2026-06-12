@@ -12,7 +12,10 @@ import {
 import { z } from 'zod'
 
 const deletedSceneRowSchema = z.object({ id: z.string() })
-const documentEventRowSchema = z.object({ scene_id: z.string() })
+const documentEventRowSchema = z.object({
+  id: z.string().optional(),
+  scene_id: z.string()
+})
 
 type SceneSetter = (next: Scene[] | ((previous: Scene[]) => Scene[])) => void
 
@@ -21,7 +24,7 @@ type WorkspaceRealtimeScenesInput = {
   isSceneBusy: (sceneId: string) => boolean
   setScenes: SceneSetter
   onSceneDeleted: (sceneId: string) => void
-  onDocumentEvent: (sceneId: string) => void
+  onDocumentEvent: (sceneId: string, documentId?: string) => void
   onMessageInsert: (message: SceneMessage) => void
 }
 
@@ -125,7 +128,7 @@ export function createWorkspaceRealtimeScenesStore({
             payload.eventType === 'DELETE' ? payload.old : payload.new
           )
           if (!parsed.success) return
-          onDocumentEvent(parsed.data.scene_id)
+          onDocumentEvent(parsed.data.scene_id, parsed.data.id)
         }
       )
       .on(

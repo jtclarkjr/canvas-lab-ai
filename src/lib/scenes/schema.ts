@@ -84,6 +84,10 @@ export const sceneDocumentRowSchema = z.object({
   updated_at: z.string()
 })
 
+export const sceneDocumentListItemRowSchema = sceneDocumentRowSchema.omit({
+  content: true
+})
+
 export const sceneDocumentSchema = z.object({
   id: z.string(),
   sceneId: z.string(),
@@ -96,6 +100,10 @@ export const sceneDocumentSchema = z.object({
   updatedBy: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string()
+})
+
+export const sceneDocumentListItemSchema = sceneDocumentSchema.omit({
+  content: true
 })
 
 export const documentTitleSchema = z
@@ -123,6 +131,9 @@ export const sceneDocumentResponseSchema = z.object({
 })
 export const listSceneDocumentsResponseSchema = z.object({
   items: z.array(sceneDocumentSchema)
+})
+export const listSceneDocumentItemsResponseSchema = z.object({
+  items: z.array(sceneDocumentListItemSchema)
 })
 
 // Freehand annotations drawn over a document ({ paths, textElements }).
@@ -207,7 +218,11 @@ export type SceneResponse = z.infer<typeof sceneResponseSchema>
 export type ListScenesResponse = z.infer<typeof listScenesResponseSchema>
 export type SceneDocumentStatus = z.infer<typeof sceneDocumentStatusSchema>
 export type SceneDocumentRow = z.infer<typeof sceneDocumentRowSchema>
+export type SceneDocumentListItemRow = z.infer<
+  typeof sceneDocumentListItemRowSchema
+>
 export type SceneDocument = z.infer<typeof sceneDocumentSchema>
+export type SceneDocumentListItem = z.infer<typeof sceneDocumentListItemSchema>
 export type CreateSceneDocumentInput = z.infer<
   typeof createSceneDocumentInputSchema
 >
@@ -217,6 +232,9 @@ export type UpdateSceneDocumentInput = z.infer<
 export type SceneDocumentResponse = z.infer<typeof sceneDocumentResponseSchema>
 export type ListSceneDocumentsResponse = z.infer<
   typeof listSceneDocumentsResponseSchema
+>
+export type ListSceneDocumentItemsResponse = z.infer<
+  typeof listSceneDocumentItemsResponseSchema
 >
 export type MarkdownDocumentContent = z.infer<
   typeof markdownDocumentContentSchema
