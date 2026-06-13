@@ -41,9 +41,9 @@ flowchart TD
   Panel --> Editor[DocumentEditorView]
   Panel --> Notes[NotesSceneView]
 
-  Scenes --> SceneApi[/api/canvases/:id/scenes]
-  Documents --> DocumentApi[/api/canvases/:id/scenes/:sceneId/documents]
-  Chat --> AiRoute[/api/ai/document-chat]
+  Scenes --> SceneApi["/api/canvases/:id/scenes"]
+  Documents --> DocumentApi["/api/canvases/:id/scenes/:sceneId/documents"]
+  Chat --> AiRoute["/api/ai/document-chat"]
   Realtime --> Tables[canvas_scenes, canvas_scene_documents, canvas_scene_messages]
 ```
 

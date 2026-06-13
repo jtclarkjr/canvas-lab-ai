@@ -34,12 +34,12 @@ flowchart TD
   Window --> Assistant[Assistant panel]
 
   Store --> ChatApi[src/lib/chat/api.ts]
-  ChatApi --> ChatRoute[/api/canvases/:id/chat]
+  ChatApi --> ChatRoute["/api/canvases/:id/chat"]
   ChatRoute --> ChatRows[canvas_chat_messages]
   Store --> ChatRealtime[canvas:id:chat realtime]
   ChatRealtime --> ChatRows
 
-  Assistant --> AiRoute[/api/ai/canvas-assistant]
+  Assistant --> AiRoute["/api/ai/canvas-assistant"]
   AiRoute --> AiRuntime[AI runtime]
   AiRoute --> AssistantRows[canvas_assistant_messages]
 ```

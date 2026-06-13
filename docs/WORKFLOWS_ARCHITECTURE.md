@@ -65,9 +65,9 @@ flowchart TD
   Layer --> Graph[WorkflowGraph.svelte]
   Layer --> Panels[WorkflowBuilderPanels.svelte]
 
-  Store --> WorkflowApi[/api/canvases/:id/workflows]
-  Panels --> VersionApi[/api/canvases/:id/workflows/:workflowId/versions]
-  Panels --> AiRoute[/api/ai/workflow-assistant]
+  Store --> WorkflowApi["/api/canvases/:id/workflows"]
+  Panels --> VersionApi["/api/canvases/:id/workflows/:workflowId/versions"]
+  Panels --> AiRoute["/api/ai/workflow-assistant"]
 
   WorkflowApi --> Rows[canvas_workflows]
   VersionApi --> Versions[canvas_workflow_versions]
@@ -384,4 +384,3 @@ Recommended shape:
 - Add explicit permissions for starting, cancelling, and reading runs.
 
 Until that layer exists, action metadata must remain inert.
-
