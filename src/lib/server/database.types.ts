@@ -211,6 +211,7 @@ export interface Database {
           y: number
           width: number
           height: number
+          rotation: number
           settings: Json
           created_by: string | null
           updated_by: string | null
@@ -226,6 +227,7 @@ export interface Database {
           y?: number
           width?: number
           height?: number
+          rotation?: number
           settings?: Json
           created_by?: string | null
           updated_by?: string | null
@@ -241,6 +243,7 @@ export interface Database {
           y?: number
           width?: number
           height?: number
+          rotation?: number
           settings?: Json
           created_by?: string | null
           updated_by?: string | null

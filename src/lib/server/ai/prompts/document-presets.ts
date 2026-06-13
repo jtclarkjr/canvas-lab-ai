@@ -41,10 +41,16 @@ export function buildDocumentSystemPrompt({
 
   if (contextDocuments.length > 0) {
     const listing = contextDocuments
-      .map((doc) => `- ${doc.id}: "${doc.title}"`)
+      .map((doc) => {
+        const source =
+          doc.source === 'linked-scene'
+            ? ` from connected scene "${doc.sceneTitle ?? 'Untitled scene'}"`
+            : ''
+        return `- ${doc.id}: "${doc.title}"${source}`
+      })
       .join('\n')
     sections.push(
-      `The user selected saved documents as optional context:\n${listing}\n\nUse the read_context_document tool to read any of them that look relevant to the task. Skip the ones that are not — you decide what is useful.`
+      `Saved documents are available as optional context:\n${listing}\n\nSome were selected by the user; some come from connected scenes whose arrows point into this scene, or from bidirectional lines. Use the read_context_document tool to read any that look relevant to the task. Skip the ones that are not — you decide what is useful.`
     )
   }
 

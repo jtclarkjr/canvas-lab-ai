@@ -24,6 +24,9 @@ export type ActiveDocument = {
 export type ContextDocumentRef = {
   id: string
   title: string
+  sceneId?: string
+  sceneTitle?: string
+  source?: 'manual' | 'linked-scene'
 }
 
 export type LoadContextDocument = (

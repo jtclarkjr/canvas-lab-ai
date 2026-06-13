@@ -11,6 +11,7 @@ export const sceneRowSchema = z.object({
   y: z.number(),
   width: z.number(),
   height: z.number(),
+  rotation: z.number().default(0),
   settings: z.record(z.string(), z.unknown()),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),
@@ -27,6 +28,7 @@ export const sceneSchema = z.object({
   y: z.number(),
   width: z.number(),
   height: z.number(),
+  rotation: z.number().default(0),
   settings: z.record(z.string(), z.unknown()),
   createdBy: z.string().nullable(),
   updatedBy: z.string().nullable(),
@@ -46,6 +48,7 @@ export const createSceneInputSchema = z.object({
   y: z.number(),
   width: z.number().min(160).max(2000).optional(),
   height: z.number().min(120).max(2000).optional(),
+  rotation: z.number().optional(),
   settings: z.record(z.string(), z.unknown()).optional()
 })
 
@@ -57,6 +60,7 @@ export const updateSceneInputSchema = z
     y: z.number(),
     width: z.number().min(160).max(2000),
     height: z.number().min(120).max(2000),
+    rotation: z.number(),
     settings: z.record(z.string(), z.unknown())
   })
   .partial()

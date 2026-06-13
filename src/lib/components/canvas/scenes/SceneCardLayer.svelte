@@ -51,6 +51,7 @@
       canModify={canModifyScene(scene.id)}
       activity={activity[scene.id] ?? null}
       {handlers}
+      interactive={mode === 'scenes'}
     />
   {/each}
 </div>

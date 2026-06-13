@@ -25,6 +25,10 @@
   import {
     connectorToSvgPath,
     getArrowheadPoints,
+    getAnchorTargetAnchors,
+    getAnchorTargetOutlinePoints,
+    getAnchorTargetResizeHandles,
+    getAnchorTargetRotateHandle,
     getConnectorTerminalSegments,
     getDiamondPoints,
     getShapeAnchors,
@@ -37,6 +41,7 @@
     resolveEndpoint
   } from '$lib/canvas/diagram-utils'
   import { resolveCanvasDisplayColor } from '$lib/canvas/helpers/display-color'
+  import type { Scene } from '$lib/scenes/schema'
 
   type CanvasSurfaceElements = {
     paths: Path[]
@@ -44,6 +49,7 @@
     textElements: TextElement[]
     shapes?: DiagramShape[]
     connectors?: DiagramConnector[]
+    scenes?: Scene[]
     draftShape?: DiagramShape | null
     draftConnector?: DiagramConnector | null
   }
@@ -96,6 +102,7 @@
   const connectors = $derived.by(
     (): DiagramConnector[] => elements.connectors ?? []
   )
+  const scenes = $derived.by((): Scene[] => elements.scenes ?? [])
   const selectedShapes = $derived(
     shapes.filter((shape: DiagramShape) => selection.selectedIds.has(shape.id))
   )
@@ -103,6 +110,9 @@
     connectors.filter((connector: DiagramConnector) =>
       selection.selectedIds.has(connector.id)
     )
+  )
+  const selectedScenes = $derived(
+    scenes.filter((scene: Scene) => selection.selectedIds.has(scene.id))
   )
   const sortedPaths = $derived([...elements.paths].sort(compareZ))
   const sortedTextElements = $derived([...elements.textElements].sort(compareZ))
@@ -188,10 +198,11 @@
     {#each sortedConnectors as connector (connector.id)}
       {@const terminalSegments = getConnectorTerminalSegments(
         connector,
-        shapes
+        shapes,
+        scenes
       )}
       <path
-        d={connectorToSvgPath(connector, shapes)}
+        d={connectorToSvgPath(connector, shapes, scenes)}
         fill="none"
         stroke={resolveCanvasDisplayColor(connector.strokeColor)}
         stroke-dasharray={getStrokeDashArray(
@@ -223,10 +234,11 @@
       {@const draftConnector = elements.draftConnector}
       {@const terminalSegments = getConnectorTerminalSegments(
         draftConnector,
-        shapes
+        shapes,
+        scenes
       )}
       <path
-        d={connectorToSvgPath(draftConnector, shapes)}
+        d={connectorToSvgPath(draftConnector, shapes, scenes)}
         fill="none"
         stroke={resolveCanvasDisplayColor(draftConnector.strokeColor)}
         stroke-dasharray={getStrokeDashArray(
@@ -533,9 +545,64 @@
       {/each}
     {/each}
 
+    {#each selectedScenes as scene (scene.id)}
+      {@const outline = getAnchorTargetOutlinePoints(scene)}
+      {@const topAnchor = getAnchorTargetAnchors(scene).find(
+        (entry) => entry.anchor === 'top'
+      )}
+      {@const rotateHandle = getAnchorTargetRotateHandle(scene)}
+      <polygon
+        fill="var(--canvas-selection-fill)"
+        points={pointsToSvg(outline)}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-dasharray={`${4 / camera.scale} ${2 / camera.scale}`}
+        stroke-width={1 / camera.scale}
+      />
+      {#if topAnchor}
+        <line
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+          x1={topAnchor.point.x}
+          y1={topAnchor.point.y}
+          x2={rotateHandle.x}
+          y2={rotateHandle.y}
+        />
+      {/if}
+      {#each getAnchorTargetResizeHandles(scene) as handle (handle.handle)}
+        <rect
+          fill="var(--background)"
+          height={handleSize}
+          rx={1.5 / camera.scale}
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+          width={handleSize}
+          x={handle.point.x - handleSize / 2}
+          y={handle.point.y - handleSize / 2}
+        />
+      {/each}
+      <circle
+        cx={rotateHandle.x}
+        cy={rotateHandle.y}
+        fill="var(--background)"
+        r={handleSize / 2}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
+      />
+      {#each getAnchorTargetAnchors(scene) as anchor (anchor.anchor)}
+        <circle
+          cx={anchor.point.x}
+          cy={anchor.point.y}
+          fill="var(--background)"
+          r={anchorSize}
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+        />
+      {/each}
+    {/each}
+
     {#each selectedConnectors as connector (connector.id)}
-      {@const start = resolveEndpoint(connector.start, shapes)}
-      {@const end = resolveEndpoint(connector.end, shapes)}
+      {@const start = resolveEndpoint(connector.start, shapes, scenes)}
+      {@const end = resolveEndpoint(connector.end, shapes, scenes)}
       <circle
         cx={start.x}
         cy={start.y}

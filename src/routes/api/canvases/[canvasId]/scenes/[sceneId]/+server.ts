@@ -57,6 +57,9 @@ export const PATCH: RequestHandler = async (event) =>
           ...(input.y !== undefined ? { y: input.y } : null),
           ...(input.width !== undefined ? { width: input.width } : null),
           ...(input.height !== undefined ? { height: input.height } : null),
+          ...(input.rotation !== undefined
+            ? { rotation: input.rotation }
+            : null),
           ...(input.settings !== undefined
             ? { settings: input.settings as Json }
             : null),

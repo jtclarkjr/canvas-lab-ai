@@ -304,6 +304,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     setShapes,
     getConnectors: () => connectors,
     setConnectors,
+    getScenes: () => scenesStore.scenes,
+    setScenes: scenesStore.setScenes,
+    canModifyScene: scenesStore.canModifyScene,
+    persistScenePatch: scenesStore.persistScenePatch,
+    setTransformBusyScenes: scenesStore.setTransformBusyScenes,
+    openSceneById: scenesStore.openSceneById,
     setDraftShape: (next) => {
       draftShape = next
     },
@@ -634,6 +640,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
         textElements,
         shapes,
         connectors,
+        scenes: scenesStore.scenes,
         draftShape,
         draftConnector
       }

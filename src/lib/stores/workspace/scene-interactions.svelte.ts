@@ -24,23 +24,29 @@ import {
   cloneEndpoint,
   cloneShape,
   connectorToData,
+  findAnchorTargetHandleAtPoint,
   findConnectorAtPoint,
   findConnectorEndpointAtPoint,
   findNearestShapeAnchor,
   findShapeAtPoint,
   findShapeHandleAtPoint,
   hasConnectorBindingToShape,
+  isAnchorTargetInSelection,
   isDiagramElementInSelection,
+  isPointInAnchorTarget,
   makeConnector,
   makeShapeFromBounds,
   getShapeResizeCursor,
+  resizeAnchorTargetFromHandle,
   resizeShapeFromHandle,
   resolveEndpoint,
+  rotateAnchorTargetTowardPoint,
   rotateShapeTowardPoint,
   shapeToData,
   type ShapeResizeHandle
 } from '$lib/canvas/diagram-utils'
 import type { UpsertElementInput } from '$lib/workspace/schema'
+import type { Scene } from '$lib/scenes/schema'
 import type {
   Arrowhead,
   CanvasDrawableElement,
@@ -60,6 +66,10 @@ import type {
 import type { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
 
 type ElementSetter<T> = (next: T[] | ((previous: T[]) => T[])) => void
+
+const MIN_SCENE_WIDTH = 160
+const MIN_SCENE_HEIGHT = 120
+const MAX_SCENE_SIZE = 2000
 
 type UpsertElementMutation = {
   mutate(
@@ -92,6 +102,15 @@ type WorkspaceSceneInteractionsInput = {
   setShapes?: ElementSetter<DiagramShape>
   getConnectors?: () => DiagramConnector[]
   setConnectors?: ElementSetter<DiagramConnector>
+  getScenes?: () => Scene[]
+  setScenes?: ElementSetter<Scene>
+  canModifyScene?: (id: string) => boolean
+  persistScenePatch?: (
+    id: string,
+    patch: Partial<Pick<Scene, 'x' | 'y' | 'width' | 'height' | 'rotation'>>
+  ) => void
+  setTransformBusyScenes?: (sceneIds: string[]) => void
+  openSceneById?: (sceneId: string, originRect: DOMRect | null) => void
   setDraftShape?: (next: DiagramShape | null) => void
   setDraftConnector?: (next: DiagramConnector | null) => void
   setHoverCursorStyle?: (next: string | null) => void
@@ -124,11 +143,19 @@ type WorkspaceSceneInteractionsInput = {
   ) => void
 }
 
-type HitElement = {
-  id: string
-  type: CanvasElementType
-  element: CanvasDrawableElement
-}
+type HitElement =
+  | {
+      id: string
+      type: CanvasElementType
+      element: CanvasDrawableElement
+      z: number
+    }
+  | {
+      id: string
+      type: 'scene'
+      element: Scene
+      z: number
+    }
 
 type ActiveInteraction =
   | {
@@ -153,6 +180,17 @@ type ActiveInteraction =
       type: 'shape-rotate'
       shapeId: string
       original: DiagramShape
+    }
+  | {
+      type: 'scene-resize'
+      sceneId: string
+      handle: ShapeResizeHandle
+      original: Scene
+    }
+  | {
+      type: 'scene-rotate'
+      sceneId: string
+      original: Scene
     }
   | {
       type: 'text-resize'
@@ -191,6 +229,12 @@ export function createWorkspaceSceneInteractionsStore({
   setShapes,
   getConnectors,
   setConnectors,
+  getScenes,
+  setScenes,
+  canModifyScene,
+  persistScenePatch,
+  setTransformBusyScenes,
+  openSceneById,
   setDraftShape,
   setDraftConnector,
   setHoverCursorStyle,
@@ -219,11 +263,15 @@ export function createWorkspaceSceneInteractionsStore({
 }: WorkspaceSceneInteractionsInput) {
   const getShapesSafe = () => getShapes?.() ?? []
   const getConnectorsSafe = () => getConnectors?.() ?? []
+  const getScenesSafe = () => getScenes?.() ?? []
   const setShapesSafe: ElementSetter<DiagramShape> = (next) => {
     setShapes?.(next)
   }
   const setConnectorsSafe: ElementSetter<DiagramConnector> = (next) => {
     setConnectors?.(next)
+  }
+  const setScenesSafe: ElementSetter<Scene> = (next) => {
+    setScenes?.(next)
   }
 
   let activeInteraction: ActiveInteraction | null = null
@@ -232,7 +280,8 @@ export function createWorkspaceSceneInteractionsStore({
     paths: new Map<string, Path>(),
     texts: new Map<string, TextElement>(),
     shapes: new Map<string, DiagramShape>(),
-    connectors: new Map<string, DiagramConnector>()
+    connectors: new Map<string, DiagramConnector>(),
+    scenes: new Map<string, Scene>()
   }
   let lastClickTime = 0
   let lastClickPos: Point | null = null
@@ -241,6 +290,16 @@ export function createWorkspaceSceneInteractionsStore({
 
   function setCursorStyle(next: string | null) {
     setHoverCursorStyle?.(next)
+  }
+
+  function canModifySceneSafe(id: string) {
+    return canModifyScene?.(id) ?? false
+  }
+
+  function canModifyHit(hit: HitElement) {
+    return hit.type === 'scene'
+      ? canModifySceneSafe(hit.id)
+      : canModifyElement(hit.id)
   }
 
   function cursorForInteraction(
@@ -257,6 +316,11 @@ export function createWorkspaceSceneInteractionsStore({
           interaction.handle,
           interaction.original.rotation
         )
+      case 'scene-resize':
+        return getShapeResizeCursor(
+          interaction.handle,
+          interaction.original.rotation
+        )
       case 'text-resize':
         return getTextResizeCursor(
           interaction.handle,
@@ -265,6 +329,7 @@ export function createWorkspaceSceneInteractionsStore({
       case 'text-rotate':
         return 'grabbing'
       case 'shape-rotate':
+      case 'scene-rotate':
       case 'connector-end':
         return 'grabbing'
     }
@@ -287,6 +352,25 @@ export function createWorkspaceSceneInteractionsStore({
   function selectCursorForPoint(point: Point): string | null {
     const selectedIds = getSelectedElementIds()
     const threshold = 10 / getCameraScale()
+    const sceneHandle = findAnchorTargetHandleAtPoint(
+      point,
+      getScenesSafe(),
+      selectedIds,
+      threshold
+    )
+
+    if (sceneHandle && canModifySceneSafe(sceneHandle.target.id)) {
+      switch (sceneHandle.type) {
+        case 'resize':
+          return getShapeResizeCursor(
+            sceneHandle.handle,
+            sceneHandle.target.rotation
+          )
+        case 'rotate':
+          return 'grab'
+      }
+    }
+
     const textHandle = findTextHandleAtPoint(
       point,
       getTextElements(),
@@ -330,7 +414,8 @@ export function createWorkspaceSceneInteractionsStore({
       getConnectorsSafe(),
       getShapesSafe(),
       selectedIds,
-      threshold
+      threshold,
+      getScenesSafe()
     )
 
     if (endpointHit && canModifyElement(endpointHit.connector.id)) {
@@ -338,7 +423,7 @@ export function createWorkspaceSceneInteractionsStore({
     }
 
     const hit = findTopElementAtPoint(point)
-    if (!hit || !canModifyElement(hit.id)) return null
+    if (!hit || !canModifyHit(hit)) return null
 
     switch (hit.type) {
       case 'shape':
@@ -466,28 +551,36 @@ export function createWorkspaceSceneInteractionsStore({
       ...getPaths().map((element) => ({
         id: element.id,
         type: 'path' as CanvasElementType,
-        element
+        element,
+        z: element.z ?? 0
       })),
       ...getTextElements().map((element) => ({
         id: element.id,
         type: 'text' as CanvasElementType,
-        element
+        element,
+        z: element.z ?? 0
       })),
       ...getShapesSafe().map((element) => ({
         id: element.id,
         type: 'shape' as CanvasElementType,
-        element
+        element,
+        z: element.z ?? 0
       })),
       ...getConnectorsSafe().map((element) => ({
         id: element.id,
         type: 'connector' as CanvasElementType,
-        element
+        element,
+        z: element.z ?? 0
+      })),
+      ...getScenesSafe().map((element, index) => ({
+        id: element.id,
+        type: 'scene' as const,
+        element,
+        z: Number.MAX_SAFE_INTEGER - getScenesSafe().length + index
       }))
     ]
     return items.sort((first, second) => {
-      const firstZ = first.element.z ?? 0
-      const secondZ = second.element.z ?? 0
-      return firstZ - secondZ
+      return first.z - second.z
     })
   }
 
@@ -521,9 +614,15 @@ export function createWorkspaceSceneInteractionsStore({
               point,
               [item.element],
               getShapesSafe(),
-              threshold
+              threshold,
+              getScenesSafe()
             )
           ) {
+            return item
+          }
+          break
+        case 'scene':
+          if (isPointInAnchorTarget(point, item.element)) {
             return item
           }
           break
@@ -544,7 +643,8 @@ export function createWorkspaceSceneInteractionsStore({
     const anchor = findNearestShapeAnchor(
       point,
       getShapesSafe(),
-      14 / getCameraScale()
+      14 / getCameraScale(),
+      getScenesSafe()
     )
     if (anchor) {
       return cloneEndpoint(anchor.endpoint)
@@ -583,7 +683,7 @@ export function createWorkspaceSceneInteractionsStore({
 
     mutableSelectedIds.forEach((id) => {
       const found = findElementById(id)
-      if (found) {
+      if (found && found.type !== 'scene') {
         elementsToDelete.push({
           element: cloneCanvasElement(found.element, found.type),
           type: found.type
@@ -631,22 +731,39 @@ export function createWorkspaceSceneInteractionsStore({
         getConnectorsSafe()
           .filter((connector) => selectedElementIds.has(connector.id))
           .map((connector) => [connector.id, cloneConnector(connector)])
+      ),
+      scenes: new Map(
+        getScenesSafe()
+          .filter((scene) => selectedElementIds.has(scene.id))
+          .map((scene) => [scene.id, { ...scene }])
       )
     }
+    setTransformBusyScenes?.([...originalElementPositions.scenes.keys()])
   }
 
   function movedEndpoint(
     endpoint: DiagramEndpoint,
     dx: number,
     dy: number,
-    selectedShapeIds: Set<string>
+    selectedShapeIds: Set<string>,
+    selectedSceneIds: Set<string>
   ): DiagramEndpoint {
-    if (endpoint.binding && selectedShapeIds.has(endpoint.binding.shapeId)) {
-      return cloneEndpoint(endpoint)
+    const binding = cloneEndpoint(endpoint).binding
+    if (binding) {
+      if (
+        (binding.targetType === 'shape' &&
+          selectedShapeIds.has(binding.targetId)) ||
+        (binding.targetType === 'scene' &&
+          selectedSceneIds.has(binding.targetId))
+      ) {
+        return cloneEndpoint(endpoint)
+      }
     }
-    const point = resolveEndpoint(endpoint, [
-      ...originalElementPositions.shapes.values()
-    ])
+    const point = resolveEndpoint(
+      endpoint,
+      [...originalElementPositions.shapes.values()],
+      [...originalElementPositions.scenes.values()]
+    )
     return { x: point.x + dx, y: point.y + dy, binding: null }
   }
 
@@ -673,6 +790,11 @@ export function createWorkspaceSceneInteractionsStore({
     const selectedElementIds = getSelectedElementIds()
     const selectedShapeIds = new Set(
       [...originalElementPositions.shapes.keys()].filter((id) =>
+        selectedElementIds.has(id)
+      )
+    )
+    const selectedSceneIds = new Set(
+      [...originalElementPositions.scenes.keys()].filter((id) =>
         selectedElementIds.has(id)
       )
     )
@@ -718,6 +840,18 @@ export function createWorkspaceSceneInteractionsStore({
       })
     )
 
+    setScenesSafe((previous) =>
+      previous.map((scene) => {
+        const originalScene = originalElementPositions.scenes.get(scene.id)
+        if (!originalScene) return scene
+        return {
+          ...originalScene,
+          x: originalScene.x + dx,
+          y: originalScene.y + dy
+        }
+      })
+    )
+
     setConnectorsSafe((previous) =>
       previous.map((connector) => {
         const originalConnector = originalElementPositions.connectors.get(
@@ -730,9 +864,16 @@ export function createWorkspaceSceneInteractionsStore({
             originalConnector.start,
             dx,
             dy,
-            selectedShapeIds
+            selectedShapeIds,
+            selectedSceneIds
           ),
-          end: movedEndpoint(originalConnector.end, dx, dy, selectedShapeIds)
+          end: movedEndpoint(
+            originalConnector.end,
+            dx,
+            dy,
+            selectedShapeIds,
+            selectedSceneIds
+          )
         }
       })
     )
@@ -751,6 +892,7 @@ export function createWorkspaceSceneInteractionsStore({
       before: CanvasDrawableElement
       after: CanvasDrawableElement
     }> = []
+    const sceneUpdates: Array<{ id: string; after: Scene }> = []
 
     for (const [id, before] of originalElementPositions.paths) {
       const after = getPaths().find((entry) => entry.id === id)
@@ -768,6 +910,10 @@ export function createWorkspaceSceneInteractionsStore({
       const after = getConnectorsSafe().find((entry) => entry.id === id)
       if (after) updates.push({ id, type: 'connector', before, after })
     }
+    for (const [id] of originalElementPositions.scenes) {
+      const after = getScenesSafe().find((entry) => entry.id === id)
+      if (after) sceneUpdates.push({ id, after })
+    }
 
     if (updates.length > 0) {
       addHistoryCommand(createUpdateMultipleCommand(updates, getUserId()))
@@ -775,14 +921,25 @@ export function createWorkspaceSceneInteractionsStore({
         persistElement(update.type, update.after)
       }
     }
+    for (const update of sceneUpdates) {
+      persistScenePatch?.(update.id, {
+        x: update.after.x,
+        y: update.after.y,
+        width: update.after.width,
+        height: update.after.height,
+        rotation: update.after.rotation
+      })
+    }
 
     isDraggingSelection = false
     dragStartPos = null
+    setTransformBusyScenes?.([])
     originalElementPositions = {
       paths: new Map(),
       texts: new Map(),
       shapes: new Map(),
-      connectors: new Map()
+      connectors: new Map(),
+      scenes: new Map()
     }
     return true
   }
@@ -816,19 +973,44 @@ export function createWorkspaceSceneInteractionsStore({
     }
 
     for (const shape of getShapesSafe()) {
-      if (isDiagramElementInSelection(shape, getShapesSafe(), rect)) {
+      if (
+        isDiagramElementInSelection(
+          shape,
+          getShapesSafe(),
+          rect,
+          getScenesSafe()
+        )
+      ) {
         nextSelected.add(shape.id)
       }
     }
 
     for (const connector of getConnectorsSafe()) {
-      if (isDiagramElementInSelection(connector, getShapesSafe(), rect)) {
+      if (
+        isDiagramElementInSelection(
+          connector,
+          getShapesSafe(),
+          rect,
+          getScenesSafe()
+        )
+      ) {
         nextSelected.add(connector.id)
       }
     }
 
+    for (const scene of getScenesSafe()) {
+      if (isAnchorTargetInSelection(scene, rect)) {
+        nextSelected.add(scene.id)
+      }
+    }
+
     setSelectedElementIds(
-      new Set([...nextSelected].filter((id) => canModifyElement(id)))
+      new Set(
+        [...nextSelected].filter((id) => {
+          const hit = findElementById(id)
+          return hit ? canModifyHit(hit) : false
+        })
+      )
     )
     setIsSelecting(false)
     setSelectionStart(null)
@@ -922,8 +1104,12 @@ export function createWorkspaceSceneInteractionsStore({
 
     if (interaction.type === 'connector-create') {
       const end = snapEndpoint(point)
-      const startPoint = resolveEndpoint(interaction.start, getShapesSafe())
-      const endPoint = resolveEndpoint(end, getShapesSafe())
+      const startPoint = resolveEndpoint(
+        interaction.start,
+        getShapesSafe(),
+        getScenesSafe()
+      )
+      const endPoint = resolveEndpoint(end, getShapesSafe(), getScenesSafe())
       setDraftConnector?.(null)
       if (
         Math.hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y) < 4
@@ -944,6 +1130,42 @@ export function createWorkspaceSceneInteractionsStore({
       setCursorStyle('grab')
       addHistoryCommand(createCreateConnectorCommand(connector, getUserId()))
       persistElement('connector', connector)
+      return true
+    }
+
+    if (interaction.type === 'scene-resize') {
+      const after = getScenesSafe().find(
+        (scene) => scene.id === interaction.sceneId
+      )
+      if (after) {
+        persistScenePatch?.(after.id, {
+          x: after.x,
+          y: after.y,
+          width: after.width,
+          height: after.height,
+          rotation: after.rotation
+        })
+      }
+      setTransformBusyScenes?.([])
+      setCursorStyle(cursorForPoint(point))
+      return true
+    }
+
+    if (interaction.type === 'scene-rotate') {
+      const after = getScenesSafe().find(
+        (scene) => scene.id === interaction.sceneId
+      )
+      if (after) {
+        persistScenePatch?.(after.id, {
+          x: after.x,
+          y: after.y,
+          width: after.width,
+          height: after.height,
+          rotation: after.rotation
+        })
+      }
+      setTransformBusyScenes?.([])
+      setCursorStyle(cursorForPoint(point))
       return true
     }
 
@@ -1100,6 +1322,28 @@ export function createWorkspaceSceneInteractionsStore({
       return true
     }
 
+    if (interaction.type === 'scene-resize') {
+      setCursorStyle(cursorForInteraction(interaction))
+      setScenesSafe((previous) =>
+        previous.map((scene) =>
+          scene.id === interaction.sceneId
+            ? resizeAnchorTargetFromHandle(
+                interaction.original,
+                interaction.handle,
+                point,
+                {
+                  minWidth: MIN_SCENE_WIDTH,
+                  minHeight: MIN_SCENE_HEIGHT,
+                  maxWidth: MAX_SCENE_SIZE,
+                  maxHeight: MAX_SCENE_SIZE
+                }
+              )
+            : scene
+        )
+      )
+      return true
+    }
+
     if (interaction.type === 'shape-rotate') {
       setCursorStyle(cursorForInteraction(interaction))
       setShapesSafe((previous) =>
@@ -1107,6 +1351,18 @@ export function createWorkspaceSceneInteractionsStore({
           shape.id === interaction.shapeId
             ? rotateShapeTowardPoint(interaction.original, point)
             : shape
+        )
+      )
+      return true
+    }
+
+    if (interaction.type === 'scene-rotate') {
+      setCursorStyle(cursorForInteraction(interaction))
+      setScenesSafe((previous) =>
+        previous.map((scene) =>
+          scene.id === interaction.sceneId
+            ? rotateAnchorTargetTowardPoint(interaction.original, point)
+            : scene
         )
       )
       return true
@@ -1217,7 +1473,12 @@ export function createWorkspaceSceneInteractionsStore({
       ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
       const point = screenToCanvasPoint(event.clientX, event.clientY)
       const hit = findTopElementAtPoint(point)
-      if (hit && hit.type !== 'text' && canModifyElement(hit.id)) {
+      if (
+        hit &&
+        hit.type !== 'text' &&
+        hit.type !== 'scene' &&
+        canModifyElement(hit.id)
+      ) {
         addHistoryCommand(
           createDeleteElementCommand(hit.element, hit.type, getUserId())
         )
@@ -1291,6 +1552,32 @@ export function createWorkspaceSceneInteractionsStore({
     const point = screenToCanvasPoint(event.clientX, event.clientY)
     const selectedIds = getSelectedElementIds()
     const handleThreshold = 10 / getCameraScale()
+    const sceneHandle = findAnchorTargetHandleAtPoint(
+      point,
+      getScenesSafe(),
+      selectedIds,
+      handleThreshold
+    )
+    if (sceneHandle && canModifySceneSafe(sceneHandle.target.id)) {
+      ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
+      activeInteraction =
+        sceneHandle.type === 'resize'
+          ? {
+              type: 'scene-resize',
+              sceneId: sceneHandle.target.id,
+              handle: sceneHandle.handle,
+              original: { ...sceneHandle.target }
+            }
+          : {
+              type: 'scene-rotate',
+              sceneId: sceneHandle.target.id,
+              original: { ...sceneHandle.target }
+            }
+      setTransformBusyScenes?.([sceneHandle.target.id])
+      setCursorStyle(cursorForInteraction(activeInteraction))
+      return
+    }
+
     const textHandle = findTextHandleAtPoint(
       point,
       getTextElements(),
@@ -1350,7 +1637,8 @@ export function createWorkspaceSceneInteractionsStore({
       getConnectorsSafe(),
       getShapesSafe(),
       selectedIds,
-      handleThreshold
+      handleThreshold,
+      getScenesSafe()
     )
     if (endpointHit && canModifyElement(endpointHit.connector.id)) {
       ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
@@ -1385,6 +1673,13 @@ export function createWorkspaceSceneInteractionsStore({
       return
     }
 
+    if (isDoubleClick && hit?.type === 'scene' && canModifySceneSafe(hit.id)) {
+      event.preventDefault()
+      event.stopPropagation()
+      openSceneById?.(hit.id, null)
+      return
+    }
+
     if (
       isDoubleClick &&
       hit?.type === 'shape' &&
@@ -1407,7 +1702,7 @@ export function createWorkspaceSceneInteractionsStore({
     }
 
     updateClickTracking(point)
-    const hitElementId = hit && canModifyElement(hit.id) ? hit.id : undefined
+    const hitElementId = hit && canModifyHit(hit) ? hit.id : undefined
 
     if (hitElementId) {
       ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
@@ -1512,6 +1807,13 @@ export function createWorkspaceSceneInteractionsStore({
       setSelectedTool('text')
       formattingStore.syncTextFormattingFromElement(hitText)
       startTextEditingAtPosition(hitText.x, hitText.y, hitText.text, hitText.id)
+      return
+    }
+
+    if (hit?.type === 'scene' && canModifySceneSafe(hit.id)) {
+      event.preventDefault()
+      event.stopPropagation()
+      openSceneById?.(hit.id, null)
       return
     }
 
@@ -1665,7 +1967,10 @@ export function createWorkspaceSceneInteractionsStore({
   function arrangeSelectedElements(action: ArrangementAction) {
     const selectedIds = getSelectedElementIds()
     if (selectedIds.size === 0) return
-    const elements = allElements()
+    const elements = allElements().filter(
+      (entry): entry is Extract<HitElement, { type: CanvasElementType }> =>
+        entry.type !== 'scene'
+    )
     const zValues = elements.map((entry) => entry.element.z ?? 0)
     const maxZ = Math.max(...zValues, 0)
     const minZ = Math.min(...zValues, 0)

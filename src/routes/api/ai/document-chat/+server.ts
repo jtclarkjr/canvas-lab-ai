@@ -5,8 +5,10 @@ import {
   markdownDocumentContentSchema
 } from '$lib/scenes/schema'
 import { getDocumentCategory } from '$lib/scenes/document-categories'
+import { getLinkedContextSceneIds } from '$lib/scenes/context-links'
 import { isKnownModelId } from '$lib/scenes/models'
 import { AiModelError, streamDocumentChat } from '$lib/server/ai'
+import type { ContextDocumentRef } from '$lib/server/ai/types'
 import { getAiRegistry } from '$lib/server/ai-runtime'
 import { persistDocumentChat } from '$lib/server/document-chat'
 import { requireCanvasRole } from '$lib/server/canvas-access'
@@ -26,6 +28,7 @@ import {
 import { logServerError } from '$lib/server/logger'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
+import { canvasElementToConnector } from '$lib/workspace/element-mapping'
 
 // AI generations are expensive: a much tighter limit than normal writes.
 const AI_RATE_LIMIT = { maxRequests: 10, windowMs: 60_000 }
@@ -68,7 +71,7 @@ export const POST: RequestHandler = async (event) =>
       )
 
       // Context documents must be saved documents of this same scene.
-      let contextDocuments: Array<{ id: string; title: string }> = []
+      let contextDocuments: ContextDocumentRef[] = []
       if (input.contextDocumentIds.length > 0) {
         const { data, error } = await supabase
           .from('canvas_scene_documents')
@@ -92,8 +95,81 @@ export const POST: RequestHandler = async (event) =>
 
         contextDocuments = valid.map((row) => ({
           id: row.id,
-          title: row.title
+          title: row.title,
+          sceneId: row.scene_id,
+          source: 'manual'
         }))
+      }
+
+      const { data: connectorRows, error: connectorError } = await supabase
+        .from('canvas_elements')
+        .select('id, data')
+        .eq('canvas_id', input.canvasId)
+        .eq('type', 'connector')
+
+      if (connectorError) {
+        throw connectorError
+      }
+
+      const linkedSceneIds = getLinkedContextSceneIds(
+        input.sceneId,
+        (connectorRows ?? [])
+          .map((row) =>
+            canvasElementToConnector({
+              id: row.id,
+              canvasId: input.canvasId,
+              type: 'connector',
+              data: row.data,
+              x: 0,
+              y: 0,
+              z: null
+            })
+          )
+          .filter((connector) => connector !== null)
+      )
+
+      if (linkedSceneIds.length > 0) {
+        const { data: linkedScenes, error: linkedScenesError } = await supabase
+          .from('canvas_scenes')
+          .select('id, title')
+          .eq('canvas_id', input.canvasId)
+          .in('id', linkedSceneIds)
+
+        if (linkedScenesError) {
+          throw linkedScenesError
+        }
+
+        const sceneTitles = new Map(
+          (linkedScenes ?? []).map((linkedScene) => [
+            linkedScene.id,
+            linkedScene.title
+          ])
+        )
+
+        const { data: linkedDocuments, error: linkedDocumentsError } =
+          await supabase
+            .from('canvas_scene_documents')
+            .select('id, title, scene_id')
+            .eq('canvas_id', input.canvasId)
+            .eq('status', 'saved')
+            .in('scene_id', linkedSceneIds)
+
+        if (linkedDocumentsError) {
+          throw linkedDocumentsError
+        }
+
+        const seenContextIds = new Set(contextDocuments.map((doc) => doc.id))
+        for (const document of linkedDocuments ?? []) {
+          if (seenContextIds.has(document.id)) continue
+          seenContextIds.add(document.id)
+          contextDocuments.push({
+            id: document.id,
+            title: document.title,
+            sceneId: document.scene_id,
+            sceneTitle: sceneTitles.get(document.scene_id) ?? 'Untitled scene',
+            source: 'linked-scene'
+          })
+        }
       }
 
       let resolved

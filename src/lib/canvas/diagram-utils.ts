@@ -1,6 +1,8 @@
 import type {
   AnchorPosition,
   ConnectorKind,
+  DiagramAnchorBinding,
+  DiagramAnchorTargetType,
   DiagramConnector,
   DiagramEndpoint,
   DiagramFormatting,
@@ -20,13 +22,107 @@ export type ShapeHandleHit =
   | { type: 'resize'; handle: ShapeResizeHandle; shape: DiagramShape }
   | { type: 'rotate'; shape: DiagramShape }
 
+export type AnchorTarget = {
+  id: string
+  x: number
+  y: number
+  width: number
+  height: number
+  rotation?: number | null
+}
+
 export type AnchorHit = {
   endpoint: DiagramEndpoint
-  shape: DiagramShape
+  target: AnchorTarget
+  targetType: DiagramAnchorTargetType
+  shape?: DiagramShape
   anchor: AnchorPosition
 }
 
 const anchors: AnchorPosition[] = ['top', 'right', 'bottom', 'left']
+
+export function makeAnchorBinding(
+  targetType: DiagramAnchorTargetType,
+  targetId: string,
+  anchor: AnchorPosition
+): DiagramAnchorBinding {
+  return {
+    targetType,
+    targetId,
+    anchor,
+    ...(targetType === 'shape' ? { shapeId: targetId } : { sceneId: targetId })
+  }
+}
+
+export function normalizeAnchorBinding(
+  binding: DiagramEndpoint['binding'] | null | undefined
+): DiagramAnchorBinding | null {
+  if (!binding) return null
+
+  const targetType = binding.targetType ?? (binding.sceneId ? 'scene' : 'shape')
+  const targetId =
+    binding.targetId ??
+    (targetType === 'scene' ? binding.sceneId : binding.shapeId) ??
+    binding.shapeId ??
+    binding.sceneId
+
+  if (!targetId) return null
+
+  return makeAnchorBinding(targetType, targetId, binding.anchor)
+}
+
+function targetRotation(target: AnchorTarget) {
+  return target.rotation ?? 0
+}
+
+export function getAnchorTargetCenter(target: AnchorTarget): Point {
+  return {
+    x: target.x + target.width / 2,
+    y: target.y + target.height / 2
+  }
+}
+
+export function getAnchorTargetOutlinePoints(target: AnchorTarget): Point[] {
+  const center = getAnchorTargetCenter(target)
+  return [
+    { x: target.x, y: target.y },
+    { x: target.x + target.width, y: target.y },
+    { x: target.x + target.width, y: target.y + target.height },
+    { x: target.x, y: target.y + target.height }
+  ].map((point) => rotatePoint(point, center, targetRotation(target)))
+}
+
+export function getAnchorTargetPoint(
+  target: AnchorTarget,
+  anchor: AnchorPosition
+): Point {
+  const center = getAnchorTargetCenter(target)
+  let point: Point
+  switch (anchor) {
+    case 'top':
+      point = { x: center.x, y: target.y }
+      break
+    case 'right':
+      point = { x: target.x + target.width, y: center.y }
+      break
+    case 'bottom':
+      point = { x: center.x, y: target.y + target.height }
+      break
+    case 'left':
+      point = { x: target.x, y: center.y }
+      break
+  }
+  return rotatePoint(point, center, targetRotation(target))
+}
+
+export function getAnchorTargetAnchors(
+  target: AnchorTarget
+): Array<{ anchor: AnchorPosition; point: Point }> {
+  return anchors.map((anchor) => ({
+    anchor,
+    point: getAnchorTargetPoint(target, anchor)
+  }))
+}
 
 export function getShapeResizeCursor(
   handle: ShapeResizeHandle,
@@ -65,7 +161,7 @@ export function cloneEndpoint(endpoint: DiagramEndpoint): DiagramEndpoint {
   return {
     x: endpoint.x,
     y: endpoint.y,
-    binding: endpoint.binding ? { ...endpoint.binding } : null
+    binding: normalizeAnchorBinding(endpoint.binding)
   }
 }
 
@@ -131,8 +227,8 @@ export function connectorToData(
 ): Record<string, unknown> {
   return {
     kind: connector.kind,
-    start: connector.start,
-    end: connector.end,
+    start: cloneEndpoint(connector.start),
+    end: cloneEndpoint(connector.end),
     strokeColor: connector.strokeColor,
     strokeWidth: connector.strokeWidth,
     strokeStyle: connector.strokeStyle,
@@ -143,10 +239,7 @@ export function connectorToData(
 }
 
 export function getShapeCenter(shape: DiagramShape): Point {
-  return {
-    x: shape.x + shape.width / 2,
-    y: shape.y + shape.height / 2
-  }
+  return getAnchorTargetCenter(shape)
 }
 
 export function rotatePoint(
@@ -174,13 +267,7 @@ export function unrotatePoint(
 }
 
 export function getShapeOutlinePoints(shape: DiagramShape): Point[] {
-  const center = getShapeCenter(shape)
-  return [
-    { x: shape.x, y: shape.y },
-    { x: shape.x + shape.width, y: shape.y },
-    { x: shape.x + shape.width, y: shape.y + shape.height },
-    { x: shape.x, y: shape.y + shape.height }
-  ].map((point) => rotatePoint(point, center, shape.rotation))
+  return getAnchorTargetOutlinePoints(shape)
 }
 
 export function getDiamondPoints(shape: DiagramShape): Point[] {
@@ -201,42 +288,32 @@ export function getShapeAnchorPoint(
   shape: DiagramShape,
   anchor: AnchorPosition
 ): Point {
-  const center = getShapeCenter(shape)
-  let point: Point
-  switch (anchor) {
-    case 'top':
-      point = { x: center.x, y: shape.y }
-      break
-    case 'right':
-      point = { x: shape.x + shape.width, y: center.y }
-      break
-    case 'bottom':
-      point = { x: center.x, y: shape.y + shape.height }
-      break
-    case 'left':
-      point = { x: shape.x, y: center.y }
-      break
-  }
-  return rotatePoint(point, center, shape.rotation)
+  return getAnchorTargetPoint(shape, anchor)
 }
 
 export function getShapeAnchors(
   shape: DiagramShape
 ): Array<{ anchor: AnchorPosition; point: Point }> {
-  return anchors.map((anchor) => ({
-    anchor,
-    point: getShapeAnchorPoint(shape, anchor)
-  }))
+  return getAnchorTargetAnchors(shape)
 }
 
 export function resolveEndpoint(
   endpoint: DiagramEndpoint,
-  shapes: DiagramShape[]
+  shapes: DiagramShape[],
+  scenes: AnchorTarget[] = []
 ): Point {
-  if (endpoint.binding) {
-    const shape = shapes.find((entry) => entry.id === endpoint.binding?.shapeId)
-    if (shape) {
-      return getShapeAnchorPoint(shape, endpoint.binding.anchor)
+  const binding = normalizeAnchorBinding(endpoint.binding)
+  if (binding) {
+    if (binding.targetType === 'scene') {
+      const scene = scenes.find((entry) => entry.id === binding.targetId)
+      if (scene) {
+        return getAnchorTargetPoint(scene, binding.anchor)
+      }
+    } else {
+      const shape = shapes.find((entry) => entry.id === binding.targetId)
+      if (shape) {
+        return getShapeAnchorPoint(shape, binding.anchor)
+      }
     }
   }
   return { x: endpoint.x, y: endpoint.y }
@@ -244,10 +321,11 @@ export function resolveEndpoint(
 
 export function getConnectorRoutePoints(
   connector: DiagramConnector,
-  shapes: DiagramShape[]
+  shapes: DiagramShape[],
+  scenes: AnchorTarget[] = []
 ): Point[] {
-  const start = resolveEndpoint(connector.start, shapes)
-  const end = resolveEndpoint(connector.end, shapes)
+  const start = resolveEndpoint(connector.start, shapes, scenes)
+  const end = resolveEndpoint(connector.end, shapes, scenes)
   if (connector.kind === 'elbow') {
     const midX = start.x + (end.x - start.x) / 2
     return [start, { x: midX, y: start.y }, { x: midX, y: end.y }, end]
@@ -269,9 +347,10 @@ export function getConnectorRoutePoints(
 
 export function connectorToSvgPath(
   connector: DiagramConnector,
-  shapes: DiagramShape[]
+  shapes: DiagramShape[],
+  scenes: AnchorTarget[] = []
 ): string {
-  const points = getConnectorRoutePoints(connector, shapes)
+  const points = getConnectorRoutePoints(connector, shapes, scenes)
   const first = points[0]
   if (!first) return ''
   if (connector.kind === 'curved') {
@@ -291,9 +370,10 @@ export function connectorToSvgPath(
 
 export function getConnectorTerminalSegments(
   connector: DiagramConnector,
-  shapes: DiagramShape[]
+  shapes: DiagramShape[],
+  scenes: AnchorTarget[] = []
 ): { start: [Point, Point] | null; end: [Point, Point] | null } {
-  const points = getConnectorRoutePoints(connector, shapes)
+  const points = getConnectorRoutePoints(connector, shapes, scenes)
   if (points.length < 2) {
     return { start: null, end: null }
   }
@@ -351,13 +431,25 @@ function distanceToSegment(point: Point, start: Point, end: Point): number {
   return distance(point, { x: start.x + t * dx, y: start.y + t * dy })
 }
 
-function pointInRect(point: Point, shape: DiagramShape): boolean {
+function pointInRect(point: Point, target: AnchorTarget): boolean {
   return (
-    point.x >= shape.x &&
-    point.x <= shape.x + shape.width &&
-    point.y >= shape.y &&
-    point.y <= shape.y + shape.height
+    point.x >= target.x &&
+    point.x <= target.x + target.width &&
+    point.y >= target.y &&
+    point.y <= target.y + target.height
   )
+}
+
+export function isPointInAnchorTarget(
+  point: Point,
+  target: AnchorTarget
+): boolean {
+  const local = unrotatePoint(
+    point,
+    getAnchorTargetCenter(target),
+    targetRotation(target)
+  )
+  return pointInRect(local, target)
 }
 
 export function isPointInShape(point: Point, shape: DiagramShape): boolean {
@@ -404,9 +496,10 @@ export function isPointNearConnector(
   point: Point,
   connector: DiagramConnector,
   shapes: DiagramShape[],
-  threshold: number
+  threshold: number,
+  scenes: AnchorTarget[] = []
 ): boolean {
-  const route = getConnectorRoutePoints(connector, shapes)
+  const route = getConnectorRoutePoints(connector, shapes, scenes)
   if (route.length < 2) return false
 
   if (connector.kind === 'curved' && route.length === 3) {
@@ -449,13 +542,14 @@ export function findConnectorAtPoint(
   point: Point,
   connectors: DiagramConnector[],
   shapes: DiagramShape[],
-  threshold: number
+  threshold: number,
+  scenes: AnchorTarget[] = []
 ): DiagramConnector | null {
   for (let i = connectors.length - 1; i >= 0; i -= 1) {
     const connector = connectors[i]
     if (
       connector &&
-      isPointNearConnector(point, connector, shapes, threshold)
+      isPointNearConnector(point, connector, shapes, threshold, scenes)
     ) {
       return connector
     }
@@ -463,24 +557,36 @@ export function findConnectorAtPoint(
   return null
 }
 
-export function getShapeResizeHandles(
-  shape: DiagramShape
+export function getAnchorTargetResizeHandles(
+  target: AnchorTarget
 ): Array<{ handle: ShapeResizeHandle; point: Point }> {
-  const [nw, ne, se, sw] = getShapeOutlinePoints(shape)
+  const [nw, ne, se, sw] = getAnchorTargetOutlinePoints(target)
   return [
-    { handle: 'nw', point: nw ?? { x: shape.x, y: shape.y } },
-    { handle: 'ne', point: ne ?? { x: shape.x + shape.width, y: shape.y } },
+    { handle: 'nw', point: nw ?? { x: target.x, y: target.y } },
+    {
+      handle: 'ne',
+      point: ne ?? { x: target.x + target.width, y: target.y }
+    },
     {
       handle: 'se',
-      point: se ?? { x: shape.x + shape.width, y: shape.y + shape.height }
+      point: se ?? { x: target.x + target.width, y: target.y + target.height }
     },
-    { handle: 'sw', point: sw ?? { x: shape.x, y: shape.y + shape.height } }
+    {
+      handle: 'sw',
+      point: sw ?? { x: target.x, y: target.y + target.height }
+    }
   ]
 }
 
-export function getShapeRotateHandle(shape: DiagramShape): Point {
-  const top = getShapeAnchorPoint(shape, 'top')
-  const center = getShapeCenter(shape)
+export function getShapeResizeHandles(
+  shape: DiagramShape
+): Array<{ handle: ShapeResizeHandle; point: Point }> {
+  return getAnchorTargetResizeHandles(shape)
+}
+
+export function getAnchorTargetRotateHandle(target: AnchorTarget): Point {
+  const top = getAnchorTargetPoint(target, 'top')
+  const center = getAnchorTargetCenter(target)
   const length = 32
   const dx = top.x - center.x
   const dy = top.y - center.y
@@ -491,25 +597,51 @@ export function getShapeRotateHandle(shape: DiagramShape): Point {
   }
 }
 
+export function getShapeRotateHandle(shape: DiagramShape): Point {
+  return getAnchorTargetRotateHandle(shape)
+}
+
+export function findAnchorTargetHandleAtPoint<T extends AnchorTarget>(
+  point: Point,
+  targets: T[],
+  selectedIds: Set<string>,
+  threshold: number
+):
+  | { type: 'resize'; handle: ShapeResizeHandle; target: T }
+  | { type: 'rotate'; target: T }
+  | null {
+  for (let i = targets.length - 1; i >= 0; i -= 1) {
+    const target = targets[i]
+    if (!target || !selectedIds.has(target.id)) continue
+    if (distance(point, getAnchorTargetRotateHandle(target)) <= threshold) {
+      return { type: 'rotate', target }
+    }
+    for (const handle of getAnchorTargetResizeHandles(target)) {
+      if (distance(point, handle.point) <= threshold) {
+        return { type: 'resize', handle: handle.handle, target }
+      }
+    }
+  }
+  return null
+}
+
 export function findShapeHandleAtPoint(
   point: Point,
   shapes: DiagramShape[],
   selectedIds: Set<string>,
   threshold: number
 ): ShapeHandleHit | null {
-  for (let i = shapes.length - 1; i >= 0; i -= 1) {
-    const shape = shapes[i]
-    if (!shape || !selectedIds.has(shape.id)) continue
-    if (distance(point, getShapeRotateHandle(shape)) <= threshold) {
-      return { type: 'rotate', shape }
-    }
-    for (const handle of getShapeResizeHandles(shape)) {
-      if (distance(point, handle.point) <= threshold) {
-        return { type: 'resize', handle: handle.handle, shape }
-      }
-    }
+  const hit = findAnchorTargetHandleAtPoint(
+    point,
+    shapes,
+    selectedIds,
+    threshold
+  )
+  if (!hit) return null
+  if (hit.type === 'rotate') {
+    return { type: 'rotate', shape: hit.target }
   }
-  return null
+  return { type: 'resize', handle: hit.handle, shape: hit.target }
 }
 
 export function findConnectorEndpointAtPoint(
@@ -517,17 +649,22 @@ export function findConnectorEndpointAtPoint(
   connectors: DiagramConnector[],
   shapes: DiagramShape[],
   selectedIds: Set<string>,
-  threshold: number
+  threshold: number,
+  scenes: AnchorTarget[] = []
 ): { connector: DiagramConnector; end: 'start' | 'end' } | null {
   for (let i = connectors.length - 1; i >= 0; i -= 1) {
     const connector = connectors[i]
     if (!connector || !selectedIds.has(connector.id)) continue
     if (
-      distance(point, resolveEndpoint(connector.start, shapes)) <= threshold
+      distance(point, resolveEndpoint(connector.start, shapes, scenes)) <=
+      threshold
     ) {
       return { connector, end: 'start' }
     }
-    if (distance(point, resolveEndpoint(connector.end, shapes)) <= threshold) {
+    if (
+      distance(point, resolveEndpoint(connector.end, shapes, scenes)) <=
+      threshold
+    ) {
       return { connector, end: 'end' }
     }
   }
@@ -537,33 +674,51 @@ export function findConnectorEndpointAtPoint(
 export function findNearestShapeAnchor(
   point: Point,
   shapes: DiagramShape[],
-  threshold: number
+  threshold: number,
+  scenes: AnchorTarget[] = []
 ): AnchorHit | null {
   let best: AnchorHit | null = null
   let bestDistance = Infinity
 
-  for (let i = shapes.length - 1; i >= 0; i -= 1) {
-    const shape = shapes[i]
-    if (!shape) continue
-    for (const entry of getShapeAnchors(shape)) {
+  const visitTarget = (
+    target: AnchorTarget,
+    targetType: DiagramAnchorTargetType,
+    isInside: boolean,
+    shape?: DiagramShape
+  ) => {
+    for (const entry of getAnchorTargetAnchors(target)) {
       const anchorDistance = distance(point, entry.point)
-      const insideBonus = isPointInShape(point, shape) ? threshold : 0
+      const insideBonus = isInside ? threshold : 0
       if (
         anchorDistance <= threshold + insideBonus &&
         anchorDistance < bestDistance
       ) {
         bestDistance = anchorDistance
         best = {
+          target,
+          targetType,
           shape,
           anchor: entry.anchor,
           endpoint: {
             x: entry.point.x,
             y: entry.point.y,
-            binding: { shapeId: shape.id, anchor: entry.anchor }
+            binding: makeAnchorBinding(targetType, target.id, entry.anchor)
           }
         }
       }
     }
+  }
+
+  for (let i = shapes.length - 1; i >= 0; i -= 1) {
+    const shape = shapes[i]
+    if (!shape) continue
+    visitTarget(shape, 'shape', isPointInShape(point, shape), shape)
+  }
+
+  for (let i = scenes.length - 1; i >= 0; i -= 1) {
+    const scene = scenes[i]
+    if (!scene) continue
+    visitTarget(scene, 'scene', isPointInAnchorTarget(point, scene))
   }
 
   return best
@@ -623,32 +778,59 @@ export function resizeShapeFromHandle(
   handle: ShapeResizeHandle,
   point: Point
 ): DiagramShape {
-  const center = getShapeCenter(shape)
-  const localPoint = unrotatePoint(point, center, shape.rotation)
+  return resizeAnchorTargetFromHandle(shape, handle, point, {
+    minWidth: MIN_SHAPE_SIZE,
+    minHeight: MIN_SHAPE_SIZE
+  })
+}
+
+export function resizeAnchorTargetFromHandle<T extends AnchorTarget>(
+  target: T,
+  handle: ShapeResizeHandle,
+  point: Point,
+  options: {
+    minWidth?: number
+    minHeight?: number
+    maxWidth?: number
+    maxHeight?: number
+  } = {}
+): T {
+  const center = getAnchorTargetCenter(target)
+  const localPoint = unrotatePoint(point, center, targetRotation(target))
   let opposite: Point
   switch (handle) {
     case 'nw':
-      opposite = { x: shape.x + shape.width, y: shape.y + shape.height }
+      opposite = { x: target.x + target.width, y: target.y + target.height }
       break
     case 'ne':
-      opposite = { x: shape.x, y: shape.y + shape.height }
+      opposite = { x: target.x, y: target.y + target.height }
       break
     case 'se':
-      opposite = { x: shape.x, y: shape.y }
+      opposite = { x: target.x, y: target.y }
       break
     case 'sw':
-      opposite = { x: shape.x + shape.width, y: shape.y }
+      opposite = { x: target.x + target.width, y: target.y }
       break
   }
 
   const nextX = Math.min(localPoint.x, opposite.x)
   const nextY = Math.min(localPoint.y, opposite.y)
+  const minWidth = options.minWidth ?? MIN_SHAPE_SIZE
+  const minHeight = options.minHeight ?? MIN_SHAPE_SIZE
+  const maxWidth = options.maxWidth ?? Infinity
+  const maxHeight = options.maxHeight ?? Infinity
   return {
-    ...shape,
+    ...target,
     x: nextX,
     y: nextY,
-    width: Math.max(Math.abs(localPoint.x - opposite.x), MIN_SHAPE_SIZE),
-    height: Math.max(Math.abs(localPoint.y - opposite.y), MIN_SHAPE_SIZE)
+    width: Math.min(
+      Math.max(Math.abs(localPoint.x - opposite.x), minWidth),
+      maxWidth
+    ),
+    height: Math.min(
+      Math.max(Math.abs(localPoint.y - opposite.y), minHeight),
+      maxHeight
+    )
   }
 }
 
@@ -656,11 +838,18 @@ export function rotateShapeTowardPoint(
   shape: DiagramShape,
   point: Point
 ): DiagramShape {
-  const center = getShapeCenter(shape)
+  return rotateAnchorTargetTowardPoint(shape, point)
+}
+
+export function rotateAnchorTargetTowardPoint<T extends AnchorTarget>(
+  target: T,
+  point: Point
+): T {
+  const center = getAnchorTargetCenter(target)
   const degrees =
     (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI
   return {
-    ...shape,
+    ...target,
     rotation: degrees + 90
   }
 }
@@ -668,18 +857,48 @@ export function rotateShapeTowardPoint(
 export function isDiagramElementInSelection(
   element: DiagramShape | DiagramConnector,
   shapes: DiagramShape[],
-  selectionRect: { x1: number; y1: number; x2: number; y2: number }
+  selectionRect: { x1: number; y1: number; x2: number; y2: number },
+  scenes: AnchorTarget[] = []
 ): boolean {
   const points =
     'kind' in element && 'width' in element
       ? getShapeOutlinePoints(element)
-      : getConnectorRoutePoints(element, shapes)
-  return points.some(
-    (point) =>
-      point.x >= selectionRect.x1 &&
-      point.x <= selectionRect.x2 &&
-      point.y >= selectionRect.y1 &&
-      point.y <= selectionRect.y2
+      : getConnectorRoutePoints(element, shapes, scenes)
+  return points.some((point) => isPointInSelection(point, selectionRect))
+}
+
+function isPointInSelection(
+  point: Point,
+  selectionRect: { x1: number; y1: number; x2: number; y2: number }
+) {
+  return (
+    point.x >= selectionRect.x1 &&
+    point.x <= selectionRect.x2 &&
+    point.y >= selectionRect.y1 &&
+    point.y <= selectionRect.y2
+  )
+}
+
+export function isAnchorTargetInSelection(
+  target: AnchorTarget,
+  selectionRect: { x1: number; y1: number; x2: number; y2: number }
+): boolean {
+  return getAnchorTargetOutlinePoints(target).some((point) =>
+    isPointInSelection(point, selectionRect)
+  )
+}
+
+export function hasConnectorBindingToTarget(
+  connector: DiagramConnector,
+  targetType: DiagramAnchorTargetType,
+  targetId: string
+): boolean {
+  const startBinding = normalizeAnchorBinding(connector.start.binding)
+  const endBinding = normalizeAnchorBinding(connector.end.binding)
+  return (
+    (startBinding?.targetType === targetType &&
+      startBinding.targetId === targetId) ||
+    (endBinding?.targetType === targetType && endBinding.targetId === targetId)
   )
 }
 
@@ -687,8 +906,5 @@ export function hasConnectorBindingToShape(
   connector: DiagramConnector,
   shapeId: string
 ): boolean {
-  return (
-    connector.start.binding?.shapeId === shapeId ||
-    connector.end.binding?.shapeId === shapeId
-  )
+  return hasConnectorBindingToTarget(connector, 'shape', shapeId)
 }

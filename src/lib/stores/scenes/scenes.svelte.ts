@@ -67,6 +67,7 @@ export function createWorkspaceScenesStore({
   let openScene = $state<OpenScene | null>(null)
   let draggingSceneId = $state<string | null>(null)
   let resizingSceneId = $state<string | null>(null)
+  let transformBusySceneIds = $state<Record<string, true>>({})
   // Bumped by realtime document events so open viewers refetch.
   let documentRevisions = $state<Record<string, number>>({})
 
@@ -163,7 +164,7 @@ export function createWorkspaceScenesStore({
 
   function persistScenePatch(
     sceneId: string,
-    patch: Partial<Pick<Scene, 'x' | 'y' | 'width' | 'height'>>
+    patch: Partial<Pick<Scene, 'x' | 'y' | 'width' | 'height' | 'rotation'>>
   ) {
     const canvasId = getActiveCanvasId()
     if (!canvasId) {
@@ -413,7 +414,17 @@ export function createWorkspaceScenesStore({
   }
 
   function isSceneBusy(sceneId: string) {
-    return draggingSceneId === sceneId || resizingSceneId === sceneId
+    return (
+      draggingSceneId === sceneId ||
+      resizingSceneId === sceneId ||
+      transformBusySceneIds[sceneId] === true
+    )
+  }
+
+  function setTransformBusyScenes(sceneIds: string[]) {
+    transformBusySceneIds = Object.fromEntries(
+      sceneIds.map((sceneId) => [sceneId, true])
+    )
   }
 
   return {
@@ -422,6 +433,7 @@ export function createWorkspaceScenesStore({
     patchScene,
     deleteScene,
     canModifyScene,
+    persistScenePatch,
     setScenes,
     getScene,
     handleCardPointerDown,
@@ -438,6 +450,7 @@ export function createWorkspaceScenesStore({
     handleSceneDeletedRemotely,
     bumpDocumentRevision,
     isSceneBusy,
+    setTransformBusyScenes,
     get scenes() {
       return scenes
     },

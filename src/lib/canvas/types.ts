@@ -65,9 +65,15 @@ export type AnchorPosition = 'top' | 'right' | 'bottom' | 'left'
 
 export type CanvasElementType = 'path' | 'text' | 'shape' | 'connector'
 
+export type DiagramAnchorTargetType = 'shape' | 'scene'
+
 export type DiagramAnchorBinding = {
-  shapeId: string
+  targetType: DiagramAnchorTargetType
+  targetId: string
   anchor: AnchorPosition
+  // Legacy/cross-version aliases. New writes use targetType + targetId.
+  shapeId?: string
+  sceneId?: string
 }
 
 export type DiagramEndpoint = {

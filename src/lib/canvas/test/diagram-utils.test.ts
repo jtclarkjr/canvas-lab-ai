@@ -10,6 +10,7 @@ import {
   resizeShapeFromHandle,
   rotateShapeTowardPoint
 } from '$lib/canvas/diagram-utils'
+import type { Scene } from '$lib/scenes/schema'
 import type { DiagramFormatting, DiagramShape } from '$lib/canvas/types'
 
 const formatting: DiagramFormatting = {
@@ -91,6 +92,46 @@ describe('diagram utils', () => {
     expect(connectorToSvgPath(connector, [shape])).toBe('M 110 50 L 220 50')
     expect(connectorToSvgPath(connector, [{ ...shape, x: 30, y: 20 }])).toBe(
       'M 130 50 L 220 50'
+    )
+  })
+
+  it('snaps endpoints to scene anchors and resolves sticky connector paths', () => {
+    const scene: Scene = {
+      id: 'scene-1',
+      canvasId: 'canvas-1',
+      type: 'document',
+      title: 'Scene',
+      x: 20,
+      y: 30,
+      width: 200,
+      height: 120,
+      rotation: 0,
+      settings: {},
+      createdBy: 'user-1',
+      updatedBy: 'user-1',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z'
+    }
+    const anchor = findNearestShapeAnchor({ x: 220, y: 90 }, [], 12, [scene])
+
+    expect(anchor?.targetType).toBe('scene')
+    expect(anchor?.endpoint.binding).toMatchObject({
+      targetType: 'scene',
+      targetId: 'scene-1',
+      anchor: 'right'
+    })
+
+    const connector = makeConnector(
+      'connector-1',
+      anchor?.endpoint ?? { x: 0, y: 0, binding: null },
+      { x: 300, y: 90, binding: null },
+      formatting,
+      2
+    )
+
+    expect(connectorToSvgPath(connector, [], [scene])).toBe('M 220 90 L 300 90')
+    expect(connectorToSvgPath(connector, [], [{ ...scene, x: 40 }])).toBe(
+      'M 240 90 L 300 90'
     )
   })
 

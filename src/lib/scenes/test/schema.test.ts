@@ -14,6 +14,7 @@ describe('scenes schema', () => {
 
     expect(input.type).toBe('document')
     expect(input.width).toBeUndefined()
+    expect(input.rotation).toBeUndefined()
 
     expect(() =>
       createSceneInputSchema.parse({ x: 0, y: 0, width: 10 })
@@ -21,9 +22,10 @@ describe('scenes schema', () => {
   })
 
   it('accepts partial scene updates', () => {
-    const input = updateSceneInputSchema.parse({ x: 5 })
+    const input = updateSceneInputSchema.parse({ x: 5, rotation: 15 })
 
     expect(input.x).toBe(5)
+    expect(input.rotation).toBe(15)
     expect(input.title).toBeUndefined()
     expect(updateSceneInputSchema.parse({})).toEqual({})
   })

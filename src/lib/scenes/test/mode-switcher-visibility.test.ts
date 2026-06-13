@@ -82,6 +82,7 @@ describe('scene mode switcher visibility', () => {
         y: 80,
         width: 320,
         height: 200,
+        rotation: 0,
         settings: { preview: 'SSR preview' },
         createdBy: 'user-1',
         updatedBy: 'user-1',

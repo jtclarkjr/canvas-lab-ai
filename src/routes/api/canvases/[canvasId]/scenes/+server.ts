@@ -70,6 +70,7 @@ export const POST: RequestHandler = async (event) =>
           y: input.y,
           width: input.width ?? sceneType.defaultSize.width,
           height: input.height ?? sceneType.defaultSize.height,
+          rotation: input.rotation ?? 0,
           settings: (input.settings ?? {}) as Json,
           created_by: user.id,
           updated_by: user.id

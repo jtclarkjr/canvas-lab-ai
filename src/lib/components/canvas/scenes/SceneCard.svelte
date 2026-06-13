@@ -18,12 +18,13 @@
     resizePointerCancel: (event: PointerEvent, sceneId: string) => void
   }
 
-  let { scene, camera, canModify, activity, handlers } = $props<{
+  let { scene, camera, canModify, activity, handlers, interactive } = $props<{
     scene: Scene
     camera: Camera
     canModify: boolean
     activity: SceneActivity | null
     handlers: CardHandlers
+    interactive: boolean
   }>()
 
   const sceneType = $derived(getSceneType(scene.type))
@@ -34,6 +35,8 @@
       `top:${camera.y + scene.y * camera.scale}px;` +
       `width:${scene.width * camera.scale}px;` +
       `height:${scene.height * camera.scale}px;` +
+      `transform:rotate(${scene.rotation}deg);` +
+      'transform-origin:center;' +
       'touch-action:none'
   )
 
@@ -47,8 +50,10 @@
 </script>
 
 <div
-  class={`glass-card group pointer-events-auto absolute flex ${
-    canModify ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+  class={`glass-card group ${interactive ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex ${
+    interactive && canModify
+      ? 'cursor-grab active:cursor-grabbing'
+      : 'cursor-default'
   } flex-col overflow-hidden p-3 transition-shadow hover:shadow-[0_18px_60px_rgba(15,23,42,0.2)]`}
   style={cardStyle}
   data-scene-id={scene.id}
@@ -104,7 +109,7 @@
     {/if}
   </div>
 
-  {#if canModify}
+  {#if interactive && canModify}
     <SceneResizeHandle sceneId={scene.id} {handlers} />
   {/if}
 </div>

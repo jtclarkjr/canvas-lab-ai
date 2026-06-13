@@ -19,6 +19,7 @@ export const sceneRowToScene = (row: SceneRow) => ({
   y: row.y,
   width: row.width,
   height: row.height,
+  rotation: row.rotation,
   settings: row.settings,
   createdBy: row.created_by,
   updatedBy: row.updated_by,

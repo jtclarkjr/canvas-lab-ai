@@ -1,8 +1,9 @@
 import { z } from 'zod'
 import type {
-  AnchorPosition,
   Arrowhead,
   ConnectorKind,
+  DiagramAnchorBinding,
+  DiagramAnchorTargetType,
   DiagramConnector,
   DiagramEndpoint,
   DiagramShape,
@@ -35,13 +36,20 @@ const connectorKindSchema = z
   .default('straight')
 const arrowheadSchema = z.enum(['none', 'arrow']).catch('none').default('none')
 const anchorSchema = z.enum(['top', 'right', 'bottom', 'left'])
+const anchorTargetTypeSchema = z
+  .enum(['shape', 'scene'])
+  .catch('shape')
+  .default('shape')
 
 const endpointSchema = z.object({
   x: z.number().default(0),
   y: z.number().default(0),
   binding: z
     .object({
-      shapeId: z.string(),
+      targetType: anchorTargetTypeSchema.optional(),
+      targetId: z.string().optional(),
+      shapeId: z.string().optional(),
+      sceneId: z.string().optional(),
       anchor: anchorSchema
     })
     .nullable()
@@ -211,16 +219,36 @@ export function canvasElementToShape(
   }
 }
 
-function normalizeEndpoint(endpoint: DiagramEndpoint): DiagramEndpoint {
+function normalizeBinding(
+  binding: z.infer<typeof endpointSchema>['binding']
+): DiagramAnchorBinding | null {
+  if (!binding) return null
+
+  const targetType: DiagramAnchorTargetType =
+    binding.targetType ?? (binding.sceneId ? 'scene' : 'shape')
+  const targetId =
+    binding.targetId ??
+    (targetType === 'scene' ? binding.sceneId : binding.shapeId) ??
+    binding.shapeId ??
+    binding.sceneId
+
+  if (!targetId) return null
+
+  return {
+    targetType,
+    targetId,
+    anchor: binding.anchor,
+    ...(targetType === 'shape' ? { shapeId: targetId } : { sceneId: targetId })
+  }
+}
+
+function normalizeEndpoint(
+  endpoint: z.infer<typeof endpointSchema>
+): DiagramEndpoint {
   return {
     x: endpoint.x,
     y: endpoint.y,
-    binding: endpoint.binding
-      ? {
-          shapeId: endpoint.binding.shapeId,
-          anchor: endpoint.binding.anchor as AnchorPosition
-        }
-      : null
+    binding: normalizeBinding(endpoint.binding)
   }
 }
 
