@@ -10,6 +10,7 @@ export const TEXT_BOUNDS_PADDING = 4
 export const TEXT_EDITOR_MIN_WIDTH = 120
 export const TEXT_EDITOR_WIDTH_PADDING = 16
 const TEXT_ROTATE_HANDLE_LENGTH = 32
+const PATH_ROTATE_HANDLE_LENGTH = 32
 const MIN_TEXT_FONT_SIZE = 6
 const MAX_TEXT_FONT_SIZE = 256
 
@@ -18,6 +19,12 @@ export type TextResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
 export type TextHandleHit =
   | { type: 'resize'; handle: TextResizeHandle; text: TextElement }
   | { type: 'rotate'; text: TextElement }
+
+export type PathResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
+
+export type PathHandleHit =
+  | { type: 'resize'; handle: PathResizeHandle; path: Path }
+  | { type: 'rotate'; path: Path }
 
 export function getTextLineHeight(fontSize: number): number {
   return fontSize * TEXT_LINE_HEIGHT
@@ -415,5 +422,163 @@ export function calculateTextBounds(text: TextElement) {
     y: text.y - TEXT_BOUNDS_PADDING,
     width,
     height
+  }
+}
+
+export function clonePath(path: Path): Path {
+  return { ...path, points: path.points.map((p) => ({ ...p })) }
+}
+
+export function getPathBoundingBox(path: Path): {
+  x: number
+  y: number
+  width: number
+  height: number
+} {
+  if (path.points.length === 0) return { x: 0, y: 0, width: 0, height: 0 }
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const p of path.points) {
+    if (p.x < minX) minX = p.x
+    if (p.y < minY) minY = p.y
+    if (p.x > maxX) maxX = p.x
+    if (p.y > maxY) maxY = p.y
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+}
+
+export function getPathCenter(path: Path): Point {
+  const bb = getPathBoundingBox(path)
+  return { x: bb.x + bb.width / 2, y: bb.y + bb.height / 2 }
+}
+
+export function getPathOutlinePoints(path: Path): Point[] {
+  const bb = getPathBoundingBox(path)
+  return [
+    { x: bb.x, y: bb.y },
+    { x: bb.x + bb.width, y: bb.y },
+    { x: bb.x + bb.width, y: bb.y + bb.height },
+    { x: bb.x, y: bb.y + bb.height }
+  ]
+}
+
+export function getPathResizeHandles(
+  path: Path
+): Array<{ handle: PathResizeHandle; point: Point }> {
+  const [nw, ne, se, sw] = getPathOutlinePoints(path)
+  const bb = getPathBoundingBox(path)
+  return [
+    { handle: 'nw', point: nw ?? { x: bb.x, y: bb.y } },
+    { handle: 'ne', point: ne ?? { x: bb.x + bb.width, y: bb.y } },
+    {
+      handle: 'se',
+      point: se ?? { x: bb.x + bb.width, y: bb.y + bb.height }
+    },
+    { handle: 'sw', point: sw ?? { x: bb.x, y: bb.y + bb.height } }
+  ]
+}
+
+export function getPathRotateAnchor(path: Path): Point {
+  const bb = getPathBoundingBox(path)
+  return { x: bb.x + bb.width / 2, y: bb.y }
+}
+
+export function getPathRotateHandle(path: Path): Point {
+  const anchor = getPathRotateAnchor(path)
+  return { x: anchor.x, y: anchor.y - PATH_ROTATE_HANDLE_LENGTH }
+}
+
+export function findPathHandleAtPoint(
+  point: Point,
+  paths: Path[],
+  selectedIds: Set<string>,
+  threshold: number
+): PathHandleHit | null {
+  for (let i = paths.length - 1; i >= 0; i -= 1) {
+    const path = paths[i]
+    if (!path || !selectedIds.has(path.id) || path.points.length === 0) continue
+    if (distance(point, getPathRotateHandle(path)) <= threshold) {
+      return { type: 'rotate', path }
+    }
+    for (const handle of getPathResizeHandles(path)) {
+      if (distance(point, handle.point) <= threshold) {
+        return { type: 'resize', handle: handle.handle, path }
+      }
+    }
+  }
+  return null
+}
+
+export function resizePathFromHandle(
+  original: Path,
+  handle: PathResizeHandle,
+  point: Point
+): Path {
+  const bb = getPathBoundingBox(original)
+  const minSize = 1
+  let fixedX: number
+  let fixedY: number
+  let newX: number
+  let newY: number
+
+  switch (handle) {
+    case 'nw':
+      fixedX = bb.x + bb.width
+      fixedY = bb.y + bb.height
+      newX = Math.min(point.x, fixedX - minSize)
+      newY = Math.min(point.y, fixedY - minSize)
+      break
+    case 'ne':
+      fixedX = bb.x
+      fixedY = bb.y + bb.height
+      newX = Math.max(point.x, fixedX + minSize)
+      newY = Math.min(point.y, fixedY - minSize)
+      break
+    case 'se':
+      fixedX = bb.x
+      fixedY = bb.y
+      newX = Math.max(point.x, fixedX + minSize)
+      newY = Math.max(point.y, fixedY + minSize)
+      break
+    case 'sw':
+      fixedX = bb.x + bb.width
+      fixedY = bb.y
+      newX = Math.min(point.x, fixedX - minSize)
+      newY = Math.max(point.y, fixedY + minSize)
+      break
+  }
+
+  const newMinX = Math.min(newX, fixedX)
+  const newMaxX = Math.max(newX, fixedX)
+  const newMinY = Math.min(newY, fixedY)
+  const newMaxY = Math.max(newY, fixedY)
+  const newWidth = newMaxX - newMinX
+  const newHeight = newMaxY - newMinY
+
+  return {
+    ...original,
+    points: original.points.map((p) => ({
+      x:
+        bb.width === 0
+          ? newMinX
+          : newMinX + ((p.x - bb.x) / bb.width) * newWidth,
+      y:
+        bb.height === 0
+          ? newMinY
+          : newMinY + ((p.y - bb.y) / bb.height) * newHeight
+    }))
+  }
+}
+
+export function rotatePathTowardPoint(original: Path, point: Point): Path {
+  const center = getPathCenter(original)
+  const degrees =
+    (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI
+  const rotation = degrees + 90
+  return {
+    ...original,
+    points: original.points.map((p) => rotatePoint(p, center, rotation))
   }
 }

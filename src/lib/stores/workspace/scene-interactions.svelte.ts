@@ -9,13 +9,18 @@ import {
   type Command
 } from '$lib/canvas/commands'
 import {
+  clonePath,
   findTextHandleAtPoint,
   findTextAtPoint,
+  findPathHandleAtPoint,
   getTextResizeCursor,
   isElementInSelection,
   isPointNearPath,
+  resizePathFromHandle,
   resizeTextFromHandle,
+  rotatePathTowardPoint,
   rotateTextTowardPoint,
+  type PathResizeHandle,
   type TextResizeHandle,
   textElementToData
 } from '$lib/canvas/drawing-utils'
@@ -205,6 +210,17 @@ type ActiveInteraction =
       original: TextElement
     }
   | {
+      type: 'path-resize'
+      pathId: string
+      handle: PathResizeHandle
+      original: Path
+    }
+  | {
+      type: 'path-rotate'
+      pathId: string
+      original: Path
+    }
+  | {
       type: 'connector-end'
       connectorId: string
       end: 'start' | 'end'
@@ -330,6 +346,10 @@ export function createWorkspaceSceneInteractionsStore({
         )
       case 'text-rotate':
         return 'grabbing'
+      case 'path-resize':
+        return getShapeResizeCursor(interaction.handle, 0)
+      case 'path-rotate':
+        return 'grabbing'
       case 'shape-rotate':
       case 'scene-rotate':
       case 'connector-end':
@@ -409,6 +429,18 @@ export function createWorkspaceSceneInteractionsStore({
         case 'rotate':
           return 'grab'
       }
+    }
+
+    const pathHandle = findPathHandleAtPoint(
+      point,
+      getPaths(),
+      selectedIds,
+      threshold
+    )
+    if (pathHandle && canModifyElement(pathHandle.path.id)) {
+      return pathHandle.type === 'resize'
+        ? getShapeResizeCursor(pathHandle.handle, 0)
+        : 'grab'
     }
 
     const endpointHit = findConnectorEndpointAtPoint(
@@ -1252,6 +1284,31 @@ export function createWorkspaceSceneInteractionsStore({
       return true
     }
 
+    if (
+      interaction.type === 'path-resize' ||
+      interaction.type === 'path-rotate'
+    ) {
+      const after = getPaths().find((path) => path.id === interaction.pathId)
+      if (after) {
+        addHistoryCommand(
+          createUpdateMultipleCommand(
+            [
+              {
+                id: after.id,
+                type: 'path',
+                before: interaction.original,
+                after
+              }
+            ],
+            getUserId()
+          )
+        )
+        persistElement('path', after)
+      }
+      setCursorStyle(cursorForPoint(point))
+      return true
+    }
+
     const after = getConnectorsSafe().find(
       (connector) => connector.id === interaction.connectorId
     )
@@ -1399,6 +1456,34 @@ export function createWorkspaceSceneInteractionsStore({
           text.id === interaction.textId
             ? rotateTextTowardPoint(interaction.original, point)
             : text
+        )
+      )
+      return true
+    }
+
+    if (interaction.type === 'path-resize') {
+      setCursorStyle(cursorForInteraction(interaction))
+      setPaths((previous) =>
+        previous.map((path) =>
+          path.id === interaction.pathId
+            ? resizePathFromHandle(
+                interaction.original,
+                interaction.handle,
+                point
+              )
+            : path
+        )
+      )
+      return true
+    }
+
+    if (interaction.type === 'path-rotate') {
+      setCursorStyle(cursorForInteraction(interaction))
+      setPaths((previous) =>
+        previous.map((path) =>
+          path.id === interaction.pathId
+            ? rotatePathTowardPoint(interaction.original, point)
+            : path
         )
       )
       return true
@@ -1648,6 +1733,31 @@ export function createWorkspaceSceneInteractionsStore({
               type: 'shape-rotate',
               shapeId: shapeHandle.shape.id,
               original: cloneShape(shapeHandle.shape)
+            }
+      setCursorStyle(cursorForInteraction(activeInteraction))
+      return
+    }
+
+    const pathHandle = findPathHandleAtPoint(
+      point,
+      getPaths(),
+      selectedIds,
+      handleThreshold
+    )
+    if (pathHandle && canModifyElement(pathHandle.path.id)) {
+      ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
+      activeInteraction =
+        pathHandle.type === 'resize'
+          ? {
+              type: 'path-resize',
+              pathId: pathHandle.path.id,
+              handle: pathHandle.handle,
+              original: clonePath(pathHandle.path)
+            }
+          : {
+              type: 'path-rotate',
+              pathId: pathHandle.path.id,
+              original: clonePath(pathHandle.path)
             }
       setCursorStyle(cursorForInteraction(activeInteraction))
       return

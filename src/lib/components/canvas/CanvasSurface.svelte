@@ -20,6 +20,10 @@
     getTextResizeHandles,
     getTextRotateAnchor,
     getTextRotateHandle,
+    getPathOutlinePoints,
+    getPathResizeHandles,
+    getPathRotateAnchor,
+    getPathRotateHandle,
     pathToSvgPath,
     selectionRectFromPoints
   } from '$lib/canvas/drawing-utils'
@@ -128,6 +132,9 @@
       (text: TextElement) =>
         selection.selectedIds.has(text.id) && !isEditingStandaloneText(text)
     )
+  )
+  const selectedPaths = $derived(
+    sortedPaths.filter((path: Path) => selection.selectedIds.has(path.id))
   )
   const handleSize = $derived(8 / camera.scale)
   const anchorSize = $derived(5 / camera.scale)
@@ -503,6 +510,47 @@
         stroke-linejoin="round"
         stroke-opacity={path.opacity}
         stroke-width={path.width}
+      />
+    {/each}
+
+    {#each selectedPaths as path (path.id)}
+      {@const outline = getPathOutlinePoints(path)}
+      {@const rotateAnchor = getPathRotateAnchor(path)}
+      {@const rotateHandle = getPathRotateHandle(path)}
+      <polygon
+        fill="var(--canvas-selection-fill)"
+        points={pointsToSvg(outline)}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-dasharray={`${4 / camera.scale} ${2 / camera.scale}`}
+        stroke-width={1 / camera.scale}
+      />
+      <line
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
+        x1={rotateAnchor.x}
+        y1={rotateAnchor.y}
+        x2={rotateHandle.x}
+        y2={rotateHandle.y}
+      />
+      {#each getPathResizeHandles(path) as handle (handle.handle)}
+        <rect
+          fill="var(--background)"
+          height={handleSize}
+          rx={1.5 / camera.scale}
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+          width={handleSize}
+          x={handle.point.x - handleSize / 2}
+          y={handle.point.y - handleSize / 2}
+        />
+      {/each}
+      <circle
+        cx={rotateHandle.x}
+        cy={rotateHandle.y}
+        fill="var(--background)"
+        r={handleSize / 2}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
       />
     {/each}
 
