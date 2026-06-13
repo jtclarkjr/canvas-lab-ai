@@ -4,12 +4,14 @@ import { ApiClientError } from '$lib/api-client'
 import { supabase } from '$lib/auth/session-store'
 import {
   listAssistantMessages,
+  listChatMembers,
   listChatMessages,
   sendChatMessage
 } from '$lib/chat/api'
 import {
   chatMessageRowSchema,
   chatMessageRowToMessage,
+  type ChatMember,
   type ChatMessage
 } from '$lib/chat/schema'
 
@@ -29,6 +31,7 @@ export type ChatEntry = {
 // first-ever load of a canvas; reopening renders instantly from cache.
 const chatMessagesCache = new Map<string, ChatMessage[]>()
 const assistantMessagesCache = new Map<string, UIMessage[]>()
+const chatMembersCache = new Map<string, ChatMember[]>()
 
 type CanvasChatStoreInput = {
   getCanvasId: () => string
@@ -51,12 +54,14 @@ export function createCanvasChatStore({
   let isLoadingChat = $state(false)
   let chatLoadError = $state<string | null>(null)
   let unreadCount = $state(0)
+  let mentionMembers = $state<ChatMember[]>([])
 
   let assistantInitialMessages = $state<UIMessage[] | null>(null)
   let assistantLoadError = $state<string | null>(null)
 
   let loadedChatForCanvasId: string | null = null
   let loadedAssistantForCanvasId: string | null = null
+  let loadedMembersForCanvasId: string | null = null
   let chatLoadPromise: Promise<void> | null = null
 
   function cacheSentMessages(canvasId: string) {
@@ -165,6 +170,30 @@ export function createCanvasChatStore({
     }
   }
 
+  async function ensureMembersLoaded() {
+    const canvasId = getCanvasId()
+    if (!canvasId || loadedMembersForCanvasId === canvasId) {
+      return
+    }
+
+    const cached = chatMembersCache.get(canvasId)
+    if (cached) {
+      mentionMembers = cached
+    }
+
+    try {
+      const response = await listChatMembers(canvasId)
+      if (canvasId !== getCanvasId()) {
+        return
+      }
+      chatMembersCache.set(canvasId, response.items)
+      mentionMembers = response.items
+      loadedMembersForCanvasId = canvasId
+    } catch {
+      // Non-critical — mention picker just stays empty on error.
+    }
+  }
+
   async function deliver(messageId: string, canvasId: string) {
     const entry = entries.find((item) => item.message.id === messageId)
     if (!entry) {
@@ -253,6 +282,7 @@ export function createCanvasChatStore({
     }
     void ensureChatLoaded()
     void ensureAssistantLoaded()
+    void ensureMembersLoaded()
   }
 
   // Called by the window component after the minimize animation finishes.
@@ -295,10 +325,13 @@ export function createCanvasChatStore({
     assistantInitialMessages = assistantMessagesCache.get(canvasId) ?? null
     assistantLoadError = null
     loadedAssistantForCanvasId = null
+    mentionMembers = chatMembersCache.get(canvasId) ?? []
+    loadedMembersForCanvasId = null
 
     if (hasOpened) {
       void ensureChatLoaded()
       void ensureAssistantLoaded()
+      void ensureMembersLoaded()
     }
   })
 
@@ -392,6 +425,9 @@ export function createCanvasChatStore({
     get assistantLoadError() {
       return assistantLoadError
     },
+    get mentionMembers() {
+      return mentionMembers
+    },
     openWindow,
     minimize,
     setTab,
@@ -403,6 +439,7 @@ export function createCanvasChatStore({
     // fullscreen chat panel): load without flipping `open`, and clear the
     // unread badge while the messages are actually visible there.
     ensureLoaded: () => ensureChatLoaded(),
+    ensureMembersLoaded: () => ensureMembersLoaded(),
     markChatRead: () => {
       unreadCount = 0
     },

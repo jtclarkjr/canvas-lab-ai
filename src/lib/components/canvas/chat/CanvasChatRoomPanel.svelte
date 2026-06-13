@@ -5,6 +5,7 @@
     type ChatEntry
   } from '$lib/stores/chat/canvas-chat.svelte'
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
+  import { segmentMentions } from '$lib/chat/mentions'
 
   // alwaysVisible: hosts outside the chat window (the call's fullscreen
   // chat panel) control their own visibility, so the auto-scroll behavior
@@ -79,6 +80,16 @@
       minute: '2-digit'
     })
   }
+
+  const mentionMembers = $derived(
+    store.mentionMembers
+      .filter((m) => m.id !== userId)
+      .map((m) => ({ ...m, color: colorFromId(m.id) }))
+  )
+
+  const myName = $derived(
+    store.mentionMembers.find((m) => m.id === userId)?.name ?? null
+  )
 </script>
 
 <div class="flex h-full min-h-0 flex-col">
@@ -120,6 +131,7 @@
       {#each store.entries as entry (entry.message.id)}
         {@const own = isOwn(entry)}
         {@const label = authorLabel(entry)}
+        {@const segs = segmentMentions(entry.message.content, myName)}
         <div class={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
           <span
             class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground"
@@ -136,7 +148,13 @@
                   : 'border border-border/60 bg-background/70 text-foreground'
             } ${entry.status === 'pending' ? 'opacity-60' : ''}`}
           >
-            {entry.message.content}
+            {#each segs as seg}{#if seg.hi}<mark
+                  class={`rounded-md px-1.5 py-0.5 font-semibold not-italic ${
+                    own
+                      ? 'bg-white/20 text-primary-foreground'
+                      : 'bg-warning/30 text-warning-foreground'
+                  }`}>{seg.text}</mark
+                >{:else}{seg.text}{/if}{/each}
           </div>
           {#if entry.status === 'failed'}
             <!-- Send failures stay local: the message never reached other
@@ -177,6 +195,7 @@
   <CanvasChatComposer
     disabled={store.isLoadingChat}
     placeholder="Message the canvas…"
+    {mentionMembers}
     onSend={(text) => void store.send(text)}
   />
 </div>

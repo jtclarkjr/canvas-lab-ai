@@ -53,11 +53,12 @@ conference fullscreen view can render the same member chat panel.
 | Section | Responsibility |
 | --- | --- |
 | Workspace shell | Provides the store and hides chat from public viewers. |
-| Chat store | Owns open/minimized state, active tab, caches, optimistic entries, unread count, assistant bootstrap, and realtime subscription. |
-| Chat components | Render the launcher, window, member chat panel, assistant panel, message lists, and composers. |
-| Chat schemas | Validate member message rows, API responses, assistant rows, and assistant requests. |
+| Chat store | Owns open/minimized state, active tab, caches, optimistic entries, unread count, mention member list, assistant bootstrap, and realtime subscription. |
+| Chat components | Render the launcher, window, member chat panel, assistant panel, message lists, composers, and @mention picker. |
+| Chat schemas | Validate member message rows, API responses, assistant rows, assistant requests, and member list responses. |
 | Chat API wrappers | Call chat endpoints and parse responses into typed client data. |
 | Member chat route | Lists latest member messages and inserts new messages with author metadata. |
+| Members route | Returns all canvas members for @mention autocomplete. Requires reader role. |
 | Assistant history route | Lists the caller's private assistant messages for one canvas. |
 | Assistant AI route | Streams model responses and persists completed assistant turns. |
 
@@ -67,11 +68,14 @@ conference fullscreen view can render the same member chat panel.
 | --- | --- |
 | `src/lib/stores/chat/canvas-chat.svelte.ts` | Store and context provider for all canvas chat surfaces. |
 | `src/lib/components/canvas/chat/CanvasChat.svelte` | Top-level launcher and window composition. |
-| `src/lib/components/canvas/chat/CanvasChatRoomPanel.svelte` | Shared member chat room. |
+| `src/lib/components/canvas/chat/CanvasChatRoomPanel.svelte` | Shared member chat room with @mention highlight. |
+| `src/lib/components/canvas/chat/CanvasChatComposer.svelte` | Message composer with @mention autocomplete picker. |
 | `src/lib/components/canvas/chat/CanvasAssistantThread.svelte` | Private assistant thread. |
-| `src/lib/chat/schema.ts` | Zod schemas and row-to-client mapping. |
+| `src/lib/chat/mentions.ts` | `mentionPattern` and `segmentMentions` helpers for @mention regex and highlight splitting. |
+| `src/lib/chat/schema.ts` | Zod schemas and row-to-client mapping, including `ChatMember`. |
 | `src/lib/chat/api.ts` | HTTP client helpers. |
 | `src/routes/api/canvases/[canvasId]/chat/+server.ts` | Member chat GET/POST endpoint. |
+| `src/routes/api/canvases/[canvasId]/chat/members/+server.ts` | Canvas member list for @mention. Requires reader role. |
 | `src/routes/api/canvases/[canvasId]/assistant-messages/+server.ts` | Private assistant history endpoint. |
 | `src/routes/api/ai/canvas-assistant/+server.ts` | Assistant streaming endpoint. |
 | `src/lib/server/canvas-assistant-chat.ts` | Idempotent assistant turn persistence. |
@@ -222,6 +226,62 @@ are included up front, and document content loads on demand. Assistant rows are
 not realtime-published; active output arrives through the stream and saved
 history reloads through HTTP.
 
+## @Mention Feature
+
+Typing `@` in the composer opens an autocomplete picker populated from a
+dedicated member list endpoint. Received messages containing `@YourName` are
+highlighted for the current user.
+
+### Member List Load Flow
+
+Members load once per canvas session, independently of chat message history.
+The store fetches them on `openWindow()` and when the active canvas changes.
+The conference fullscreen panel calls `ensureMembersLoaded()` when its chat
+panel opens.
+
+```mermaid
+sequenceDiagram
+  participant Store as Chat store
+  participant Api as Chat API
+  participant Route as /chat/members route
+  participant Db as canvas_members + profiles
+
+  Store->>Api: listChatMembers(canvasId)
+  Api->>Route: GET /api/canvases/:id/chat/members
+  Route->>Db: Join canvas_members with profiles
+  Route->>Route: Sanitize display names (strip HTML, normalize)
+  Route-->>Store: [{ id, name }]
+  Store->>Store: mentionMembers = items
+```
+
+Members are cached in a module-level `Map` keyed by canvas id. A load failure
+is silently swallowed — the picker just stays empty.
+
+### Composer Autocomplete
+
+Pressing `@` (or typing any `@word` at word start) opens the picker. Closing
+happens on `Escape`, selection, or when the `@` token is deleted.
+
+- Matches filter by `name.includes(query)` and cap at 6 results.
+- `ArrowUp`/`ArrowDown` navigate; `Enter`/`Tab` select; `Escape` dismisses.
+- `pick()` splices `@Name ` in place and moves the caret.
+
+### Highlight Logic
+
+`src/lib/chat/mentions.ts` handles both the regex and the highlight split:
+
+- `mentionPattern(name)` builds a case-insensitive regex that matches
+  `@FullName`, `@FirstName`, or `@LastName`, longest alternative first, with a
+  lookahead requiring a word boundary (`\s`, punctuation, or end-of-string).
+  Input is sanitized through DOMPurify (client) and manual stripping (server)
+  before the regex is built, preventing injection.
+- `segmentMentions(content, name)` runs the pattern against a message and
+  returns `{ text, hi }[]` segments. The panel renders `<mark>` around `hi`
+  segments.
+
+The highlight only fires for the currently logged-in user's name — other users'
+names in the same message are not highlighted.
+
 ## Access And Permission Boundaries
 
 Chat is members-only:
@@ -255,3 +315,9 @@ Use the smallest owner of the behavior:
 - Add model/tool behavior in the AI runtime.
 - Change membership or public-viewer behavior in both the client gate and the
   server routes/RLS policy.
+- Change @mention highlight logic (regex, word-boundary rules) in
+  `src/lib/chat/mentions.ts`.
+- Change @mention picker behavior (key handling, result count) in
+  `CanvasChatComposer.svelte`.
+- Change which member fields are exposed for @mention in the `/chat/members`
+  route and `ChatMember` schema.

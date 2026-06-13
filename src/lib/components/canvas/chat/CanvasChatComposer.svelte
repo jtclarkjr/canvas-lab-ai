@@ -1,13 +1,16 @@
 <script lang="ts">
   import { ArrowUp, Globe } from 'lucide-svelte'
 
+  type MentionMember = { id: string; name: string; color: string }
+
   let {
     disabled = false,
     isStreaming = false,
     placeholder = 'Message…',
     webSearch,
     onWebSearchToggle,
-    onSend
+    onSend,
+    mentionMembers = []
   } = $props<{
     disabled?: boolean
     isStreaming?: boolean
@@ -17,10 +20,66 @@
     webSearch?: boolean
     onWebSearchToggle?: () => void
     onSend: (text: string) => void
+    mentionMembers?: MentionMember[]
   }>()
 
   let text = $state('')
   let textareaEl = $state<HTMLTextAreaElement | null>(null)
+
+  // ── @mention ──────────────────────────────────────────────────────────────
+  // atIndex: position of the '@' that opened the picker; null = picker closed.
+  let atIndex = $state<number | null>(null)
+  let query = $state('')
+  let cursor = $state(0)
+
+  const matches = $derived<MentionMember[]>(
+    atIndex === null || mentionMembers.length === 0
+      ? []
+      : mentionMembers
+          .filter((m) => m.name.toLowerCase().includes(query.toLowerCase()))
+          .slice(0, 6)
+  )
+
+  // Reset highlight cursor whenever the filtered list changes.
+  $effect(() => {
+    void matches.length
+    cursor = 0
+  })
+
+  function detectMention() {
+    if (!textareaEl) return
+    const pos = textareaEl.selectionStart
+    const before = text.slice(0, pos)
+    // '@' at start-of-string or after whitespace, followed by non-whitespace.
+    const m = before.match(/(^|\s)@(\S*)$/)
+    if (m) {
+      atIndex = before.lastIndexOf('@')
+      query = m[2]
+    } else {
+      atIndex = null
+      query = ''
+    }
+  }
+
+  function pick(member: MentionMember) {
+    if (atIndex === null || !textareaEl) return
+    const pos = textareaEl.selectionStart
+    const before = text.slice(0, atIndex)
+    const after = text.slice(pos)
+    const inserted = `@${member.name} `
+    text = `${before}${inserted}${after}`
+    atIndex = null
+    query = ''
+    requestAnimationFrame(() => {
+      if (!textareaEl) return
+      const newPos = before.length + inserted.length
+      textareaEl.setSelectionRange(newPos, newPos)
+      textareaEl.focus()
+      autogrow()
+    })
+  }
+
+  // ── core ──────────────────────────────────────────────────────────────────
 
   const canSend = $derived(!disabled && !isStreaming && text.trim().length > 0)
 
@@ -34,20 +93,75 @@
     if (!canSend) return
     onSend(text.trim())
     text = ''
-    if (textareaEl) {
-      textareaEl.style.height = 'auto'
-    }
+    atIndex = null
+    if (textareaEl) textareaEl.style.height = 'auto'
   }
 
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
+  function handleKeydown(e: KeyboardEvent) {
+    if (atIndex !== null && matches.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        cursor = (cursor + 1) % matches.length
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        cursor = (cursor - 1 + matches.length) % matches.length
+        return
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault()
+        pick(matches[cursor])
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        atIndex = null
+        return
+      }
+    }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
       send()
     }
   }
+
+  function handleInput() {
+    autogrow()
+    if (mentionMembers.length > 0) detectMention()
+  }
 </script>
 
-<div class="border-t border-border/50 px-3 py-2.5">
+<div class="relative border-t border-border/50 px-3 py-2.5">
+  {#if atIndex !== null && matches.length > 0}
+    <div
+      class="absolute right-3 bottom-full left-3 z-10 mb-1 overflow-hidden rounded-xl border border-border/60 bg-popover shadow-lg"
+    >
+      {#each matches as member, i (member.id)}
+        <button
+          type="button"
+          class={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition ${
+            i === cursor
+              ? 'bg-primary/10 text-foreground'
+              : 'text-foreground hover:bg-muted/60'
+          }`}
+          onmousedown={(e) => {
+            e.preventDefault()
+            pick(member)
+          }}
+        >
+          <span
+            class="flex size-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+            style={`background-color:${member.color}`}
+          >
+            {member.name[0]?.toUpperCase() ?? '?'}
+          </span>
+          <span class="truncate">{member.name}</span>
+        </button>
+      {/each}
+    </div>
+  {/if}
+
   <div class="flex items-end gap-2">
     {#if onWebSearchToggle}
       <button
@@ -69,7 +183,7 @@
     <textarea
       bind:this={textareaEl}
       bind:value={text}
-      oninput={autogrow}
+      oninput={handleInput}
       onkeydown={handleKeydown}
       rows="1"
       maxlength="4000"

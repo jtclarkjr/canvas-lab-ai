@@ -2,10 +2,12 @@ import { getApiHeaders, parseResponse } from '$lib/api-client'
 import {
   chatMessageResponseSchema,
   listAssistantMessagesResponseSchema,
+  listChatMembersResponseSchema,
   listChatMessagesResponseSchema,
   sendChatMessageInputSchema,
   type ChatMessageResponse,
   type ListAssistantMessagesResponse,
+  type ListChatMembersResponse,
   type ListChatMessagesResponse,
   type SendChatMessageInput
 } from '$lib/chat/schema'
@@ -45,6 +47,20 @@ export async function sendChatMessage(
     response,
     (payload) => chatMessageResponseSchema.parse(payload),
     'Failed to send message.'
+  )
+}
+
+export async function listChatMembers(
+  canvasId: string
+): Promise<ListChatMembersResponse> {
+  const response = await fetch(`/api/canvases/${canvasId}/chat/members`, {
+    headers: await getApiHeaders({ accept: 'application/json' })
+  })
+
+  return parseResponse(
+    response,
+    (payload) => listChatMembersResponseSchema.parse(payload),
+    'Failed to load chat members.'
   )
 }
 

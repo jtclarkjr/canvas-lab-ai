@@ -81,6 +81,20 @@ export const canvasAssistantRequestSchema = z.object({
   messages: z.array(uiMessageSchema).min(1)
 })
 
+export const chatMemberSchema = z.object({
+  id: z.string(),
+  name: z.string()
+})
+
+export const listChatMembersResponseSchema = z.object({
+  items: z.array(chatMemberSchema)
+})
+
+export type ChatMember = z.infer<typeof chatMemberSchema>
+export type ListChatMembersResponse = z.infer<
+  typeof listChatMembersResponseSchema
+>
+
 export type ChatMessageRow = z.infer<typeof chatMessageRowSchema>
 export type ChatMessage = z.infer<typeof chatMessageSchema>
 export type SendChatMessageInput = z.infer<typeof sendChatMessageInputSchema>
