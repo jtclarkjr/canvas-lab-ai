@@ -1,5 +1,9 @@
 import { getContext, setContext } from 'svelte'
-import type { CaptionLanguageCode } from '$lib/conference/captions'
+import type {
+  CaptionLanguageCode,
+  CaptionTextColor,
+  CaptionTextSize
+} from '$lib/conference/captions'
 import type {
   ConferenceFullscreenPanel,
   ConferenceViewMode,
@@ -45,7 +49,6 @@ export function createCanvasConferenceStore({
 
   const room = createConferenceRoomStore({
     getCanvasId,
-    getUserId,
     getEnabled,
     devices,
     onRosterChanged: () => {
@@ -165,6 +168,12 @@ export function createCanvasConferenceStore({
     get captionsLanguage() {
       return captions.language
     },
+    get captionTextSize() {
+      return captions.textSize
+    },
+    get captionTextColor() {
+      return captions.textColor
+    },
     get captionsState() {
       return captions.sttState
     },
@@ -173,7 +182,10 @@ export function createCanvasConferenceStore({
     },
     toggleCaptions: () => captions.toggle(),
     setCaptionsLanguage: (code: CaptionLanguageCode) =>
-      captions.setLanguage(code)
+      captions.setLanguage(code),
+    setCaptionTextSize: (size: CaptionTextSize) => captions.setTextSize(size),
+    setCaptionTextColor: (color: CaptionTextColor) =>
+      captions.setTextColor(color)
   }
 }
 

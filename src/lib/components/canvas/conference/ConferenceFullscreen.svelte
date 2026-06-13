@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
   import {
-    Captions,
+    ClosedCaption,
     LoaderCircle,
     MessageSquare,
     Mic,
@@ -18,7 +18,11 @@
   } from 'lucide-svelte'
   import {
     CAPTION_LANGUAGES,
-    type CaptionLanguageCode
+    CAPTION_TEXT_COLORS,
+    CAPTION_TEXT_SIZES,
+    captionTextColorValue,
+    type CaptionLanguageCode,
+    type CaptionTextSize
   } from '$lib/conference/captions'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
@@ -62,6 +66,21 @@
   const captionsStatusLabel = $derived(
     CAPTIONS_STATUS_LABELS[store.captionsState]
   )
+  function captionFontSizeFor(size: CaptionTextSize) {
+    switch (size) {
+      case 'small':
+        return '0.75rem'
+      case 'large':
+        return '1rem'
+      default:
+        return '0.875rem'
+    }
+  }
+
+  const captionFontSize = $derived(captionFontSizeFor(store.captionTextSize))
+  const captionTextColor = $derived(
+    captionTextColorValue(store.captionTextColor)
+  )
 
   // Escape exits full screen back to the PiP — unless the settings modal is
   // open, in which case Escape belongs to the modal.
@@ -96,6 +115,31 @@
         ? 'bg-primary/15 text-primary'
         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
     }`
+
+  const captionSizeButtonClass = (active: boolean) =>
+    `flex size-7 items-center justify-center rounded-md transition ${
+      active
+        ? 'bg-primary text-primary-foreground'
+        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    }`
+
+  function captionSizePreviewClass(size: CaptionTextSize) {
+    switch (size) {
+      case 'small':
+        return 'text-[10px]'
+      case 'large':
+        return 'text-sm'
+      default:
+        return 'text-xs'
+    }
+  }
+
+  const captionColorButtonClass = (active: boolean) =>
+    `size-5 rounded-full border transition ${
+      active
+        ? 'border-primary ring-2 ring-primary/30'
+        : 'border-border hover:border-primary/60'
+    }`
 </script>
 
 <div
@@ -105,23 +149,102 @@
   aria-label="Call"
   data-camera-exempt
 >
-  <!-- Live captions, Meet-style: above the control bar, never interactive. -->
+  <!-- Live captions, Meet-style: above the control bar. -->
   {#if store.captionsEnabled}
     <div
       class="pointer-events-none absolute inset-x-0 bottom-24 z-10 flex justify-center px-6"
-      aria-live="polite"
     >
-      <div class="max-w-2xl rounded-2xl bg-black/65 px-4 py-2.5 backdrop-blur">
-        {#each visibleCaptions as segment (segment.id)}
-          <p class="text-sm leading-snug text-white">
-            <span class="font-bold" style={`color:${segment.speakerColor}`}>
-              {segment.speakerName}:
-            </span>
-            <span>{segment.translated ?? segment.text}</span>
-          </p>
-        {:else}
-          <p class="text-xs font-medium text-white/70">{captionsStatusLabel}</p>
-        {/each}
+      <div
+        class="group pointer-events-auto max-w-2xl rounded-2xl border border-border/70 bg-popover/95 px-4 py-2.5 text-popover-foreground shadow-xl backdrop-blur transition focus-within:ring-2 focus-within:ring-ring"
+        role="group"
+        aria-label="Caption controls"
+      >
+        <div class="grid gap-2">
+          <div aria-live="polite">
+            {#each visibleCaptions as segment (segment.id)}
+              <p
+                class="leading-snug"
+                style={`font-size:${captionFontSize};color:${captionTextColor}`}
+              >
+                <span class="font-bold" style={`color:${segment.speakerColor}`}>
+                  {segment.speakerName}:
+                </span>
+                <span>{segment.translated ?? segment.text}</span>
+              </p>
+            {:else}
+              <p
+                class="font-medium"
+                style={`font-size:${captionFontSize};color:${captionTextColor}`}
+              >
+                {captionsStatusLabel}
+              </p>
+            {/each}
+          </div>
+
+          <div
+            class="flex max-h-0 items-center gap-2 overflow-hidden opacity-0 transition-all duration-150 group-hover:max-h-16 group-hover:opacity-100 group-focus-within:max-h-16 group-focus-within:opacity-100"
+          >
+            <select
+              class="h-8 rounded-lg border border-border bg-card/90 px-2 text-xs text-foreground outline-none"
+              value={store.captionsLanguage}
+              onchange={(event) =>
+                store.setCaptionsLanguage(
+                  event.currentTarget.value as CaptionLanguageCode
+                )}
+              aria-label="Caption language"
+              title="Caption language"
+            >
+              {#each CAPTION_LANGUAGES as entry (entry.code)}
+                <option value={entry.code}>{entry.label}</option>
+              {/each}
+            </select>
+
+            <div
+              class="flex items-center rounded-lg bg-muted/70 p-0.5"
+              role="group"
+              aria-label="Caption size"
+            >
+              {#each CAPTION_TEXT_SIZES as entry (entry.code)}
+                <button
+                  type="button"
+                  class={captionSizeButtonClass(
+                    store.captionTextSize === entry.code
+                  )}
+                  onclick={() => store.setCaptionTextSize(entry.code)}
+                  title={`${entry.label} captions`}
+                  aria-label={`${entry.label} captions`}
+                  aria-pressed={store.captionTextSize === entry.code}
+                >
+                  <span
+                    class={`font-bold ${captionSizePreviewClass(entry.code)}`}
+                  >
+                    A
+                  </span>
+                </button>
+              {/each}
+            </div>
+
+            <div
+              class="flex items-center gap-1"
+              role="group"
+              aria-label="Caption color"
+            >
+              {#each CAPTION_TEXT_COLORS as entry (entry.code)}
+                <button
+                  type="button"
+                  class={captionColorButtonClass(
+                    store.captionTextColor === entry.code
+                  )}
+                  style={`background:${entry.value}`}
+                  onclick={() => store.setCaptionTextColor(entry.code)}
+                  title={`${entry.label} captions`}
+                  aria-label={`${entry.label} captions`}
+                  aria-pressed={store.captionTextColor === entry.code}
+                ></button>
+              {/each}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   {/if}
@@ -364,26 +487,9 @@
         {#if store.captionsState === 'connecting'}
           <LoaderCircle class="size-5 animate-spin" />
         {:else}
-          <Captions class="size-5" />
+          <ClosedCaption class="size-5" />
         {/if}
       </button>
-
-      {#if store.captionsEnabled}
-        <select
-          class="h-11 rounded-full border border-border bg-secondary px-3 text-sm text-foreground outline-none"
-          value={store.captionsLanguage}
-          onchange={(event) =>
-            store.setCaptionsLanguage(
-              event.currentTarget.value as CaptionLanguageCode
-            )}
-          aria-label="Caption language"
-          title="Caption language"
-        >
-          {#each CAPTION_LANGUAGES as entry (entry.code)}
-            <option value={entry.code}>{entry.label}</option>
-          {/each}
-        </select>
-      {/if}
 
       <button
         type="button"

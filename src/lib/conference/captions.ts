@@ -68,6 +68,50 @@ export function captionLanguageLabel(code: CaptionLanguageCode) {
   return CAPTION_LANGUAGES.find((entry) => entry.code === code)?.label ?? code
 }
 
+export const CAPTION_TEXT_SIZE_CODES = ['small', 'medium', 'large'] as const
+export type CaptionTextSize = (typeof CAPTION_TEXT_SIZE_CODES)[number]
+
+export const DEFAULT_CAPTION_TEXT_SIZE: CaptionTextSize = 'medium'
+
+export const CAPTION_TEXT_SIZES: Array<{
+  code: CaptionTextSize
+  label: string
+}> = [
+  { code: 'small', label: 'Small' },
+  { code: 'medium', label: 'Medium' },
+  { code: 'large', label: 'Large' }
+]
+
+export const CAPTION_TEXT_COLOR_CODES = [
+  'theme',
+  'white',
+  'yellow',
+  'cyan',
+  'green'
+] as const
+export type CaptionTextColor = (typeof CAPTION_TEXT_COLOR_CODES)[number]
+
+export const DEFAULT_CAPTION_TEXT_COLOR: CaptionTextColor = 'theme'
+
+export const CAPTION_TEXT_COLORS: Array<{
+  code: CaptionTextColor
+  label: string
+  value: string
+}> = [
+  { code: 'theme', label: 'Theme', value: 'var(--popover-foreground)' },
+  { code: 'white', label: 'White', value: '#ffffff' },
+  { code: 'yellow', label: 'Yellow', value: '#fde047' },
+  { code: 'cyan', label: 'Cyan', value: '#67e8f9' },
+  { code: 'green', label: 'Green', value: '#86efac' }
+]
+
+export function captionTextColorValue(code: CaptionTextColor) {
+  return (
+    CAPTION_TEXT_COLORS.find((entry) => entry.code === code)?.value ??
+    CAPTION_TEXT_COLORS[0].value
+  )
+}
+
 // Wire format of a caption data message. Deltas re-use the segment id so
 // receivers update the segment in place; `final` marks the authoritative
 // text for a segment.

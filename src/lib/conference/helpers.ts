@@ -72,13 +72,13 @@ export function clampToViewport(
 
 type Featurable = { identity: string; isLocal: boolean }
 
-// Meet-style featured tile: an explicit pin wins, otherwise the last remote
-// participant who spoke stays featured (sticky, no flicker between words),
-// falling back to self when alone or the speaker left.
+// Meet-style featured tile: an explicit pin wins, otherwise the last active
+// speaker stays featured (sticky, no flicker between words), falling back to
+// self when alone or the speaker left.
 export function pickFeatured<T extends Featurable>(
   participants: readonly T[],
   pinnedIdentity: string | null,
-  lastRemoteSpeakerIdentity: string | null
+  lastActiveSpeakerIdentity: string | null
 ): T | null {
   if (pinnedIdentity) {
     const pinned = participants.find((p) => p.identity === pinnedIdentity)
@@ -86,9 +86,9 @@ export function pickFeatured<T extends Featurable>(
       return pinned
     }
   }
-  if (lastRemoteSpeakerIdentity) {
+  if (lastActiveSpeakerIdentity) {
     const speaker = participants.find(
-      (p) => p.identity === lastRemoteSpeakerIdentity
+      (p) => p.identity === lastActiveSpeakerIdentity
     )
     if (speaker) {
       return speaker

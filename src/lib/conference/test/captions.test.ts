@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test'
 import {
   CAPTION_LANGUAGES,
+  CAPTION_TEXT_COLORS,
+  CAPTION_TEXT_SIZES,
+  DEFAULT_CAPTION_TEXT_COLOR,
+  DEFAULT_CAPTION_TEXT_SIZE,
   captionDataSchema,
   captionLanguageLabel,
+  captionTextColorValue,
   loadCaptionPrefs
 } from '$lib/conference/captions'
 
@@ -39,6 +44,34 @@ describe('caption data wire format', () => {
       captionDataSchema.safeParse({ v: 1, id: '', text: 'x', final: false })
         .success
     ).toBe(false)
+  })
+})
+
+describe('caption display presets', () => {
+  it('defaults to medium themed captions', () => {
+    expect(DEFAULT_CAPTION_TEXT_SIZE).toBe('medium')
+    expect(DEFAULT_CAPTION_TEXT_COLOR).toBe('theme')
+  })
+
+  it('offers every text size and color preset', () => {
+    expect(CAPTION_TEXT_SIZES.map((entry) => entry.code)).toEqual([
+      'small',
+      'medium',
+      'large'
+    ])
+    expect(CAPTION_TEXT_COLORS.map((entry) => entry.code)).toEqual([
+      'theme',
+      'white',
+      'yellow',
+      'cyan',
+      'green'
+    ])
+  })
+
+  it('maps caption text colors to swatch values', () => {
+    for (const entry of CAPTION_TEXT_COLORS) {
+      expect(captionTextColorValue(entry.code)).toBe(entry.value)
+    }
   })
 })
 

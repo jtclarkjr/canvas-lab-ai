@@ -13,7 +13,6 @@ import type { ConferenceDevicesStore } from '$lib/stores/conference/devices.svel
 
 type ConferenceRoomInput = {
   getCanvasId: () => string
-  getUserId: () => string
   getEnabled: () => boolean
   devices: ConferenceDevicesStore
   // Nudges other members (broadcast) and refreshes the idle indicator.
@@ -68,7 +67,6 @@ function mediaFailureDescription(
 // rebuilt by syncFromRoom instead.
 export function createConferenceRoomStore({
   getCanvasId,
-  getUserId,
   getEnabled,
   devices,
   onRosterChanged,
@@ -83,13 +81,13 @@ export function createConferenceRoomStore({
   let participants = $state.raw<ConferenceParticipant[]>([])
   let micEnabled = $state(false)
   let camEnabled = $state(false)
-  let lastRemoteSpeaker = $state<string | null>(null)
+  let lastActiveSpeaker = $state<string | null>(null)
   let pinnedIdentity = $state<string | null>(null)
   let canPlayAudio = $state(true)
 
   const isInCall = $derived(status === 'connected' || status === 'reconnecting')
   const featured = $derived(
-    pickFeatured(participants, pinnedIdentity, lastRemoteSpeaker)
+    pickFeatured(participants, pinnedIdentity, lastActiveSpeaker)
   )
   const remoteAudioParticipants = $derived(
     participants.filter((p) => !p.isLocal && p.audioTrack !== null)
@@ -127,10 +125,10 @@ export function createConferenceRoomStore({
     camEnabled = r.localParticipant.isCameraEnabled
 
     if (
-      lastRemoteSpeaker &&
-      !participants.some((p) => p.identity === lastRemoteSpeaker)
+      lastActiveSpeaker &&
+      !participants.some((p) => p.identity === lastActiveSpeaker)
     ) {
-      lastRemoteSpeaker = null
+      lastActiveSpeaker = null
     }
   }
 
@@ -139,7 +137,7 @@ export function createConferenceRoomStore({
     participants = []
     micEnabled = false
     camEnabled = false
-    lastRemoteSpeaker = null
+    lastActiveSpeaker = null
     pinnedIdentity = null
     canPlayAudio = true
     onCallEnded()
@@ -191,11 +189,10 @@ export function createConferenceRoomStore({
       r.on(livekit.RoomEvent.ParticipantConnected, onRosterChanged)
       r.on(livekit.RoomEvent.ParticipantDisconnected, onRosterChanged)
       r.on(livekit.RoomEvent.ActiveSpeakersChanged, (speakers) => {
-        const remote = speakers.find(
-          (speaker) => speaker.identity !== getUserId()
-        )
-        if (remote) {
-          lastRemoteSpeaker = remote.identity
+        // Empty means nobody is currently loud enough; keep the previous focus.
+        const activeSpeaker = speakers[0]
+        if (activeSpeaker) {
+          lastActiveSpeaker = activeSpeaker.identity
         }
         syncFromRoom()
       })

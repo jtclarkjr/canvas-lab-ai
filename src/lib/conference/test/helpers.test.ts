@@ -92,8 +92,9 @@ describe('pickFeatured', () => {
     expect(pickFeatured([me, ada], null, null)).toBe(me)
   })
 
-  it('features the last remote speaker', () => {
+  it('features the last active speaker', () => {
     expect(pickFeatured([me, ada, ben], null, 'ada')).toBe(ada)
+    expect(pickFeatured([me, ada, ben], null, 'me')).toBe(me)
   })
 
   it('returns to self when the speaker leaves', () => {

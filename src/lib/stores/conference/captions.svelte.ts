@@ -4,9 +4,13 @@ import {
   CAPTIONS_DATA_TOPIC,
   captionDataSchema,
   captionsSessionConfig,
+  DEFAULT_CAPTION_TEXT_COLOR,
+  DEFAULT_CAPTION_TEXT_SIZE,
   loadCaptionPrefs,
   saveCaptionPrefs,
-  type CaptionLanguageCode
+  type CaptionLanguageCode,
+  type CaptionTextColor,
+  type CaptionTextSize
 } from '$lib/conference/captions'
 import { OPENAI_REALTIME_CALLS_URL } from '$lib/conference/openai-realtime'
 import type { CaptionSegment } from '$lib/conference/types'
@@ -36,10 +40,11 @@ export function createConferenceCaptionsStore({
   room,
   devices
 }: ConferenceCaptionsInput) {
+  const prefs = loadCaptionPrefs()
   let enabled = $state(false)
-  let language = $state<CaptionLanguageCode>(
-    loadCaptionPrefs().language ?? 'en'
-  )
+  let language = $state<CaptionLanguageCode>(prefs.language ?? 'en')
+  let textSize = $state<CaptionTextSize>(DEFAULT_CAPTION_TEXT_SIZE)
+  let textColor = $state<CaptionTextColor>(DEFAULT_CAPTION_TEXT_COLOR)
   let segments = $state.raw<CaptionSegment[]>([])
   let sttState = $state<SttState>('off')
 
@@ -466,6 +471,12 @@ export function createConferenceCaptionsStore({
     get language() {
       return language
     },
+    get textSize() {
+      return textSize
+    },
+    get textColor() {
+      return textColor
+    },
     get segments() {
       return segments
     },
@@ -492,6 +503,12 @@ export function createConferenceCaptionsStore({
           void translateSegment(segment.id, segment.text)
         }
       }
+    },
+    setTextSize(size: CaptionTextSize) {
+      textSize = size
+    },
+    setTextColor(color: CaptionTextColor) {
+      textColor = color
     },
     handleData
   }
