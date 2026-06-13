@@ -115,6 +115,12 @@ export type DiagramConnector = {
   opacity: number
   startArrow: Arrowhead
   endArrow: Arrowhead
+  text?: string
+  textColor?: string
+  textFontSize?: number
+  textIsBold?: boolean
+  textIsItalic?: boolean
+  textIsUnderline?: boolean
   z?: number | null
 }
 
@@ -140,7 +146,7 @@ export type DiagramFormatting = {
 
 export type EditingText = {
   id?: string
-  target?: 'text' | 'shape'
+  target?: 'text' | 'shape' | 'connector'
   x: number
   y: number
   value: string

@@ -135,6 +135,7 @@ type WorkspaceSceneInteractionsInput = {
   deleteElement: DeleteElementMutation
   commitText: (text: EditingText | null) => void
   startShapeTextEditing?: (shape: DiagramShape) => void
+  startConnectorTextEditing?: (connector: DiagramConnector) => void
   startTextEditingAtPosition: (
     x: number,
     y: number,
@@ -259,6 +260,7 @@ export function createWorkspaceSceneInteractionsStore({
   deleteElement,
   commitText,
   startShapeTextEditing,
+  startConnectorTextEditing,
   startTextEditingAtPosition
 }: WorkspaceSceneInteractionsInput) {
   const getShapesSafe = () => getShapes?.() ?? []
@@ -513,6 +515,12 @@ export function createWorkspaceSceneInteractionsStore({
     element: CanvasDrawableElement
   ): element is TextElement {
     return 'fontSize' in element && !('kind' in element)
+  }
+
+  function isConnectorElement(
+    element: CanvasDrawableElement
+  ): element is DiagramConnector {
+    return 'start' in element && 'end' in element
   }
 
   function elementData(
@@ -1494,6 +1502,7 @@ export function createWorkspaceSceneInteractionsStore({
       const point = screenToCanvasPoint(event.clientX, event.clientY)
       const hitText = findTextAtPoint(point, getTextElements())
       const hitShape = findShapeAtPoint(point, getShapesSafe())
+      const hit = findTopElementAtPoint(point)
       const wasEditing = !!getEditingText()
       const editingText = getEditingText()
 
@@ -1504,6 +1513,18 @@ export function createWorkspaceSceneInteractionsStore({
       if (hitShape && canModifyElement(hitShape.id)) {
         setSelectedTool('select')
         setSelectedElementIds(new Set([hitShape.id]))
+        setCursorStyle('move')
+        return
+      }
+
+      if (
+        hit?.type === 'connector' &&
+        isConnectorElement(hit.element) &&
+        canModifyElement(hit.id)
+      ) {
+        setSelectedTool('select')
+        setSelectedElementIds(new Set([hit.id]))
+        updateClickTracking(point)
         setCursorStyle('move')
         return
       }
@@ -1682,6 +1703,27 @@ export function createWorkspaceSceneInteractionsStore({
 
     if (
       isDoubleClick &&
+      hit?.type === 'connector' &&
+      isConnectorElement(hit.element) &&
+      canModifyElement(hit.id)
+    ) {
+      const editingText = getEditingText()
+      if (editingText?.value.trim()) {
+        commitText(editingText)
+      }
+      if (editingText && !editingText.value.trim()) {
+        setEditingText(null)
+      }
+
+      setSelectedElementIds(new Set())
+      setSelectedTool('text')
+      startConnectorTextEditing?.(hit.element)
+      setCursorStyle('text')
+      return
+    }
+
+    if (
+      isDoubleClick &&
       hit?.type === 'shape' &&
       isShapeElement(hit.element) &&
       canModifyElement(hit.id)
@@ -1787,7 +1829,8 @@ export function createWorkspaceSceneInteractionsStore({
 
   function handleSvgDoubleClick(event: MouseEvent) {
     if (!canEdit()) return
-    if (getEditingText()?.target === 'shape') return
+    const editingTarget = getEditingText()?.target
+    if (editingTarget === 'shape' || editingTarget === 'connector') return
     const point = screenToCanvasPoint(event.clientX, event.clientY)
     const hitText = findTextAtPoint(point, getTextElements())
     const hit = findTopElementAtPoint(point)
@@ -1814,6 +1857,29 @@ export function createWorkspaceSceneInteractionsStore({
       event.preventDefault()
       event.stopPropagation()
       openSceneById?.(hit.id, null)
+      return
+    }
+
+    if (
+      hit?.type === 'connector' &&
+      isConnectorElement(hit.element) &&
+      canModifyElement(hit.id)
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+
+      const editingText = getEditingText()
+      if (editingText?.value.trim()) {
+        commitText(editingText)
+      }
+      if (editingText && !editingText.value.trim()) {
+        setEditingText(null)
+      }
+
+      setSelectedTool('text')
+      setSelectedElementIds(new Set())
+      startConnectorTextEditing?.(hit.element)
+      setCursorStyle('text')
       return
     }
 

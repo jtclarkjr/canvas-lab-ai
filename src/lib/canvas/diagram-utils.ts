@@ -234,7 +234,13 @@ export function connectorToData(
     strokeStyle: connector.strokeStyle,
     opacity: connector.opacity,
     startArrow: connector.startArrow,
-    endArrow: connector.endArrow
+    endArrow: connector.endArrow,
+    text: connector.text ?? '',
+    textColor: connector.textColor ?? '#000000',
+    textFontSize: connector.textFontSize ?? 16,
+    textIsBold: connector.textIsBold ?? false,
+    textIsItalic: connector.textIsItalic ?? false,
+    textIsUnderline: connector.textIsUnderline ?? false
   }
 }
 
@@ -343,6 +349,54 @@ export function getConnectorRoutePoints(
     ]
   }
   return [start, end]
+}
+
+export function getConnectorLabelPoint(
+  connector: DiagramConnector,
+  shapes: DiagramShape[],
+  scenes: AnchorTarget[] = []
+): Point {
+  const points = getConnectorRoutePoints(connector, shapes, scenes)
+  if (connector.kind === 'curved') {
+    const start = points[0]
+    const control = points[1]
+    const end = points[2]
+    if (start && control && end) {
+      return {
+        x: (start.x + 2 * control.x + end.x) / 4,
+        y: (start.y + 2 * control.y + end.y) / 4
+      }
+    }
+  }
+
+  let totalLength = 0
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index]
+    const end = points[index + 1]
+    if (start && end) {
+      totalLength += distance(start, end)
+    }
+  }
+
+  const midpointLength = totalLength / 2
+  let traversed = 0
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index]
+    const end = points[index + 1]
+    if (!start || !end) continue
+    const segmentLength = distance(start, end)
+    if (traversed + segmentLength >= midpointLength) {
+      const ratio =
+        segmentLength === 0 ? 0 : (midpointLength - traversed) / segmentLength
+      return {
+        x: start.x + (end.x - start.x) * ratio,
+        y: start.y + (end.y - start.y) * ratio
+      }
+    }
+    traversed += segmentLength
+  }
+
+  return points[0] ?? { x: 0, y: 0 }
 }
 
 export function connectorToSvgPath(

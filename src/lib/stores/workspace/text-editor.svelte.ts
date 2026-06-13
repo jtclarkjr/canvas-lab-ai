@@ -7,13 +7,21 @@ import {
   createUpdateTextCommand
 } from '$lib/canvas/commands'
 import {
+  getTextContentWidth,
   getTextLineHeight,
   getTextLines,
   textElementToData
 } from '$lib/canvas/drawing-utils'
-import { shapeToData } from '$lib/canvas/diagram-utils'
+import {
+  cloneConnector,
+  connectorToData,
+  getConnectorLabelPoint,
+  shapeToData
+} from '$lib/canvas/diagram-utils'
 import type { UpsertElementInput } from '$lib/workspace/schema'
+import type { Scene } from '$lib/scenes/schema'
 import type {
+  DiagramConnector,
   DiagramShape,
   EditingText,
   ListStyle,
@@ -52,6 +60,9 @@ type WorkspaceTextEditorInput = {
   setTextElements: ElementSetter<TextElement>
   getShapes?: () => DiagramShape[]
   setShapes?: ElementSetter<DiagramShape>
+  getConnectors?: () => DiagramConnector[]
+  setConnectors?: ElementSetter<DiagramConnector>
+  getScenes?: () => Scene[]
   getEditingText: () => EditingText | null
   setEditingText: (next: EditingText | null) => void
   getEditorSelection: () => { start: number; end: number }
@@ -71,6 +82,9 @@ export function createWorkspaceTextEditorStore({
   setTextElements,
   getShapes,
   setShapes,
+  getConnectors,
+  setConnectors,
+  getScenes,
   getEditingText,
   setEditingText,
   getEditorSelection,
@@ -83,15 +97,29 @@ export function createWorkspaceTextEditorStore({
 }: WorkspaceTextEditorInput) {
   let originalTextValue: TextElement | null = null
   let originalShapeValue: DiagramShape | null = null
+  let originalConnectorValue: DiagramConnector | null = null
 
   const shapeTextPadding = 16
+  const connectorTextMinWidth = 80
 
   function getShapesSafe() {
     return getShapes?.() ?? []
   }
 
+  function getConnectorsSafe() {
+    return getConnectors?.() ?? []
+  }
+
+  function getScenesSafe() {
+    return getScenes?.() ?? []
+  }
+
   const setShapesSafe: ElementSetter<DiagramShape> = (next) => {
     setShapes?.(next)
+  }
+
+  const setConnectorsSafe: ElementSetter<DiagramConnector> = (next) => {
+    setConnectors?.(next)
   }
 
   function shapeLabelAsTextElement(shape: DiagramShape): TextElement {
@@ -110,6 +138,28 @@ export function createWorkspaceTextEditorStore({
     }
   }
 
+  function connectorLabelAsTextElement(
+    connector: DiagramConnector
+  ): TextElement {
+    const point = getConnectorLabelPoint(
+      connector,
+      getShapesSafe(),
+      getScenesSafe()
+    )
+    return {
+      id: connector.id,
+      text: connector.text ?? '',
+      x: point.x,
+      y: point.y,
+      color: connector.textColor ?? '#000000',
+      fontSize: connector.textFontSize ?? 16,
+      isBold: connector.textIsBold ?? false,
+      isItalic: connector.textIsItalic ?? false,
+      isUnderline: connector.textIsUnderline ?? false,
+      z: connector.z
+    }
+  }
+
   function shapeEditorFrame(shape: DiagramShape, value: string) {
     const fontSize =
       shape.textFontSize ?? formattingStore.textFormatting.fontSize
@@ -123,12 +173,37 @@ export function createWorkspaceTextEditorStore({
     }
   }
 
+  function connectorEditorFrame(connector: DiagramConnector, value: string) {
+    const fontSize =
+      connector.textFontSize ?? formattingStore.textFormatting.fontSize
+    const lines = getTextLines(value || '')
+    const textHeight =
+      (lines.length - 1) * getTextLineHeight(fontSize) + fontSize
+    const width = Math.max(
+      connectorTextMinWidth,
+      getTextContentWidth(lines, fontSize) + 16
+    )
+    const point = getConnectorLabelPoint(
+      connector,
+      getShapesSafe(),
+      getScenesSafe()
+    )
+    return {
+      x: point.x - width / 2,
+      y: point.y - textHeight / 2,
+      width
+    }
+  }
+
   function commitText(text: EditingText | null) {
     if (!text?.id) return
 
     switch (text.target) {
       case 'shape':
         commitShapeText(text)
+        return
+      case 'connector':
+        commitConnectorText(text)
         return
       default:
         commitStandaloneText(text)
@@ -296,6 +371,73 @@ export function createWorkspaceTextEditorStore({
     )
   }
 
+  function commitConnectorText(text: EditingText) {
+    if (!text.id) return
+    const existingConnector = getConnectorsSafe().find(
+      (entry) => entry.id === text.id
+    )
+    const previousConnectorValue = originalConnectorValue
+    if (!existingConnector || !previousConnectorValue) {
+      setEditingText(null)
+      originalConnectorValue = null
+      return
+    }
+
+    const value = normalizeListText(text.value)
+    const after: DiagramConnector = {
+      ...existingConnector,
+      text: value,
+      textColor: formattingStore.textFormatting.color,
+      textFontSize: formattingStore.textFormatting.fontSize,
+      textIsBold: formattingStore.textFormatting.isBold,
+      textIsItalic: formattingStore.textFormatting.isItalic,
+      textIsUnderline: formattingStore.textFormatting.isUnderline
+    }
+
+    setConnectorsSafe((previous) =>
+      previous.map((entry) => (entry.id === after.id ? after : entry))
+    )
+    addHistoryCommand(
+      createUpdateMultipleCommand(
+        [
+          {
+            id: after.id,
+            type: 'connector',
+            before: previousConnectorValue,
+            after
+          }
+        ],
+        getUserId()
+      )
+    )
+
+    setEditingText(null)
+    originalConnectorValue = null
+
+    upsertElement.mutate(
+      {
+        id: after.id,
+        canvasId: getActiveCanvasId(),
+        type: 'connector',
+        data: connectorToData(after),
+        x: 0,
+        y: 0,
+        z: after.z ?? Date.now()
+      },
+      {
+        onError: () => {
+          setConnectorsSafe((previous) =>
+            previous.map((entry) =>
+              entry.id === previousConnectorValue.id
+                ? previousConnectorValue
+                : entry
+            )
+          )
+        }
+      }
+    )
+  }
+
   function startTextEditingAtPosition(
     x: number,
     y: number,
@@ -311,9 +453,11 @@ export function createWorkspaceTextEditorStore({
     if (id) {
       originalTextValue = existing ? { ...existing } : null
       originalShapeValue = null
+      originalConnectorValue = null
     } else {
       originalTextValue = null
       originalShapeValue = null
+      originalConnectorValue = null
       setElementOwner(textId, getUserId())
       if (!value) {
         initialValue = listStartValue(formattingStore.textFormatting.listStyle)
@@ -363,6 +507,7 @@ export function createWorkspaceTextEditorStore({
     const frame = shapeEditorFrame(shape, initialValue)
     originalTextValue = null
     originalShapeValue = { ...shape }
+    originalConnectorValue = null
     formattingStore.syncTextFormattingFromElement(
       shapeLabelAsTextElement(shape)
     )
@@ -375,6 +520,36 @@ export function createWorkspaceTextEditorStore({
       value: initialValue,
       width: frame.width,
       rotation: frame.rotation,
+      textAlign: 'center'
+    })
+
+    queueMicrotask(() => {
+      const textInputEl = getTextInputEl()
+      textInputEl?.focus()
+      if (initialValue) {
+        textInputEl?.select()
+      }
+      syncEditorSelection()
+    })
+  }
+
+  function startConnectorTextEditing(connector: DiagramConnector) {
+    const initialValue = connector.text ?? ''
+    const frame = connectorEditorFrame(connector, initialValue)
+    originalTextValue = null
+    originalShapeValue = null
+    originalConnectorValue = cloneConnector(connector)
+    formattingStore.syncTextFormattingFromElement(
+      connectorLabelAsTextElement(connector)
+    )
+
+    setEditingText({
+      id: connector.id,
+      target: 'connector',
+      x: frame.x,
+      y: frame.y,
+      value: initialValue,
+      width: frame.width,
       textAlign: 'center'
     })
 
@@ -404,6 +579,13 @@ export function createWorkspaceTextEditorStore({
     switch (editingText?.target) {
       case 'shape':
         setShapesSafe((previous) =>
+          previous.map((entry) =>
+            entry.id === editingText.id ? { ...entry, text: value } : entry
+          )
+        )
+        break
+      case 'connector':
+        setConnectorsSafe((previous) =>
           previous.map((entry) =>
             entry.id === editingText.id ? { ...entry, text: value } : entry
           )
@@ -467,17 +649,33 @@ export function createWorkspaceTextEditorStore({
 
     if (event.key === 'Escape') {
       event.preventDefault()
-      if (editingText?.target === 'shape') {
-        if (originalShapeValue) {
-          setShapesSafe((previous) =>
-            previous.map((entry) =>
-              entry.id === originalShapeValue?.id ? originalShapeValue : entry
+      switch (editingText?.target) {
+        case 'shape':
+          if (originalShapeValue) {
+            setShapesSafe((previous) =>
+              previous.map((entry) =>
+                entry.id === originalShapeValue?.id ? originalShapeValue : entry
+              )
             )
-          )
-        }
-        setEditingText(null)
-        originalShapeValue = null
-        return
+          }
+          setEditingText(null)
+          originalShapeValue = null
+          return
+        case 'connector':
+          if (originalConnectorValue) {
+            setConnectorsSafe((previous) =>
+              previous.map((entry) =>
+                entry.id === originalConnectorValue?.id
+                  ? originalConnectorValue
+                  : entry
+              )
+            )
+          }
+          setEditingText(null)
+          originalConnectorValue = null
+          return
+        default:
+          break
       }
       if (editingText?.id) {
         const existing = getTextElements().find(
@@ -521,6 +719,7 @@ export function createWorkspaceTextEditorStore({
     commitText,
     startTextEditingAtPosition,
     startShapeTextEditing,
+    startConnectorTextEditing,
     syncEditorSelection,
     applyEditorValue,
     handleListStyleToggle,

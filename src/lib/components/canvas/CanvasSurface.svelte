@@ -11,6 +11,7 @@
     Tool
   } from '$lib/canvas/types'
   import {
+    getTextContentWidth,
     getTextCenter,
     getTextLines,
     getTextLineBaseline,
@@ -29,6 +30,7 @@
     getAnchorTargetOutlinePoints,
     getAnchorTargetResizeHandles,
     getAnchorTargetRotateHandle,
+    getConnectorLabelPoint,
     getConnectorTerminalSegments,
     getDiamondPoints,
     getShapeAnchors,
@@ -158,6 +160,10 @@
     return shape.textFontSize ?? 16
   }
 
+  function connectorTextFontSize(connector: DiagramConnector) {
+    return connector.textFontSize ?? 16
+  }
+
   function shapeTextBaseline(shape: DiagramShape, lineIndex: number) {
     const fontSize = shapeTextFontSize(shape)
     const lineHeight = getTextLineHeight(fontSize)
@@ -172,8 +178,36 @@
     )
   }
 
+  function connectorTextFrame(connector: DiagramConnector) {
+    const fontSize = connectorTextFontSize(connector)
+    const lines = getTextLines(connector.text ?? '')
+    const lineHeight = getTextLineHeight(fontSize)
+    const width = getTextContentWidth(lines, fontSize) + 12
+    const height = (lines.length - 1) * lineHeight + fontSize + 8
+    const point = getConnectorLabelPoint(connector, shapes, scenes)
+    return {
+      x: point.x - width / 2,
+      y: point.y - height / 2,
+      width,
+      height,
+      textX: point.x,
+      firstBaseline: point.y - (height - 8) / 2 + fontSize,
+      lineHeight
+    }
+  }
+
+  function connectorLabelMaskId(connector: DiagramConnector) {
+    return `connector-label-mask-${connector.id}`
+  }
+
   function isEditingShapeText(shape: DiagramShape) {
     return editingText?.target === 'shape' && editingText.id === shape.id
+  }
+
+  function isEditingConnectorText(connector: DiagramConnector) {
+    return (
+      editingText?.target === 'connector' && editingText.id === connector.id
+    )
   }
 
   function isEditingStandaloneText(text: TextElement) {
@@ -201,9 +235,35 @@
         shapes,
         scenes
       )}
+      {@const labelFrame =
+        connector.text && !isEditingConnectorText(connector)
+          ? connectorTextFrame(connector)
+          : null}
+      {#if labelFrame}
+        <mask id={connectorLabelMaskId(connector)} maskUnits="userSpaceOnUse">
+          <rect
+            fill="white"
+            height="200000"
+            width="200000"
+            x="-100000"
+            y="-100000"
+          />
+          <rect
+            fill="black"
+            height={labelFrame.height}
+            rx={2 / camera.scale}
+            width={labelFrame.width}
+            x={labelFrame.x}
+            y={labelFrame.y}
+          />
+        </mask>
+      {/if}
       <path
         d={connectorToSvgPath(connector, shapes, scenes)}
         fill="none"
+        mask={labelFrame
+          ? `url(#${connectorLabelMaskId(connector)})`
+          : undefined}
         stroke={resolveCanvasDisplayColor(connector.strokeColor)}
         stroke-dasharray={getStrokeDashArray(
           connector.strokeStyle,
@@ -217,6 +277,9 @@
       {#if connector.startArrow === 'arrow'}
         <polygon
           fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          mask={labelFrame
+            ? `url(#${connectorLabelMaskId(connector)})`
+            : undefined}
           opacity={connector.opacity}
           points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
         />
@@ -224,9 +287,35 @@
       {#if connector.endArrow === 'arrow'}
         <polygon
           fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          mask={labelFrame
+            ? `url(#${connectorLabelMaskId(connector)})`
+            : undefined}
           opacity={connector.opacity}
           points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
         />
+      {/if}
+      {#if labelFrame}
+        <g style="pointer-events:none">
+          <text
+            class="select-none"
+            fill={resolveCanvasDisplayColor(connector.textColor ?? '#000000')}
+            font-size={connectorTextFontSize(connector)}
+            font-style={connector.textIsItalic ? 'italic' : 'normal'}
+            font-weight={connector.textIsBold ? 'bold' : 'normal'}
+            style="white-space:pre;font-family:inherit"
+            text-anchor="middle"
+            text-decoration={connector.textIsUnderline ? 'underline' : 'none'}
+          >
+            {#each getTextLines(connector.text ?? '') as line, lineIndex (lineIndex)}
+              <tspan
+                x={labelFrame.textX}
+                y={labelFrame.firstBaseline + lineIndex * labelFrame.lineHeight}
+              >
+                {line}
+              </tspan>
+            {/each}
+          </text>
+        </g>
       {/if}
     {/each}
 

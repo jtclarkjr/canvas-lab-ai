@@ -114,7 +114,13 @@ export const connectorDataSchema = z
     strokeStyle: strokeStyleSchema,
     opacity: z.number().min(0).max(1).default(1),
     startArrow: arrowheadSchema,
-    endArrow: arrowheadSchema.catch('arrow').default('arrow')
+    endArrow: arrowheadSchema.catch('arrow').default('arrow'),
+    text: z.string().default(''),
+    textColor: z.string().default('#000000'),
+    textFontSize: z.number().default(16),
+    textIsBold: z.boolean().default(false),
+    textIsItalic: z.boolean().default(false),
+    textIsUnderline: z.boolean().default(false)
   })
   .nullable()
   .catch(null)
@@ -275,6 +281,12 @@ export function canvasElementToConnector(
     opacity: connectorData.opacity,
     startArrow: connectorData.startArrow as Arrowhead,
     endArrow: connectorData.endArrow as Arrowhead,
+    text: connectorData.text,
+    textColor: connectorData.textColor,
+    textFontSize: connectorData.textFontSize,
+    textIsBold: connectorData.textIsBold,
+    textIsItalic: connectorData.textIsItalic,
+    textIsUnderline: connectorData.textIsUnderline,
     z: element.z ?? null
   }
 }

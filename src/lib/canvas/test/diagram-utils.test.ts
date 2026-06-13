@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test'
 import {
   connectorToSvgPath,
   findNearestShapeAnchor,
+  getConnectorLabelPoint,
   getShapeAnchorPoint,
   getShapeResizeCursor,
   isPointInShape,
@@ -93,6 +94,24 @@ describe('diagram utils', () => {
     expect(connectorToSvgPath(connector, [{ ...shape, x: 30, y: 20 }])).toBe(
       'M 130 50 L 220 50'
     )
+  })
+
+  it('places connector labels at the route midpoint', () => {
+    const straight = makeConnector(
+      'connector-1',
+      { x: 0, y: 0, binding: null },
+      { x: 200, y: 0, binding: null },
+      formatting,
+      2
+    )
+    const elbow = {
+      ...straight,
+      kind: 'elbow' as const,
+      end: { x: 100, y: 100 }
+    }
+
+    expect(getConnectorLabelPoint(straight, [])).toEqual({ x: 100, y: 0 })
+    expect(getConnectorLabelPoint(elbow, [])).toEqual({ x: 50, y: 50 })
   })
 
   it('snaps endpoints to scene anchors and resolves sticky connector paths', () => {

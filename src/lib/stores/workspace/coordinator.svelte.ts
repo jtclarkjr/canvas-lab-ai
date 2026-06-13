@@ -271,6 +271,9 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     setTextElements,
     getShapes: () => shapes,
     setShapes,
+    getConnectors: () => connectors,
+    setConnectors,
+    getScenes: () => scenesStore.scenes,
     getEditingText: () => editingText,
     setEditingText: (next) => {
       editingText = next
@@ -354,6 +357,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     deleteElement,
     commitText: textEditorStore.commitText,
     startShapeTextEditing: textEditorStore.startShapeTextEditing,
+    startConnectorTextEditing: textEditorStore.startConnectorTextEditing,
     startTextEditingAtPosition: textEditorStore.startTextEditingAtPosition
   })
   const keyboardStore = createWorkspaceKeyboardStore({
