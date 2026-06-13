@@ -1,4 +1,4 @@
-export type WorkspaceMode = 'editor' | 'scenes'
+export type WorkspaceMode = 'editor' | 'scenes' | 'workflows'
 
 export type SceneTypeId = 'document'
 

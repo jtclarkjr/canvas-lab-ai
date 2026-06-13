@@ -26,6 +26,8 @@ import { createWorkspaceModeStore } from '$lib/stores/scenes/mode.svelte'
 import { createWorkspaceRealtimeScenesStore } from '$lib/stores/scenes/realtime-scenes.svelte'
 import { createWorkspaceSceneActivityStore } from '$lib/stores/scenes/scene-activity.svelte'
 import { createWorkspaceScenesStore } from '$lib/stores/scenes/scenes.svelte'
+import { createWorkspaceRealtimeWorkflowsStore } from '$lib/stores/workflows/realtime-workflows.svelte'
+import { createWorkspaceWorkflowsStore } from '$lib/stores/workflows/workflows.svelte'
 import { createWorkspaceAccessStore } from '$lib/stores/workspace/access.svelte'
 import { createWorkspaceCameraStore } from '$lib/stores/workspace/camera.svelte'
 import { createWorkspaceCanvasesStore } from '$lib/stores/workspace/canvases.svelte'
@@ -54,6 +56,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   let role = $state<CanvasRole>(input.role ?? 'owner')
   let isPublicViewer = $state(input.isPublicViewer ?? false)
   let canvasTitle = $state(input.canvasTitle ?? '')
+  let workflowEnabled = $state(input.workflowEnabled ?? false)
   const sceneDocumentsStore = input.sceneDocumentsStore
 
   let rootEl = $state<HTMLDivElement | null>(null)
@@ -137,6 +140,15 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     screenToCanvasPoint,
     initialScenes: input.initialScenes
   })
+  const workflowsStore = createWorkspaceWorkflowsStore({
+    getActiveCanvasId: () => activeCanvasId,
+    getUserId: () => userId,
+    getRole: () => role,
+    getRootElement: () => rootEl,
+    getCameraScale: () => cameraStore.camera.scale,
+    screenToCanvasPoint,
+    initialWorkflows: input.workflowEnabled ? input.initialWorkflows : []
+  })
   const sceneActivityStore = createWorkspaceSceneActivityStore({
     getActiveCanvasId: () => activeCanvasId,
     getUserId: () => userId,
@@ -162,6 +174,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
       }
     }
   })
+  createWorkspaceRealtimeWorkflowsStore({
+    getActiveCanvasId: () => (workflowEnabled ? activeCanvasId : ''),
+    isWorkflowBusy: workflowsStore.isWorkflowBusy,
+    setWorkflows: workflowsStore.setWorkflows,
+    onWorkflowDeleted: workflowsStore.handleWorkflowDeletedRemotely
+  })
 
   function setProps(next: CanvasWorkspaceStoreInput) {
     const canvasChanged = next.canvasId !== activeCanvasId
@@ -172,12 +190,19 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     role = next.role ?? 'owner'
     isPublicViewer = next.isPublicViewer ?? false
     canvasTitle = next.canvasTitle ?? ''
+    workflowEnabled = next.workflowEnabled ?? false
     activeCanvasId = next.canvasId
     canvasesStore.setCanvases(next.initialCanvases)
 
     if (canvasChanged) {
       syncElements(next.initialElements ?? [])
       scenesStore.setScenes(next.initialScenes ?? [])
+      workflowsStore.setWorkflows(
+        workflowEnabled ? (next.initialWorkflows ?? []) : []
+      )
+    } else if (!workflowEnabled) {
+      workflowsStore.clearFocusedWorkflow()
+      workflowsStore.setWorkflows([])
     }
   }
 
@@ -429,12 +454,19 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     if (nextMode === modeStore.mode) {
       return
     }
+    if (nextMode === 'workflows' && !workflowEnabled) {
+      return
+    }
 
-    if (nextMode === 'scenes') {
+    if (nextMode !== 'editor' && modeStore.mode === 'editor') {
       toolBeforeScenesMode = selectedTool
       if (editingText) {
         textEditorStore.commitText(editingText)
       }
+    }
+
+    if (nextMode !== 'workflows') {
+      workflowsStore.clearFocusedWorkflow()
     }
 
     modeStore.setMode(nextMode)
@@ -448,7 +480,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   // is open — typing or pressing Delete there targets the scene, not the
   // drawing layer behind it.
   function handleWorkspaceKeydown(event: KeyboardEvent) {
-    if (scenesStore.openScene) {
+    if (scenesStore.openScene || workflowsStore.focusedWorkflow) {
       return
     }
     keyboardStore.handleWorkspaceKeydown(event)
@@ -469,10 +501,16 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     }
   })
 
-  // Scenes mode keeps the drawing layer passive: the hand tool turns off
-  // the SVG's pointer events, so panning/zooming keep working untouched.
+  // Scene/workflow modes keep the drawing layer passive: the hand tool turns
+  // off the SVG's pointer events, so panning/zooming keep working untouched.
   $effect(() => {
-    if (modeStore.mode === 'scenes' && selectedTool !== 'hand') {
+    if (!workflowEnabled && modeStore.mode === 'workflows') {
+      workflowsStore.clearFocusedWorkflow()
+      modeStore.setMode('editor')
+      return
+    }
+
+    if (modeStore.mode !== 'editor' && selectedTool !== 'hand') {
       selectedTool = 'hand'
     }
   })
@@ -495,10 +533,16 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     editingText = null
     sceneLiveMessages = {}
     scenesStore.closeScene()
+    workflowsStore.clearFocusedWorkflow()
     modeStore.loadModeState(nextCanvasId)
     cameraStore.loadCameraState(nextCanvasId)
     void loadCanvasElements(nextCanvasId)
     void scenesStore.loadScenes(nextCanvasId)
+    if (workflowEnabled) {
+      void workflowsStore.loadWorkflows(nextCanvasId)
+    } else {
+      workflowsStore.setWorkflows([])
+    }
   })
 
   $effect(() => {
@@ -521,11 +565,22 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     handleToolChange,
     handleModeChange,
     createScene: scenesStore.createSceneAtViewportCenter,
+    createWorkflow: () =>
+      workflowEnabled ? workflowsStore.createWorkflowAtViewportCenter() : null,
     patchScene: scenesStore.patchScene,
+    patchWorkflow: workflowsStore.patchWorkflow,
+    patchWorkflowDefinition: workflowsStore.patchWorkflowDefinition,
+    patchWorkflowYaml: workflowsStore.patchWorkflowYaml,
+    patchWorkflowNotes: workflowsStore.patchWorkflowNotes,
+    patchWorkflowSettings: workflowsStore.patchWorkflowSettings,
     deleteScene: scenesStore.deleteScene,
+    deleteWorkflow: workflowsStore.deleteWorkflow,
     canModifyScene: scenesStore.canModifyScene,
+    canModifyWorkflow: workflowsStore.canModifyWorkflow,
+    focusWorkflow: workflowsStore.focusWorkflow,
     openSceneById: scenesStore.openSceneById,
     closeOpenScene: scenesStore.closeScene,
+    clearFocusedWorkflow: workflowsStore.clearFocusedWorkflow,
     broadcastSceneActivity: sceneActivityStore.broadcastActivity,
     handleListStyleToggle: textEditorStore.handleListStyleToggle,
     setTextFontSize: formattingStore.setTextFontSize,
@@ -591,6 +646,9 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     },
     get canManageCanvas() {
       return canManageCanvas()
+    },
+    get workflowEnabled() {
+      return workflowEnabled
     },
     get isLoadingCanvases() {
       return canvasesStore.isLoading
@@ -676,11 +734,20 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     get scenes() {
       return scenesStore.scenes
     },
+    get workflows() {
+      return workflowsStore.workflows
+    },
     get scenesError() {
       return scenesStore.error
     },
+    get workflowsError() {
+      return workflowsStore.error
+    },
     get isCreatingScene() {
       return scenesStore.isCreatingScene
+    },
+    get isCreatingWorkflow() {
+      return workflowsStore.isCreatingWorkflow
     },
     get openScene() {
       const open = scenesStore.openScene
@@ -707,6 +774,21 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
         resizePointerUp: scenesStore.handleResizePointerUp,
         resizePointerCancel: scenesStore.handleResizePointerCancel
       }
+    },
+    get workflowFrameHandlers() {
+      return {
+        pointerDown: workflowsStore.handleFramePointerDown,
+        pointerMove: workflowsStore.handleFramePointerMove,
+        pointerUp: workflowsStore.handleFramePointerUp,
+        pointerCancel: workflowsStore.handleFramePointerCancel,
+        resizePointerDown: workflowsStore.handleResizePointerDown,
+        resizePointerMove: workflowsStore.handleResizePointerMove,
+        resizePointerUp: workflowsStore.handleResizePointerUp,
+        resizePointerCancel: workflowsStore.handleResizePointerCancel
+      }
+    },
+    get focusedWorkflow() {
+      return workflowsStore.focusedWorkflow
     },
     get sceneActivity() {
       return sceneActivityStore.activity

@@ -4,6 +4,7 @@
   import type { Canvas } from '$lib/canvas/schema'
   import type { CanvasElement } from '$lib/workspace/schema'
   import type { Scene } from '$lib/scenes/schema'
+  import type { Workflow } from '$lib/workflows/schema'
   import { createCanvasWorkspaceStore } from '$lib/stores/workspace/index.svelte'
   import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { provideCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
@@ -25,6 +26,7 @@
   import SceneCardLayer from '$lib/components/canvas/scenes/SceneCardLayer.svelte'
   import SceneDialog from '$lib/components/canvas/scenes/SceneDialog.svelte'
   import SceneModeSwitcher from '$lib/components/canvas/scenes/SceneModeSwitcher.svelte'
+  import type WorkflowLayer from '$lib/components/canvas/workflows/WorkflowLayer.svelte'
 
   let {
     canvasId,
@@ -35,7 +37,9 @@
     canvasTitle,
     initialCanvases,
     initialElements,
-    initialScenes
+    initialScenes,
+    initialWorkflows,
+    workflowEnabled = false
   } = $props<{
     canvasId: string
     userId: string
@@ -46,6 +50,8 @@
     initialCanvases?: Canvas[]
     initialElements?: CanvasElement[]
     initialScenes?: Scene[]
+    initialWorkflows?: Workflow[]
+    workflowEnabled?: boolean
   }>()
 
   // svelte-ignore state_referenced_locally -- route usage provides context;
@@ -66,6 +72,8 @@
       initialCanvases,
       initialElements,
       initialScenes,
+      initialWorkflows,
+      workflowEnabled,
       sceneDocumentsStore
     }
   }
@@ -90,6 +98,7 @@
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
   let textInputEl = $state<HTMLTextAreaElement | null>(null)
+  let WorkflowLayerComponent = $state<typeof WorkflowLayer | null>(null)
 
   $effect(() => {
     workspace.setProps(currentWorkspaceInput())
@@ -97,6 +106,25 @@
 
   $effect(() => {
     workspace.setElements({ rootEl, svgEl, textInputEl })
+  })
+
+  $effect(() => {
+    if (!workflowEnabled || WorkflowLayerComponent) {
+      return
+    }
+
+    let cancelled = false
+    void import('$lib/components/canvas/workflows/WorkflowLayer.svelte').then(
+      (module) => {
+        if (!cancelled) {
+          WorkflowLayerComponent = module.default
+        }
+      }
+    )
+
+    return () => {
+      cancelled = true
+    }
   })
 
   onMount(workspace.mount)
@@ -133,6 +161,7 @@
   {#if workspace.canEdit}
     <SceneModeSwitcher
       mode={workspace.mode}
+      workflowEnabled={workspace.workflowEnabled}
       onModeChange={workspace.handleModeChange}
     />
   {/if}
@@ -209,11 +238,13 @@
     onArrange={workspace.arrangeSelectedElements}
   />
 
-  {#if workspace.canvasesError || workspace.scenesError}
+  {#if workspace.canvasesError || workspace.scenesError || (workspace.workflowEnabled && workspace.workflowsError)}
     <div
       class="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full bg-destructive px-4 py-2 text-sm text-destructive-foreground shadow-lg"
     >
-      {workspace.canvasesError ?? workspace.scenesError}
+      {workspace.canvasesError ??
+        workspace.scenesError ??
+        workspace.workflowsError}
     </div>
   {/if}
 
@@ -240,6 +271,32 @@
     isCreatingScene={workspace.isCreatingScene}
     onCreateScene={() => void workspace.createScene('document')}
   />
+
+  {#if workspace.workflowEnabled && WorkflowLayerComponent}
+    <WorkflowLayerComponent
+      canvasId={workspace.canvasIdForActions}
+      workflows={workspace.workflows}
+      focusedWorkflow={workspace.focusedWorkflow}
+      scenes={workspace.scenes}
+      {sceneDocumentsStore}
+      camera={workspace.camera}
+      mode={workspace.mode}
+      canEdit={workspace.canEdit}
+      canModifyWorkflow={workspace.canModifyWorkflow}
+      handlers={workspace.workflowFrameHandlers}
+      isCreatingWorkflow={workspace.isCreatingWorkflow}
+      onCreateWorkflow={() => void workspace.createWorkflow()}
+      onFocusWorkflow={workspace.focusWorkflow}
+      onClearFocusedWorkflow={workspace.clearFocusedWorkflow}
+      onDeleteWorkflow={(workflowId) =>
+        void workspace.deleteWorkflow(workflowId)}
+      onPatchWorkflow={workspace.patchWorkflow}
+      onPatchWorkflowDefinition={workspace.patchWorkflowDefinition}
+      onPatchWorkflowYaml={workspace.patchWorkflowYaml}
+      onPatchWorkflowNotes={workspace.patchWorkflowNotes}
+      onPatchWorkflowSettings={workspace.patchWorkflowSettings}
+    />
+  {/if}
 
   <TextEditor
     bind:textInputEl

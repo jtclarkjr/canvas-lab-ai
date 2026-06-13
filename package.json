@@ -17,6 +17,7 @@
     "@ai-sdk/svelte": "^4.0.196",
     "@supabase/supabase-js": "^2.107.0",
     "@vercel/analytics": "^2.0.1",
+    "@xyflow/svelte": "^1.6.0",
     "ai": "^6.0.196",
     "clsx": "^2.1.1",
     "dompurify": "^3.4.8",
@@ -28,6 +29,7 @@
     "marked": "^18.0.5",
     "svg2pdf.js": "^2.7.0",
     "tailwind-merge": "^3.6.0",
+    "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -8,6 +8,7 @@
   import type { CanvasElement } from '$lib/workspace/schema'
   import { provideSceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
   import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
+  import type { Workflow } from '$lib/workflows/schema'
   import { sleep } from '$lib/utils'
 
   const CANVAS_ENTRY_TRANSITION_HOLD_MS = 80
@@ -20,6 +21,8 @@
       canvasList?: { items: Canvas[] }
       initialElements?: CanvasElement[]
       initialScenes?: Scene[]
+      initialWorkflows?: Workflow[]
+      workflowEnabled?: boolean
       sceneDocumentListsBySceneId?: Record<string, SceneDocumentListItem[]>
       access?:
         | { state: 'member'; role: CanvasRole; canvasTitle: string }
@@ -92,6 +95,8 @@
     initialCanvases={data.canvasList?.items ?? []}
     initialElements={data.initialElements ?? []}
     initialScenes={data.initialScenes ?? []}
+    initialWorkflows={data.initialWorkflows ?? []}
+    workflowEnabled={data.workflowEnabled ?? false}
   />
 {:else}
   <CanvasWorkspace
@@ -103,6 +108,8 @@
     initialCanvases={data.canvasList?.items ?? []}
     initialElements={data.initialElements ?? []}
     initialScenes={data.initialScenes ?? []}
+    initialWorkflows={data.initialWorkflows ?? []}
+    workflowEnabled={data.workflowEnabled ?? false}
   />
 {/if}
 

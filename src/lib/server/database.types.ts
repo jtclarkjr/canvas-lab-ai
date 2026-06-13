@@ -368,6 +368,122 @@ export interface Database {
           }
         ]
       }
+      canvas_workflows: {
+        Row: {
+          id: string
+          canvas_id: string
+          title: string
+          x: number
+          y: number
+          width: number
+          height: number
+          rotation: number
+          definition: Json
+          config_yaml: string
+          notes: string
+          settings: Json
+          created_by: string | null
+          updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          canvas_id: string
+          title?: string
+          x?: number
+          y?: number
+          width?: number
+          height?: number
+          rotation?: number
+          definition?: Json
+          config_yaml?: string
+          notes?: string
+          settings?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          canvas_id?: string
+          title?: string
+          x?: number
+          y?: number
+          width?: number
+          height?: number
+          rotation?: number
+          definition?: Json
+          config_yaml?: string
+          notes?: string
+          settings?: Json
+          created_by?: string | null
+          updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_workflows_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      canvas_workflow_versions: {
+        Row: {
+          id: string
+          workflow_id: string
+          canvas_id: string
+          title: string
+          definition: Json
+          config_yaml: string
+          notes: string
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workflow_id: string
+          canvas_id: string
+          title?: string
+          definition: Json
+          config_yaml?: string
+          notes?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workflow_id?: string
+          canvas_id?: string
+          title?: string
+          definition?: Json
+          config_yaml?: string
+          notes?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_workflow_versions_workflow_id_fkey'
+            columns: ['workflow_id']
+            isOneToOne: false
+            referencedRelation: 'canvas_workflows'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_workflow_versions_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       canvas_chat_messages: {
         Row: {
           id: string

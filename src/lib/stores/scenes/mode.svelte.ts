@@ -15,7 +15,7 @@ export function createWorkspaceModeStore({
         ? localStorage.getItem(`canvas-mode-${id}`)
         : null
 
-    mode = stored === 'scenes' ? 'scenes' : 'editor'
+    mode = stored === 'scenes' || stored === 'workflows' ? stored : 'editor'
   }
 
   function setMode(next: WorkspaceMode) {

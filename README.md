@@ -49,6 +49,7 @@ A real-time collaborative canvas application built with SvelteKit and Supabase.
    | `ENABLE_GITHUB_AUTH` | Show GitHub sign-in button (`true`/`false`) |
    | `ENABLE_GOOGLE_AUTH` | Show Google sign-in button (`true`/`false`) |
    | `ENABLE_APPLE_AUTH` | Show Apple sign-in button (`true`/`false`) |
+   | `WORKFLOW_ENABLED` | Enable the experimental workflows canvas mode (`true`/`false`, default `false`) |
 
 3. Start the development server:
 
@@ -80,5 +81,6 @@ vp fmt . --write
 - [Canvas workspace architecture](docs/CANVAS_WORKSPACE.md)
 - [Canvas chat architecture](docs/CHAT_ARCHITECTURE.md)
 - [Scenes and document workspace architecture](docs/SCENES_ARCHITECTURE.md)
+- [Workflows architecture](docs/WORKFLOWS_ARCHITECTURE.md)
 - [Text editor and rich text architecture](docs/TEXT_EDITOR_ARCHITECTURE.md)
 - [Role-based access control](docs/RBAC.md)

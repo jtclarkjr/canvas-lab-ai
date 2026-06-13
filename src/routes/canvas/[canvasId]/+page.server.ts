@@ -4,6 +4,8 @@ import { AppError } from '$lib/server/api-error'
 import { resolveCanvasAccess } from '$lib/server/canvas-access'
 import { listCanvasElementsForCanvas } from '$lib/server/canvas-elements'
 import { listCanvasScenesForCanvas } from '$lib/server/canvas-scenes'
+import { listCanvasWorkflowsForCanvas } from '$lib/server/canvas-workflows'
+import { workflowsEnabled } from '$lib/server/features'
 import {
   groupSceneDocumentItemsBySceneId,
   listSceneDocumentItemsForCanvas,
@@ -13,6 +15,7 @@ import { getSupabase } from '$lib/server/supabase'
 import type { CanvasElement } from '$lib/workspace/schema'
 import type { CanvasRole } from '$lib/canvas/roles'
 import type { Scene } from '$lib/scenes/schema'
+import type { Workflow } from '$lib/workflows/schema'
 
 export type CanvasPageAccess =
   | { state: 'member'; role: CanvasRole; canvasTitle: string }
@@ -22,12 +25,15 @@ export type CanvasPageAccess =
 
 export const load: PageServerLoad = async ({ params, locals, depends }) => {
   depends(sceneDocumentsDependency(params.canvasId))
+  const workflowEnabled = workflowsEnabled()
 
   if (!locals.user) {
     return {
       canvasId: params.canvasId,
       initialElements: [],
       initialScenes: [],
+      initialWorkflows: [],
+      workflowEnabled,
       sceneDocumentListsBySceneId: {}
     }
   }
@@ -35,6 +41,7 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
   let access: CanvasPageAccess
   let initialElements: CanvasElement[] = []
   let initialScenes: Scene[] = []
+  let initialWorkflows: Workflow[] = []
   let sceneDocumentListsBySceneId: SceneDocumentListsBySceneId = {}
   try {
     const supabase = getSupabase()
@@ -57,14 +64,18 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     }
 
     if (resolved.role || resolved.publicAccess) {
-      const [elements, scenes, sceneDocuments] = await Promise.all([
+      const [elements, scenes, workflows, sceneDocuments] = await Promise.all([
         listCanvasElementsForCanvas(supabase, params.canvasId),
         listCanvasScenesForCanvas(supabase, params.canvasId),
+        workflowEnabled
+          ? listCanvasWorkflowsForCanvas(supabase, params.canvasId)
+          : Promise.resolve({ items: [] }),
         listSceneDocumentItemsForCanvas(supabase, params.canvasId)
       ])
 
       initialElements = elements.items
       initialScenes = scenes.items
+      initialWorkflows = workflows.items
       sceneDocumentListsBySceneId = groupSceneDocumentItemsBySceneId(
         sceneDocuments.items
       )
@@ -84,6 +95,8 @@ export const load: PageServerLoad = async ({ params, locals, depends }) => {
     access,
     initialElements,
     initialScenes,
+    initialWorkflows,
+    workflowEnabled,
     sceneDocumentListsBySceneId
   }
 }
