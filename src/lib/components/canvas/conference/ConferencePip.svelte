@@ -167,7 +167,9 @@
 >
   {#if store.viewMode === 'bar'}
     <!-- Minimized: a speaker pill, controls always visible. -->
-    <div class="glass-card flex h-14 items-center gap-2 rounded-full pl-2 pr-2">
+    <div
+      class="flex h-14 items-center gap-2 rounded-full border border-border/30 bg-card/30 pl-2 pr-2 backdrop-blur-md"
+    >
       {#if featured}
         <span
           class={`flex size-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold shadow-inner transition ${
