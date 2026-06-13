@@ -13,6 +13,9 @@ export function getWorkspaceCursorStyle(
       return 'pointer'
     case 'text':
       return 'text'
+    case 'shape':
+    case 'connector':
+      return 'crosshair'
     case 'hand':
       return 'grab'
     default:

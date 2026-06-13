@@ -45,5 +45,6 @@ export type RealtimeCanvasElementRow = {
   data: unknown
   x?: number | null
   y?: number | null
+  z?: number | null
   created_by?: string | null
 }

@@ -33,6 +33,7 @@ export async function listCanvasElementsForCanvas(
     .from('canvas_elements')
     .select('*')
     .eq('canvas_id', canvasId)
+    .order('z', { ascending: true, nullsFirst: true })
     .order('updated_at', { ascending: true })
 
   if (error) {
@@ -86,8 +87,13 @@ if (import.meta.vitest) {
         eq: (column: string, value: string) => FakeQuery
         order: (
           column: string,
-          options: { ascending: boolean }
-        ) => { data: CanvasElementRow[]; error: null }
+          options: object
+        ) =>
+          | FakeQuery
+          | {
+              data: CanvasElementRow[]
+              error: null
+            }
       }
 
       let query: FakeQuery
@@ -102,6 +108,9 @@ if (import.meta.vitest) {
         },
         order: (column, options) => {
           calls.push(['order', column, options])
+          if (column === 'z') {
+            return query
+          }
           return { data: [row()], error: null }
         }
       }
@@ -118,6 +127,11 @@ if (import.meta.vitest) {
       expect(response.items).toHaveLength(1)
       expect(calls).toContainEqual(['from', 'canvas_elements'])
       expect(calls).toContainEqual(['eq', 'canvas_id', 'canvas-1'])
+      expect(calls).toContainEqual([
+        'order',
+        'z',
+        { ascending: true, nullsFirst: true }
+      ])
       expect(calls).toContainEqual(['order', 'updated_at', { ascending: true }])
     })
   })

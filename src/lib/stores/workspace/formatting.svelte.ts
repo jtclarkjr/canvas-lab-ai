@@ -1,7 +1,12 @@
 import type {
+  Arrowhead,
+  ConnectorKind,
+  DiagramFormatting,
   DrawFormatting,
   DrawStyle,
   ListStyle,
+  ShapeKind,
+  StrokeStyle,
   TextElement,
   TextFormatting
 } from '$lib/canvas/types'
@@ -22,6 +27,17 @@ export function createWorkspaceFormattingStore() {
     isHighlighter: false,
     highlighterOpacity: 0.4
   })
+  let diagramFormatting = $state<DiagramFormatting>({
+    shapeKind: 'rectangle',
+    connectorKind: 'straight',
+    fillColor: '#ffffff',
+    strokeColor: '#000000',
+    strokeWidth: 2,
+    strokeStyle: 'solid',
+    opacity: 1,
+    startArrow: 'none',
+    endArrow: 'arrow'
+  })
 
   function setTextFormatting(
     next: TextFormatting | ((previous: TextFormatting) => TextFormatting)
@@ -33,6 +49,15 @@ export function createWorkspaceFormattingStore() {
     next: DrawFormatting | ((previous: DrawFormatting) => DrawFormatting)
   ) {
     drawFormatting = typeof next === 'function' ? next(drawFormatting) : next
+  }
+
+  function setDiagramFormatting(
+    next:
+      | DiagramFormatting
+      | ((previous: DiagramFormatting) => DiagramFormatting)
+  ) {
+    diagramFormatting =
+      typeof next === 'function' ? next(diagramFormatting) : next
   }
 
   function syncTextFormattingFromElement(element: TextElement) {
@@ -99,6 +124,42 @@ export function createWorkspaceFormattingStore() {
     setDrawFormatting((previous) => ({ ...previous, highlighterOpacity }))
   }
 
+  function setShapeKind(shapeKind: ShapeKind) {
+    setDiagramFormatting((previous) => ({ ...previous, shapeKind }))
+  }
+
+  function setConnectorKind(connectorKind: ConnectorKind) {
+    setDiagramFormatting((previous) => ({ ...previous, connectorKind }))
+  }
+
+  function setDiagramFillColor(fillColor: string) {
+    setDiagramFormatting((previous) => ({ ...previous, fillColor }))
+  }
+
+  function setDiagramStrokeColor(strokeColor: string) {
+    setDiagramFormatting((previous) => ({ ...previous, strokeColor }))
+  }
+
+  function setDiagramStrokeWidth(strokeWidth: number) {
+    setDiagramFormatting((previous) => ({ ...previous, strokeWidth }))
+  }
+
+  function setDiagramStrokeStyle(strokeStyle: StrokeStyle) {
+    setDiagramFormatting((previous) => ({ ...previous, strokeStyle }))
+  }
+
+  function setDiagramOpacity(opacity: number) {
+    setDiagramFormatting((previous) => ({ ...previous, opacity }))
+  }
+
+  function setDiagramStartArrow(startArrow: Arrowhead) {
+    setDiagramFormatting((previous) => ({ ...previous, startArrow }))
+  }
+
+  function setDiagramEndArrow(endArrow: Arrowhead) {
+    setDiagramFormatting((previous) => ({ ...previous, endArrow }))
+  }
+
   return {
     setTextListStyle,
     syncTextFormattingFromElement,
@@ -112,11 +173,23 @@ export function createWorkspaceFormattingStore() {
     setDrawStyle,
     toggleHighlighter,
     setHighlighterOpacity,
+    setShapeKind,
+    setConnectorKind,
+    setDiagramFillColor,
+    setDiagramStrokeColor,
+    setDiagramStrokeWidth,
+    setDiagramStrokeStyle,
+    setDiagramOpacity,
+    setDiagramStartArrow,
+    setDiagramEndArrow,
     get textFormatting() {
       return textFormatting
     },
     get drawFormatting() {
       return drawFormatting
+    },
+    get diagramFormatting() {
+      return diagramFormatting
     }
   }
 }

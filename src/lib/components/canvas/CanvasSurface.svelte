@@ -1,6 +1,8 @@
 <script lang="ts">
   import type {
     Camera,
+    DiagramConnector,
+    DiagramShape,
     DrawFormatting,
     EditingText,
     Path,
@@ -12,15 +14,34 @@
     calculateTextBounds,
     getTextLines,
     getTextLineBaseline,
+    getTextLineHeight,
     pathToSvgPath,
     selectionRectFromPoints
   } from '$lib/canvas/drawing-utils'
+  import {
+    connectorToSvgPath,
+    getArrowheadPoints,
+    getConnectorTerminalSegments,
+    getDiamondPoints,
+    getShapeAnchors,
+    getShapeCenter,
+    getShapeOutlinePoints,
+    getShapeResizeHandles,
+    getShapeRotateHandle,
+    getStrokeDashArray,
+    pointsToSvg,
+    resolveEndpoint
+  } from '$lib/canvas/diagram-utils'
   import { resolveCanvasDisplayColor } from '$lib/canvas/helpers/display-color'
 
   type CanvasSurfaceElements = {
     paths: Path[]
     currentPath: Point[]
     textElements: TextElement[]
+    shapes?: DiagramShape[]
+    connectors?: DiagramConnector[]
+    draftShape?: DiagramShape | null
+    draftConnector?: DiagramConnector | null
   }
 
   type CanvasSurfaceSelection = {
@@ -59,10 +80,76 @@
   }>()
 
   const pointerEvents = $derived(
-    canEdit && ['select', 'pencil', 'eraser', 'text'].includes(selectedTool)
+    canEdit &&
+      ['select', 'pencil', 'eraser', 'text', 'shape', 'connector'].includes(
+        selectedTool
+      )
       ? 'auto'
       : 'none'
   )
+
+  const shapes = $derived.by((): DiagramShape[] => elements.shapes ?? [])
+  const connectors = $derived.by(
+    (): DiagramConnector[] => elements.connectors ?? []
+  )
+  const selectedShapes = $derived(
+    shapes.filter((shape: DiagramShape) => selection.selectedIds.has(shape.id))
+  )
+  const selectedConnectors = $derived(
+    connectors.filter((connector: DiagramConnector) =>
+      selection.selectedIds.has(connector.id)
+    )
+  )
+  const sortedPaths = $derived([...elements.paths].sort(compareZ))
+  const sortedTextElements = $derived([...elements.textElements].sort(compareZ))
+  const sortedShapes = $derived([...shapes].sort(compareZ))
+  const sortedConnectors = $derived([...connectors].sort(compareZ))
+  const handleSize = $derived(8 / camera.scale)
+  const anchorSize = $derived(5 / camera.scale)
+
+  function compareZ(
+    first: { z?: number | null },
+    second: { z?: number | null }
+  ) {
+    return (first.z ?? 0) - (second.z ?? 0)
+  }
+
+  function shapeTransform(shape: DiagramShape) {
+    const center = getShapeCenter(shape)
+    return `rotate(${shape.rotation} ${center.x} ${center.y})`
+  }
+
+  function arrowPoints(
+    segment: [Point, Point] | null,
+    strokeWidth: number
+  ): string {
+    if (!segment) return ''
+    return pointsToSvg(
+      getArrowheadPoints(segment[0], segment[1], Math.max(10, strokeWidth * 5))
+    )
+  }
+
+  function shapeTextFontSize(shape: DiagramShape) {
+    return shape.textFontSize ?? 16
+  }
+
+  function shapeTextBaseline(shape: DiagramShape, lineIndex: number) {
+    const fontSize = shapeTextFontSize(shape)
+    const lineHeight = getTextLineHeight(fontSize)
+    const lineCount = getTextLines(shape.text ?? '').length
+    const textHeight = (lineCount - 1) * lineHeight + fontSize
+    return (
+      shape.y +
+      shape.height / 2 -
+      textHeight / 2 +
+      fontSize +
+      lineIndex * lineHeight
+    )
+  }
+
+  function isEditingShapeText(shape: DiagramShape) {
+    return editingText?.target === 'shape' && editingText.id === shape.id
+  }
 </script>
 
 <svg
@@ -79,7 +166,206 @@
   style={`pointer-events:${pointerEvents};user-select:none;-webkit-user-select:none;touch-action:none`}
 >
   <g transform={`translate(${camera.x}, ${camera.y}) scale(${camera.scale})`}>
-    {#each elements.paths as path (path.id)}
+    {#each sortedConnectors as connector (connector.id)}
+      {@const terminalSegments = getConnectorTerminalSegments(
+        connector,
+        shapes
+      )}
+      <path
+        d={connectorToSvgPath(connector, shapes)}
+        fill="none"
+        stroke={resolveCanvasDisplayColor(connector.strokeColor)}
+        stroke-dasharray={getStrokeDashArray(
+          connector.strokeStyle,
+          connector.strokeWidth
+        )}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-opacity={connector.opacity}
+        stroke-width={connector.strokeWidth}
+      />
+      {#if connector.startArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
+        />
+      {/if}
+      {#if connector.endArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
+        />
+      {/if}
+    {/each}
+
+    {#if elements.draftConnector}
+      {@const draftConnector = elements.draftConnector}
+      {@const terminalSegments = getConnectorTerminalSegments(
+        draftConnector,
+        shapes
+      )}
+      <path
+        d={connectorToSvgPath(draftConnector, shapes)}
+        fill="none"
+        stroke={resolveCanvasDisplayColor(draftConnector.strokeColor)}
+        stroke-dasharray={getStrokeDashArray(
+          draftConnector.strokeStyle,
+          draftConnector.strokeWidth
+        )}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-opacity={draftConnector.opacity * 0.75}
+        stroke-width={draftConnector.strokeWidth}
+      />
+      {#if draftConnector.startArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(draftConnector.strokeColor)}
+          opacity={draftConnector.opacity * 0.75}
+          points={arrowPoints(
+            terminalSegments.start,
+            draftConnector.strokeWidth
+          )}
+        />
+      {/if}
+      {#if draftConnector.endArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(draftConnector.strokeColor)}
+          opacity={draftConnector.opacity * 0.75}
+          points={arrowPoints(terminalSegments.end, draftConnector.strokeWidth)}
+        />
+      {/if}
+    {/if}
+
+    {#each sortedShapes as shape (shape.id)}
+      {#if shape.kind === 'ellipse'}
+        <ellipse
+          cx={shape.x + shape.width / 2}
+          cy={shape.y + shape.height / 2}
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          opacity={shape.opacity}
+          rx={shape.width / 2}
+          ry={shape.height / 2}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-linejoin="round"
+          stroke-width={shape.strokeWidth}
+          transform={shapeTransform(shape)}
+        />
+      {/if}
+      {#if shape.kind === 'diamond'}
+        <polygon
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          opacity={shape.opacity}
+          points={pointsToSvg(getDiamondPoints(shape))}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-linejoin="round"
+          stroke-width={shape.strokeWidth}
+        />
+      {/if}
+      {#if shape.kind === 'rectangle'}
+        <rect
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          height={shape.height}
+          opacity={shape.opacity}
+          rx={8 / camera.scale}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-linejoin="round"
+          stroke-width={shape.strokeWidth}
+          transform={shapeTransform(shape)}
+          width={shape.width}
+          x={shape.x}
+          y={shape.y}
+        />
+      {/if}
+      {#if shape.text && !isEditingShapeText(shape)}
+        <text
+          class="select-none"
+          fill={resolveCanvasDisplayColor(shape.textColor ?? '#000000')}
+          font-size={shapeTextFontSize(shape)}
+          font-style={shape.textIsItalic ? 'italic' : 'normal'}
+          font-weight={shape.textIsBold ? 'bold' : 'normal'}
+          style="pointer-events:none;white-space:pre;font-family:inherit"
+          text-anchor="middle"
+          text-decoration={shape.textIsUnderline ? 'underline' : 'none'}
+          transform={shapeTransform(shape)}
+          x={shape.x + shape.width / 2}
+        >
+          {#each getTextLines(shape.text) as line, lineIndex (lineIndex)}
+            <tspan
+              x={shape.x + shape.width / 2}
+              y={shapeTextBaseline(shape, lineIndex)}
+            >
+              {line}
+            </tspan>
+          {/each}
+        </text>
+      {/if}
+    {/each}
+
+    {#if elements.draftShape}
+      {@const shape = elements.draftShape}
+      {#if shape.kind === 'ellipse'}
+        <ellipse
+          cx={shape.x + shape.width / 2}
+          cy={shape.y + shape.height / 2}
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          fill-opacity={shape.opacity * 0.55}
+          rx={shape.width / 2}
+          ry={shape.height / 2}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-width={shape.strokeWidth}
+        />
+      {/if}
+      {#if shape.kind === 'diamond'}
+        <polygon
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          fill-opacity={shape.opacity * 0.55}
+          points={pointsToSvg(getDiamondPoints(shape))}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-width={shape.strokeWidth}
+        />
+      {/if}
+      {#if shape.kind === 'rectangle'}
+        <rect
+          fill={resolveCanvasDisplayColor(shape.fillColor)}
+          fill-opacity={shape.opacity * 0.55}
+          height={shape.height}
+          rx={8 / camera.scale}
+          stroke={resolveCanvasDisplayColor(shape.strokeColor)}
+          stroke-dasharray={getStrokeDashArray(
+            shape.strokeStyle,
+            shape.strokeWidth
+          )}
+          stroke-width={shape.strokeWidth}
+          width={shape.width}
+          x={shape.x}
+          y={shape.y}
+        />
+      {/if}
+    {/if}
+
+    {#each sortedPaths as path (path.id)}
       <path
         d={pathToSvgPath(path.points)}
         fill="none"
@@ -108,7 +394,7 @@
       />
     {/if}
 
-    {#each elements.textElements as text (text.id)}
+    {#each sortedTextElements as text (text.id)}
       {#if editingText?.id !== text.id}
         {@const bounds = calculateTextBounds(text)}
         <g>
@@ -143,6 +429,82 @@
           </text>
         </g>
       {/if}
+    {/each}
+
+    {#each selectedShapes as shape (shape.id)}
+      {@const outline = getShapeOutlinePoints(shape)}
+      {@const topAnchor = getShapeAnchors(shape).find(
+        (entry) => entry.anchor === 'top'
+      )}
+      {@const rotateHandle = getShapeRotateHandle(shape)}
+      <polygon
+        fill="var(--canvas-selection-fill)"
+        points={pointsToSvg(outline)}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-dasharray={`${4 / camera.scale} ${2 / camera.scale}`}
+        stroke-width={1 / camera.scale}
+      />
+      {#if topAnchor}
+        <line
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+          x1={topAnchor.point.x}
+          y1={topAnchor.point.y}
+          x2={rotateHandle.x}
+          y2={rotateHandle.y}
+        />
+      {/if}
+      {#each getShapeResizeHandles(shape) as handle (handle.handle)}
+        <rect
+          fill="var(--background)"
+          height={handleSize}
+          rx={1.5 / camera.scale}
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+          width={handleSize}
+          x={handle.point.x - handleSize / 2}
+          y={handle.point.y - handleSize / 2}
+        />
+      {/each}
+      <circle
+        cx={rotateHandle.x}
+        cy={rotateHandle.y}
+        fill="var(--background)"
+        r={handleSize / 2}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
+      />
+      {#each getShapeAnchors(shape) as anchor (anchor.anchor)}
+        <circle
+          cx={anchor.point.x}
+          cy={anchor.point.y}
+          fill="var(--background)"
+          r={anchorSize}
+          stroke="var(--canvas-selection-stroke)"
+          stroke-width={1 / camera.scale}
+        />
+      {/each}
+    {/each}
+
+    {#each selectedConnectors as connector (connector.id)}
+      {@const start = resolveEndpoint(connector.start, shapes)}
+      {@const end = resolveEndpoint(connector.end, shapes)}
+      <circle
+        cx={start.x}
+        cy={start.y}
+        fill="var(--background)"
+        r={handleSize / 2}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
+      />
+      <circle
+        cx={end.x}
+        cy={end.y}
+        fill="var(--background)"
+        r={handleSize / 2}
+        stroke="var(--canvas-selection-stroke)"
+        stroke-width={1 / camera.scale}
+      />
     {/each}
 
     {#if selection.start && selection.end}

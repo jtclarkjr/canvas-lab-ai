@@ -11,6 +11,8 @@ import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
 import type { CanvasElement, UpsertElementInput } from '$lib/workspace/schema'
 import type { CanvasRole } from '$lib/canvas/roles'
 import type {
+  DiagramConnector,
+  DiagramShape,
   EditingText,
   Path,
   Point,
@@ -62,12 +64,17 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   let selectedTool = $state<Tool>('select')
   let paths = $state<Path[]>(initialDrawingState.paths)
   let textElements = $state<TextElement[]>(initialDrawingState.textElements)
+  let shapes = $state<DiagramShape[]>(initialDrawingState.shapes)
+  let connectors = $state<DiagramConnector[]>(initialDrawingState.connectors)
   let currentPath = $state<Point[]>([])
+  let draftShape = $state<DiagramShape | null>(null)
+  let draftConnector = $state<DiagramConnector | null>(null)
   let isCurrentlyDrawing = $state(false)
   let selectionStart = $state<Point | null>(null)
   let selectionEnd = $state<Point | null>(null)
   let isSelecting = $state(false)
   let selectedElementIds = $state<Set<string>>(new Set())
+  let sceneCursorStyle = $state<string | null>(null)
   let editingText = $state<EditingText | null>(null)
   let editorSelection = $state({ start: 0, end: 0 })
   let elementOwners = initialDrawingState.owners
@@ -81,7 +88,8 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   const cameraStore = createWorkspaceCameraStore({
     getActiveCanvasId: () => activeCanvasId,
     getRootElement: () => rootEl,
-    getSelectedTool: () => selectedTool
+    getSelectedTool: () => selectedTool,
+    getCursorStyleOverride: () => sceneCursorStyle
   })
   const canvasesStore = createWorkspaceCanvasesStore({
     getActiveCanvasId: () => activeCanvasId,
@@ -113,7 +121,9 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     hasElementOwner: (id) => elementOwners.has(id),
     setElementOwner: (id, ownerId) => elementOwners.set(id, ownerId),
     setPaths,
-    setTextElements
+    setTextElements,
+    setShapes,
+    setConnectors
   })
   const modeStore = createWorkspaceModeStore({
     getActiveCanvasId: () => activeCanvasId
@@ -209,6 +219,20 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     textElements = typeof next === 'function' ? next(textElements) : next
   }
 
+  function setShapes(
+    next: DiagramShape[] | ((previous: DiagramShape[]) => DiagramShape[])
+  ) {
+    shapes = typeof next === 'function' ? next(shapes) : next
+  }
+
+  function setConnectors(
+    next:
+      | DiagramConnector[]
+      | ((previous: DiagramConnector[]) => DiagramConnector[])
+  ) {
+    connectors = typeof next === 'function' ? next(connectors) : next
+  }
+
   function screenToCanvasPoint(clientX: number, clientY: number): Point {
     return cameraStore.screenToCanvasPoint(svgEl, clientX, clientY)
   }
@@ -245,6 +269,8 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     getTextInputEl: () => textInputEl,
     getTextElements: () => textElements,
     setTextElements,
+    getShapes: () => shapes,
+    setShapes,
     getEditingText: () => editingText,
     setEditingText: (next) => {
       editingText = next
@@ -274,6 +300,19 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     setPaths,
     getTextElements: () => textElements,
     setTextElements,
+    getShapes: () => shapes,
+    setShapes,
+    getConnectors: () => connectors,
+    setConnectors,
+    setDraftShape: (next) => {
+      draftShape = next
+    },
+    setDraftConnector: (next) => {
+      draftConnector = next
+    },
+    setHoverCursorStyle: (next) => {
+      sceneCursorStyle = next
+    },
     getCurrentPath: () => currentPath,
     setCurrentPath: (next) => {
       currentPath = next
@@ -308,6 +347,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     upsertElement,
     deleteElement,
     commitText: textEditorStore.commitText,
+    startShapeTextEditing: textEditorStore.startShapeTextEditing,
     startTextEditingAtPosition: textEditorStore.startTextEditingAtPosition
   })
   const keyboardStore = createWorkspaceKeyboardStore({
@@ -326,8 +366,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
       canvasId: activeCanvasId,
       paths,
       textElements,
+      shapes,
+      connectors,
       setPaths,
       setTextElements,
+      setShapes,
+      setConnectors,
       upsertElement,
       deleteElement
     })(command)
@@ -338,6 +382,8 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     elementOwners = drawingState.owners
     paths = drawingState.paths
     textElements = drawingState.textElements
+    shapes = drawingState.shapes
+    connectors = drawingState.connectors
   }
 
   async function loadCanvasElements(id: string) {
@@ -366,6 +412,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
       textEditorStore.commitText(editingText)
     }
     selectedTool = tool
+    sceneCursorStyle = null
   }
 
   function handleModeChange(nextMode: WorkspaceMode) {
@@ -429,9 +476,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     lastLoadedCanvasId = nextCanvasId
     historyStore.clear()
     selectedElementIds = new Set()
+    sceneCursorStyle = null
     selectionStart = null
     selectionEnd = null
     currentPath = []
+    draftShape = null
+    draftConnector = null
     editingText = null
     sceneLiveMessages = {}
     scenesStore.closeScene()
@@ -478,6 +528,16 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     setDrawStyle: formattingStore.setDrawStyle,
     toggleHighlighter: formattingStore.toggleHighlighter,
     setHighlighterOpacity: formattingStore.setHighlighterOpacity,
+    setShapeKind: sceneStore.setShapeKind,
+    setConnectorKind: sceneStore.setConnectorKind,
+    setDiagramFillColor: sceneStore.setDiagramFillColor,
+    setDiagramStrokeColor: sceneStore.setDiagramStrokeColor,
+    setDiagramStrokeWidth: sceneStore.setDiagramStrokeWidth,
+    setDiagramStrokeStyle: sceneStore.setDiagramStrokeStyle,
+    setDiagramOpacity: sceneStore.setDiagramOpacity,
+    setDiagramStartArrow: sceneStore.setDiagramStartArrow,
+    setDiagramEndArrow: sceneStore.setDiagramEndArrow,
+    arrangeSelectedElements: sceneStore.arrangeSelectedElements,
     openShareDialog: accessStore.openShareDialog,
     handleRequestResolved: accessStore.handleRequestResolved,
     applyEditorValue: textEditorStore.applyEditorValue,
@@ -555,6 +615,9 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     get drawFormatting() {
       return formattingStore.drawFormatting
     },
+    get diagramFormatting() {
+      return formattingStore.diagramFormatting
+    },
     get canvasesError() {
       return canvasesStore.error
     },
@@ -565,7 +628,15 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
       return editingText
     },
     get sceneElements() {
-      return { paths, currentPath, textElements }
+      return {
+        paths,
+        currentPath,
+        textElements,
+        shapes,
+        connectors,
+        draftShape,
+        draftConnector
+      }
     },
     get sceneSelection() {
       return {
@@ -581,6 +652,12 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
         pointerUp: sceneStore.handleSvgPointerUp,
         doubleClick: sceneStore.handleSvgDoubleClick
       }
+    },
+    get hasShapeSelection() {
+      return sceneStore.hasShapeSelection
+    },
+    get hasConnectorSelection() {
+      return sceneStore.hasConnectorSelection
     },
     get mode() {
       return modeStore.mode

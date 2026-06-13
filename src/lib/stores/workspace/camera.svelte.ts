@@ -7,6 +7,7 @@ type WorkspaceCameraInput = {
   getActiveCanvasId: () => string
   getRootElement: () => HTMLDivElement | null
   getSelectedTool: () => Tool
+  getCursorStyleOverride?: () => string | null
 }
 
 const cameraFallback: Camera = { x: 0, y: 0, scale: 1 }
@@ -22,7 +23,8 @@ function isCameraExempt(target: EventTarget | null) {
 export function createWorkspaceCameraStore({
   getActiveCanvasId,
   getRootElement,
-  getSelectedTool
+  getSelectedTool,
+  getCursorStyleOverride
 }: WorkspaceCameraInput) {
   let camera = $state<Camera>(cameraFallback)
   let isViewportDragging = $state(false)
@@ -246,6 +248,14 @@ export function createWorkspaceCameraStore({
     camera = resetCamera()
   }
 
+  function cursorStyle() {
+    if (isViewportDragging) return 'grabbing'
+    return (
+      getCursorStyleOverride?.() ??
+      getWorkspaceCursorStyle(false, getSelectedTool())
+    )
+  }
+
   $effect(() => {
     const activeCanvasId = getActiveCanvasId()
     if (typeof localStorage !== 'undefined' && activeCanvasId) {
@@ -312,10 +322,7 @@ export function createWorkspaceCameraStore({
       return camera
     },
     get rootStyle() {
-      return `cursor:${getWorkspaceCursorStyle(
-        isViewportDragging,
-        getSelectedTool()
-      )};overscroll-behavior:none;touch-action:none`
+      return `cursor:${cursorStyle()};overscroll-behavior:none;touch-action:none`
     }
   }
 }

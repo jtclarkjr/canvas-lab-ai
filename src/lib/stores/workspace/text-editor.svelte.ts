@@ -3,11 +3,22 @@ import type { Command } from '$lib/canvas/commands'
 import {
   createCreateTextCommand,
   createDeleteElementCommand,
+  createUpdateMultipleCommand,
   createUpdateTextCommand
 } from '$lib/canvas/commands'
-import { textElementToData } from '$lib/canvas/drawing-utils'
+import {
+  getTextLineHeight,
+  getTextLines,
+  textElementToData
+} from '$lib/canvas/drawing-utils'
+import { shapeToData } from '$lib/canvas/diagram-utils'
 import type { UpsertElementInput } from '$lib/workspace/schema'
-import type { EditingText, ListStyle, TextElement } from '$lib/canvas/types'
+import type {
+  DiagramShape,
+  EditingText,
+  ListStyle,
+  TextElement
+} from '$lib/canvas/types'
 import {
   continueListOnEnter,
   getSelectionListStyle,
@@ -39,6 +50,8 @@ type WorkspaceTextEditorInput = {
   getTextInputEl: () => HTMLTextAreaElement | null
   getTextElements: () => TextElement[]
   setTextElements: ElementSetter<TextElement>
+  getShapes?: () => DiagramShape[]
+  setShapes?: ElementSetter<DiagramShape>
   getEditingText: () => EditingText | null
   setEditingText: (next: EditingText | null) => void
   getEditorSelection: () => { start: number; end: number }
@@ -56,6 +69,8 @@ export function createWorkspaceTextEditorStore({
   getTextInputEl,
   getTextElements,
   setTextElements,
+  getShapes,
+  setShapes,
   getEditingText,
   setEditingText,
   getEditorSelection,
@@ -67,16 +82,68 @@ export function createWorkspaceTextEditorStore({
   deleteElement
 }: WorkspaceTextEditorInput) {
   let originalTextValue: TextElement | null = null
+  let originalShapeValue: DiagramShape | null = null
+
+  const shapeTextPadding = 16
+
+  function getShapesSafe() {
+    return getShapes?.() ?? []
+  }
+
+  const setShapesSafe: ElementSetter<DiagramShape> = (next) => {
+    setShapes?.(next)
+  }
+
+  function shapeLabelAsTextElement(shape: DiagramShape): TextElement {
+    return {
+      id: shape.id,
+      text: shape.text ?? '',
+      x: shape.x,
+      y: shape.y,
+      color: shape.textColor ?? '#000000',
+      fontSize: shape.textFontSize ?? 16,
+      isBold: shape.textIsBold ?? false,
+      isItalic: shape.textIsItalic ?? false,
+      isUnderline: shape.textIsUnderline ?? false,
+      z: shape.z
+    }
+  }
+
+  function shapeEditorFrame(shape: DiagramShape, value: string) {
+    const fontSize =
+      shape.textFontSize ?? formattingStore.textFormatting.fontSize
+    const lineCount = getTextLines(value || '').length
+    const textHeight = (lineCount - 1) * getTextLineHeight(fontSize) + fontSize
+    return {
+      x: shape.x + shapeTextPadding,
+      y: shape.y + shape.height / 2 - textHeight / 2,
+      width: Math.max(24, shape.width - shapeTextPadding * 2),
+      rotation: shape.rotation
+    }
+  }
 
   function commitText(text: EditingText | null) {
     if (!text?.id) return
+
+    switch (text.target) {
+      case 'shape':
+        commitShapeText(text)
+        return
+      default:
+        commitStandaloneText(text)
+    }
+  }
+
+  function commitStandaloneText(text: EditingText) {
+    const textId = text.id
+    if (!textId) return
     const value = normalizeListText(text.value)
     const previousTextValue = originalTextValue
 
     if (!value) {
       const wasCreate = !previousTextValue
       const existingText = getTextElements().find(
-        (entry) => entry.id === text.id
+        (entry) => entry.id === textId
       )
       if (existingText && !wasCreate) {
         addHistoryCommand(
@@ -84,20 +151,20 @@ export function createWorkspaceTextEditorStore({
         )
       }
       setTextElements((previous) =>
-        previous.filter((entry) => entry.id !== text.id)
+        previous.filter((entry) => entry.id !== textId)
       )
 
       if (!wasCreate) {
-        deleteElement.mutate({ id: text.id })
+        deleteElement.mutate({ id: textId })
       }
 
       setEditingText(null)
       return
     }
 
-    const existingText = getTextElements().find((entry) => entry.id === text.id)
+    const existingText = getTextElements().find((entry) => entry.id === textId)
     const textElement: TextElement = {
-      id: text.id,
+      id: textId,
       text: value,
       x: existingText?.x ?? text.x,
       y: existingText?.y ?? text.y,
@@ -110,7 +177,7 @@ export function createWorkspaceTextEditorStore({
 
     if (existingText) {
       setTextElements((previous) =>
-        previous.map((entry) => (entry.id === text.id ? textElement : entry))
+        previous.map((entry) => (entry.id === textId ? textElement : entry))
       )
     } else {
       setTextElements((previous) => [...previous, textElement])
@@ -119,10 +186,11 @@ export function createWorkspaceTextEditorStore({
     const wasCreate = !previousTextValue
     if (wasCreate) {
       addHistoryCommand(createCreateTextCommand(textElement, getUserId()))
-    } else if (previousTextValue) {
+    }
+    if (!wasCreate && previousTextValue) {
       addHistoryCommand(
         createUpdateTextCommand(
-          text.id,
+          textId,
           previousTextValue,
           textElement,
           getUserId()
@@ -134,7 +202,7 @@ export function createWorkspaceTextEditorStore({
 
     upsertElement.mutate(
       {
-        id: text.id,
+        id: textId,
         canvasId: getActiveCanvasId(),
         type: 'text',
         data: textElementToData(textElement),
@@ -146,15 +214,80 @@ export function createWorkspaceTextEditorStore({
         onError: () => {
           if (wasCreate) {
             setTextElements((previous) =>
-              previous.filter((entry) => entry.id !== text.id)
+              previous.filter((entry) => entry.id !== textId)
             )
-          } else if (previousTextValue) {
+            return
+          }
+          if (previousTextValue) {
             setTextElements((previous) =>
               previous.map((entry) =>
-                entry.id === text.id ? previousTextValue : entry
+                entry.id === textId ? previousTextValue : entry
               )
             )
           }
+        }
+      }
+    )
+  }
+
+  function commitShapeText(text: EditingText) {
+    if (!text.id) return
+    const existingShape = getShapesSafe().find((entry) => entry.id === text.id)
+    const previousShapeValue = originalShapeValue
+    if (!existingShape || !previousShapeValue) {
+      setEditingText(null)
+      originalShapeValue = null
+      return
+    }
+
+    const value = normalizeListText(text.value)
+    const after: DiagramShape = {
+      ...existingShape,
+      text: value,
+      textColor: formattingStore.textFormatting.color,
+      textFontSize: formattingStore.textFormatting.fontSize,
+      textIsBold: formattingStore.textFormatting.isBold,
+      textIsItalic: formattingStore.textFormatting.isItalic,
+      textIsUnderline: formattingStore.textFormatting.isUnderline
+    }
+
+    setShapesSafe((previous) =>
+      previous.map((entry) => (entry.id === after.id ? after : entry))
+    )
+    addHistoryCommand(
+      createUpdateMultipleCommand(
+        [
+          {
+            id: after.id,
+            type: 'shape',
+            before: previousShapeValue,
+            after
+          }
+        ],
+        getUserId()
+      )
+    )
+
+    setEditingText(null)
+    originalShapeValue = null
+
+    upsertElement.mutate(
+      {
+        id: after.id,
+        canvasId: getActiveCanvasId(),
+        type: 'shape',
+        data: shapeToData(after),
+        x: after.x,
+        y: after.y,
+        z: after.z ?? Date.now()
+      },
+      {
+        onError: () => {
+          setShapesSafe((previous) =>
+            previous.map((entry) =>
+              entry.id === previousShapeValue.id ? previousShapeValue : entry
+            )
+          )
         }
       }
     )
@@ -172,8 +305,10 @@ export function createWorkspaceTextEditorStore({
     if (id) {
       const existing = getTextElements().find((entry) => entry.id === id)
       originalTextValue = existing ? { ...existing } : null
+      originalShapeValue = null
     } else {
       originalTextValue = null
+      originalShapeValue = null
       setElementOwner(textId, getUserId())
       if (!value) {
         initialValue = listStartValue(formattingStore.textFormatting.listStyle)
@@ -192,15 +327,48 @@ export function createWorkspaceTextEditorStore({
       setTextElements((previous) => [...previous, placeholder])
     }
 
-    setEditingText({ id: textId, x, y, value: initialValue })
+    setEditingText({ id: textId, target: 'text', x, y, value: initialValue })
 
     queueMicrotask(() => {
       const textInputEl = getTextInputEl()
       textInputEl?.focus()
       if (id && initialValue) {
         textInputEl?.select()
-      } else if (initialValue) {
+        syncEditorSelection()
+        return
+      }
+      if (initialValue) {
         textInputEl?.setSelectionRange(initialValue.length, initialValue.length)
+      }
+      syncEditorSelection()
+    })
+  }
+
+  function startShapeTextEditing(shape: DiagramShape) {
+    const initialValue = shape.text ?? ''
+    const frame = shapeEditorFrame(shape, initialValue)
+    originalTextValue = null
+    originalShapeValue = { ...shape }
+    formattingStore.syncTextFormattingFromElement(
+      shapeLabelAsTextElement(shape)
+    )
+
+    setEditingText({
+      id: shape.id,
+      target: 'shape',
+      x: frame.x,
+      y: frame.y,
+      value: initialValue,
+      width: frame.width,
+      rotation: frame.rotation,
+      textAlign: 'center'
+    })
+
+    queueMicrotask(() => {
+      const textInputEl = getTextInputEl()
+      textInputEl?.focus()
+      if (initialValue) {
+        textInputEl?.select()
       }
       syncEditorSelection()
     })
@@ -218,11 +386,25 @@ export function createWorkspaceTextEditorStore({
   function applyEditorValue(value: string) {
     const editingText = getEditingText()
     setEditingText(editingText ? { ...editingText, value } : editingText)
-    setTextElements((previous) =>
-      previous.map((entry) =>
-        entry.id === getEditingText()?.id ? { ...entry, text: value } : entry
-      )
-    )
+
+    switch (editingText?.target) {
+      case 'shape':
+        setShapesSafe((previous) =>
+          previous.map((entry) =>
+            entry.id === editingText.id ? { ...entry, text: value } : entry
+          )
+        )
+        break
+      default:
+        setTextElements((previous) =>
+          previous.map((entry) =>
+            entry.id === getEditingText()?.id
+              ? { ...entry, text: value }
+              : entry
+          )
+        )
+        break
+    }
   }
 
   async function handleListStyleToggle(style: Exclude<ListStyle, 'none'>) {
@@ -267,8 +449,22 @@ export function createWorkspaceTextEditorStore({
         getTextInputEl()?.setSelectionRange(result.caret, result.caret)
         syncEditorSelection()
       }
-    } else if (event.key === 'Escape') {
+    }
+
+    if (event.key === 'Escape') {
       event.preventDefault()
+      if (editingText?.target === 'shape') {
+        if (originalShapeValue) {
+          setShapesSafe((previous) =>
+            previous.map((entry) =>
+              entry.id === originalShapeValue?.id ? originalShapeValue : entry
+            )
+          )
+        }
+        setEditingText(null)
+        originalShapeValue = null
+        return
+      }
       if (editingText?.id) {
         const existing = getTextElements().find(
           (entry) => entry.id === editingText?.id
@@ -310,6 +506,7 @@ export function createWorkspaceTextEditorStore({
   return {
     commitText,
     startTextEditingAtPosition,
+    startShapeTextEditing,
     syncEditorSelection,
     applyEditorValue,
     handleListStyleToggle,

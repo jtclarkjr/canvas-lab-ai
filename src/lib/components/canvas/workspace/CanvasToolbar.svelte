@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { Eraser, Hand, MousePointer2, Pencil, Type } from 'lucide-svelte'
+  import {
+    ArrowRight,
+    Eraser,
+    Hand,
+    MousePointer2,
+    Pencil,
+    Square,
+    Type
+  } from 'lucide-svelte'
   import { slide } from 'svelte/transition'
   import type { Tool } from '$lib/canvas/types'
 
@@ -19,6 +27,8 @@
     { id: 'select' as Tool, icon: MousePointer2, label: 'Pointer' },
     { id: 'hand' as Tool, icon: Hand, label: 'Hand' },
     { id: 'pencil' as Tool, icon: Pencil, label: 'Pencil' },
+    { id: 'shape' as Tool, icon: Square, label: 'Shape' },
+    { id: 'connector' as Tool, icon: ArrowRight, label: 'Connector' },
     { id: 'eraser' as Tool, icon: Eraser, label: 'Eraser' },
     { id: 'text' as Tool, icon: Type, label: 'Text' }
   ]

@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vite-plus/test'
 import {
   createCreatePathCommand,
+  createCreateShapeCommand,
   createDeleteMultipleCommand,
   createMoveElementCommand,
+  createUpdateMultipleCommand,
   createUpdateTextCommand,
   getInverseCommand
 } from '$lib/canvas/commands'
-import type { Path, TextElement } from '$lib/canvas/types'
+import type { DiagramShape, Path, TextElement } from '$lib/canvas/types'
 
 describe('canvas commands', () => {
   it('inverts create-path into delete-element', () => {
@@ -90,6 +92,64 @@ describe('canvas commands', () => {
     if (inverse.type === 'CREATE_MULTIPLE') {
       expect(inverse.elements).toHaveLength(1)
       expect(inverse.elements[0]?.element).toEqual(text)
+    }
+  })
+
+  it('inverts create-shape into delete-element', () => {
+    const shape: DiagramShape = {
+      id: 'shape-1',
+      kind: 'rectangle',
+      x: 10,
+      y: 20,
+      width: 100,
+      height: 60,
+      rotation: 0,
+      fillColor: '#ffffff',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      strokeStyle: 'solid',
+      opacity: 1,
+      z: 1
+    }
+
+    const inverse = getInverseCommand(createCreateShapeCommand(shape, 'user-1'))
+
+    expect(inverse.type).toBe('DELETE_ELEMENT')
+    if (inverse.type === 'DELETE_ELEMENT') {
+      expect(inverse.element.id).toBe('shape-1')
+      expect(inverse.elementType).toBe('shape')
+    }
+  })
+
+  it('swaps before and after for update-multiple undo', () => {
+    const before: DiagramShape = {
+      id: 'shape-1',
+      kind: 'rectangle',
+      x: 10,
+      y: 20,
+      width: 100,
+      height: 60,
+      rotation: 0,
+      fillColor: '#ffffff',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      strokeStyle: 'solid',
+      opacity: 1,
+      z: 1
+    }
+    const after: DiagramShape = { ...before, x: 40, rotation: 15 }
+
+    const inverse = getInverseCommand(
+      createUpdateMultipleCommand(
+        [{ id: before.id, type: 'shape', before, after }],
+        'user-1'
+      )
+    )
+
+    expect(inverse.type).toBe('UPDATE_MULTIPLE')
+    if (inverse.type === 'UPDATE_MULTIPLE') {
+      expect(inverse.elements[0]?.before).toEqual(after)
+      expect(inverse.elements[0]?.after).toEqual(before)
     }
   })
 })

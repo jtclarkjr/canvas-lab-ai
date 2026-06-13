@@ -1,10 +1,23 @@
-import type { Path, Point, TextElement } from '$lib/canvas/types'
+import { cloneConnector, cloneShape } from '$lib/canvas/diagram-utils'
+import type {
+  CanvasDrawableElement,
+  CanvasElementType,
+  DiagramConnector,
+  DiagramShape,
+  Path,
+  Point,
+  TextElement
+} from '$lib/canvas/types'
 
 export type CommandType =
   | 'CREATE_PATH'
   | 'CREATE_TEXT'
+  | 'CREATE_SHAPE'
+  | 'CREATE_CONNECTOR'
   | 'CREATE_MULTIPLE'
   | 'UPDATE_TEXT'
+  | 'UPDATE_ELEMENT'
+  | 'UPDATE_MULTIPLE'
   | 'MOVE_ELEMENT'
   | 'MOVE_MULTIPLE'
   | 'DELETE_ELEMENT'
@@ -26,11 +39,21 @@ export interface CreateTextCommand extends BaseCommand {
   element: TextElement
 }
 
+export interface CreateShapeCommand extends BaseCommand {
+  type: 'CREATE_SHAPE'
+  element: DiagramShape
+}
+
+export interface CreateConnectorCommand extends BaseCommand {
+  type: 'CREATE_CONNECTOR'
+  element: DiagramConnector
+}
+
 export interface CreateMultipleCommand extends BaseCommand {
   type: 'CREATE_MULTIPLE'
   elements: Array<{
-    element: Path | TextElement
-    type: 'path' | 'text'
+    element: CanvasDrawableElement
+    type: CanvasElementType
   }>
 }
 
@@ -44,7 +67,7 @@ export interface UpdateTextCommand extends BaseCommand {
 export interface MoveElementCommand extends BaseCommand {
   type: 'MOVE_ELEMENT'
   elementId: string
-  elementType: 'path' | 'text'
+  elementType: CanvasElementType
   before: { x?: number; y?: number; points?: Point[] }
   after: { x?: number; y?: number; points?: Point[] }
 }
@@ -53,31 +76,53 @@ export interface MoveMultipleCommand extends BaseCommand {
   type: 'MOVE_MULTIPLE'
   elements: Array<{
     id: string
-    type: 'path' | 'text'
+    type: CanvasElementType
     before: { x?: number; y?: number; points?: Point[] }
     after: { x?: number; y?: number; points?: Point[] }
   }>
 }
 
+export interface UpdateElementCommand extends BaseCommand {
+  type: 'UPDATE_ELEMENT'
+  elementId: string
+  elementType: CanvasElementType
+  before: CanvasDrawableElement
+  after: CanvasDrawableElement
+}
+
+export interface UpdateMultipleCommand extends BaseCommand {
+  type: 'UPDATE_MULTIPLE'
+  elements: Array<{
+    id: string
+    type: CanvasElementType
+    before: CanvasDrawableElement
+    after: CanvasDrawableElement
+  }>
+}
+
 export interface DeleteElementCommand extends BaseCommand {
   type: 'DELETE_ELEMENT'
-  element: Path | TextElement
-  elementType: 'path' | 'text'
+  element: CanvasDrawableElement
+  elementType: CanvasElementType
 }
 
 export interface DeleteMultipleCommand extends BaseCommand {
   type: 'DELETE_MULTIPLE'
   elements: Array<{
-    element: Path | TextElement
-    type: 'path' | 'text'
+    element: CanvasDrawableElement
+    type: CanvasElementType
   }>
 }
 
 export type Command =
   | CreatePathCommand
   | CreateTextCommand
+  | CreateShapeCommand
+  | CreateConnectorCommand
   | CreateMultipleCommand
   | UpdateTextCommand
+  | UpdateElementCommand
+  | UpdateMultipleCommand
   | MoveElementCommand
   | MoveMultipleCommand
   | DeleteElementCommand
@@ -89,8 +134,12 @@ export interface ApplyCommandOptions {
   canvasId: string
   paths: Path[]
   textElements: TextElement[]
+  shapes?: DiagramShape[]
+  connectors?: DiagramConnector[]
   setPaths: SetState<Path[]>
   setTextElements: SetState<TextElement[]>
+  setShapes?: SetState<DiagramShape[]>
+  setConnectors?: SetState<DiagramConnector[]>
   upsertElement: {
     mutate: (
       variables: {
@@ -133,6 +182,26 @@ export const createCreateTextCommand = (
   element: { ...text }
 })
 
+export const createCreateShapeCommand = (
+  shape: DiagramShape,
+  userId: string
+): CreateShapeCommand => ({
+  type: 'CREATE_SHAPE',
+  timestamp: Date.now(),
+  userId,
+  element: cloneShape(shape)
+})
+
+export const createCreateConnectorCommand = (
+  connector: DiagramConnector,
+  userId: string
+): CreateConnectorCommand => ({
+  type: 'CREATE_CONNECTOR',
+  timestamp: Date.now(),
+  userId,
+  element: cloneConnector(connector)
+})
+
 export const createUpdateTextCommand = (
   elementId: string,
   before: TextElement,
@@ -149,7 +218,7 @@ export const createUpdateTextCommand = (
 
 export const createMoveElementCommand = (
   elementId: string,
-  elementType: 'path' | 'text',
+  elementType: CanvasElementType,
   before: { x?: number; y?: number; points?: Point[] },
   after: { x?: number; y?: number; points?: Point[] },
   userId: string
@@ -168,7 +237,7 @@ export const createMoveElementCommand = (
 export const createMoveMultipleCommand = (
   elements: Array<{
     id: string
-    type: 'path' | 'text'
+    type: CanvasElementType
     before: { x?: number; y?: number; points?: Point[] }
     after: { x?: number; y?: number; points?: Point[] }
   }>,
@@ -190,24 +259,21 @@ export const createMoveMultipleCommand = (
 })
 
 export const createDeleteElementCommand = (
-  element: Path | TextElement,
-  elementType: 'path' | 'text',
+  element: CanvasDrawableElement,
+  elementType: CanvasElementType,
   userId: string
 ): DeleteElementCommand => ({
   type: 'DELETE_ELEMENT',
   timestamp: Date.now(),
   userId,
-  element:
-    elementType === 'path' && 'points' in element
-      ? { ...element, points: [...element.points] }
-      : { ...element },
+  element: cloneCanvasElement(element, elementType),
   elementType
 })
 
 export const createDeleteMultipleCommand = (
   elements: Array<{
-    element: Path | TextElement
-    type: 'path' | 'text'
+    element: CanvasDrawableElement
+    type: CanvasElementType
   }>,
   userId: string
 ): DeleteMultipleCommand => ({
@@ -215,16 +281,67 @@ export const createDeleteMultipleCommand = (
   timestamp: Date.now(),
   userId,
   elements: elements.map((element) => ({
-    element:
-      element.type === 'path' && 'points' in element.element
-        ? { ...element.element, points: [...element.element.points] }
-        : { ...element.element },
+    element: cloneCanvasElement(element.element, element.type),
     type: element.type
   }))
 })
 
-const isPath = (element: Path | TextElement): element is Path =>
+export const createUpdateElementCommand = (
+  elementId: string,
+  elementType: CanvasElementType,
+  before: CanvasDrawableElement,
+  after: CanvasDrawableElement,
+  userId: string
+): UpdateElementCommand => ({
+  type: 'UPDATE_ELEMENT',
+  timestamp: Date.now(),
+  userId,
+  elementId,
+  elementType,
+  before: cloneCanvasElement(before, elementType),
+  after: cloneCanvasElement(after, elementType)
+})
+
+export const createUpdateMultipleCommand = (
+  elements: Array<{
+    id: string
+    type: CanvasElementType
+    before: CanvasDrawableElement
+    after: CanvasDrawableElement
+  }>,
+  userId: string
+): UpdateMultipleCommand => ({
+  type: 'UPDATE_MULTIPLE',
+  timestamp: Date.now(),
+  userId,
+  elements: elements.map((element) => ({
+    id: element.id,
+    type: element.type,
+    before: cloneCanvasElement(element.before, element.type),
+    after: cloneCanvasElement(element.after, element.type)
+  }))
+})
+
+export function cloneCanvasElement(
+  element: CanvasDrawableElement,
+  type: CanvasElementType
+): CanvasDrawableElement {
+  if (type === 'path' && 'points' in element) {
+    return { ...element, points: [...element.points] }
+  }
+  if (type === 'shape' && isShape(element)) {
+    return cloneShape(element)
+  }
+  if (type === 'connector' && 'start' in element) {
+    return cloneConnector(element)
+  }
+  return { ...element }
+}
+
+const isPath = (element: CanvasDrawableElement): element is Path =>
   'points' in element
+const isShape = (element: CanvasDrawableElement): element is DiagramShape =>
+  'width' in element && !('points' in element)
 
 export function getInverseCommand(command: Command): Command {
   switch (command.type) {
@@ -244,6 +361,22 @@ export function getInverseCommand(command: Command): Command {
         element: command.element,
         elementType: 'text'
       }
+    case 'CREATE_SHAPE':
+      return {
+        type: 'DELETE_ELEMENT',
+        timestamp: Date.now(),
+        userId: command.userId,
+        element: command.element,
+        elementType: 'shape'
+      }
+    case 'CREATE_CONNECTOR':
+      return {
+        type: 'DELETE_ELEMENT',
+        timestamp: Date.now(),
+        userId: command.userId,
+        element: command.element,
+        elementType: 'connector'
+      }
     case 'CREATE_MULTIPLE':
       return {
         type: 'DELETE_MULTIPLE',
@@ -259,6 +392,28 @@ export function getInverseCommand(command: Command): Command {
         elementId: command.elementId,
         before: command.after,
         after: command.before
+      }
+    case 'UPDATE_ELEMENT':
+      return {
+        type: 'UPDATE_ELEMENT',
+        timestamp: Date.now(),
+        userId: command.userId,
+        elementId: command.elementId,
+        elementType: command.elementType,
+        before: command.after,
+        after: command.before
+      }
+    case 'UPDATE_MULTIPLE':
+      return {
+        type: 'UPDATE_MULTIPLE',
+        timestamp: Date.now(),
+        userId: command.userId,
+        elements: command.elements.map((element) => ({
+          id: element.id,
+          type: element.type,
+          before: element.after,
+          after: element.before
+        }))
       }
     case 'MOVE_ELEMENT':
       return {
@@ -279,19 +434,36 @@ export function getInverseCommand(command: Command): Command {
         }))
       }
     case 'DELETE_ELEMENT':
-      return isPath(command.element)
-        ? {
-            type: 'CREATE_PATH',
-            timestamp: Date.now(),
-            userId: command.userId,
-            element: command.element
-          }
-        : {
-            type: 'CREATE_TEXT',
-            timestamp: Date.now(),
-            userId: command.userId,
-            element: command.element
-          }
+      if (command.elementType === 'path' && isPath(command.element)) {
+        return {
+          type: 'CREATE_PATH',
+          timestamp: Date.now(),
+          userId: command.userId,
+          element: command.element
+        }
+      }
+      if (command.elementType === 'shape' && isShape(command.element)) {
+        return {
+          type: 'CREATE_SHAPE',
+          timestamp: Date.now(),
+          userId: command.userId,
+          element: command.element
+        }
+      }
+      if (command.elementType === 'connector' && 'start' in command.element) {
+        return {
+          type: 'CREATE_CONNECTOR',
+          timestamp: Date.now(),
+          userId: command.userId,
+          element: command.element
+        }
+      }
+      return {
+        type: 'CREATE_TEXT',
+        timestamp: Date.now(),
+        userId: command.userId,
+        element: command.element as TextElement
+      }
     case 'DELETE_MULTIPLE':
       return {
         type: 'CREATE_MULTIPLE',

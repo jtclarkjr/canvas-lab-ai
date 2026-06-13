@@ -16,6 +16,7 @@
   import CanvasZoomControls from '$lib/components/canvas/workspace/CanvasZoomControls.svelte'
   import CanvasChat from '$lib/components/canvas/chat/CanvasChat.svelte'
   import CanvasConference from '$lib/components/canvas/conference/CanvasConference.svelte'
+  import DiagramToolbar from '$lib/components/canvas/workspace/DiagramToolbar.svelte'
   import DrawingToolbar from '$lib/components/canvas/workspace/DrawingToolbar.svelte'
   import LiveCursors from '$lib/components/canvas/workspace/LiveCursors.svelte'
   import RequestEditAccessBanner from '$lib/components/canvas/workspace/RequestEditAccessBanner.svelte'
@@ -184,6 +185,28 @@
     onStyleChange={workspace.setDrawStyle}
     onHighlighterToggle={workspace.toggleHighlighter}
     onHighlighterOpacityChange={workspace.setHighlighterOpacity}
+  />
+
+  <DiagramToolbar
+    formatting={workspace.diagramFormatting}
+    selectedTool={workspace.selectedTool}
+    selectedCount={workspace.selectedCount}
+    hasShapeSelection={workspace.hasShapeSelection}
+    hasConnectorSelection={workspace.hasConnectorSelection}
+    isVisible={workspace.selectedTool === 'shape' ||
+      workspace.selectedTool === 'connector' ||
+      workspace.hasShapeSelection ||
+      workspace.hasConnectorSelection}
+    onShapeKindChange={workspace.setShapeKind}
+    onConnectorKindChange={workspace.setConnectorKind}
+    onFillColorChange={workspace.setDiagramFillColor}
+    onStrokeColorChange={workspace.setDiagramStrokeColor}
+    onStrokeWidthChange={workspace.setDiagramStrokeWidth}
+    onStrokeStyleChange={workspace.setDiagramStrokeStyle}
+    onOpacityChange={workspace.setDiagramOpacity}
+    onStartArrowChange={workspace.setDiagramStartArrow}
+    onEndArrowChange={workspace.setDiagramEndArrow}
+    onArrange={workspace.arrangeSelectedElements}
   />
 
   {#if workspace.canvasesError || workspace.scenesError}
