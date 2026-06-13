@@ -389,6 +389,8 @@
 
       <div
         class="group/cc relative"
+        role="group"
+        aria-label="Captions controls"
         onmouseenter={() => (ccSettingsHovered = true)}
         onmouseleave={() => (ccSettingsHovered = false)}
       >

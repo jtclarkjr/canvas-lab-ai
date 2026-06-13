@@ -36,7 +36,9 @@
     atIndex === null || mentionMembers.length === 0
       ? []
       : mentionMembers
-          .filter((m) => m.name.toLowerCase().includes(query.toLowerCase()))
+          .filter((m: MentionMember) =>
+            m.name.toLowerCase().includes(query.toLowerCase())
+          )
           .slice(0, 6)
   )
 
