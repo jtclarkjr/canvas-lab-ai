@@ -80,6 +80,7 @@
   const isStreaming = $derived(
     chat.status === 'submitted' || chat.status === 'streaming'
   )
+  let initialPromptSent = false
 
   // Merge this client's chat with messages other collaborators produced
   // (delivered over realtime, deduped by message id).
@@ -148,8 +149,9 @@
 
   // Seed the first prompt coming from the blank-scene entry screen.
   $effect(() => {
-    if (initialPrompt && chat.status === 'ready') {
+    if (initialPrompt && !initialPromptSent && chat.status === 'ready') {
       const text = initialPrompt
+      initialPromptSent = true
       onInitialPromptSent()
       void chat.sendMessage({ text })
     }

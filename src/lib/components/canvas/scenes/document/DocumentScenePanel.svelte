@@ -95,11 +95,12 @@
   let liveDraft = $state<DraftToolPart | null>(null)
   let documentPendingDelete = $state<SceneDocumentListItem | null>(null)
   let confirmDeleteDocumentOpen = $state(false)
-  // First prompt typed in the blank state — sent automatically once the
-  // lazily-created draft's chat mounts.
+  // First prompt typed in the blank state or handed off from scene creation —
+  // sent automatically once the lazily-created draft's chat mounts.
   let localPendingPrompt = $state<string | null>(null)
   let creatingDraft = false
   let loadingDocumentId = $state<string | null>(null)
+  let activeDocumentReloadTimer: ReturnType<typeof setTimeout> | null = null
   // Gates the hide-chat toggle: only meaningful once a conversation exists.
   let conversationStarted = $state(false)
 
@@ -146,6 +147,27 @@
     }
   }
 
+  function scheduleActiveDocumentReload(fallback: string) {
+    const documentId = activeDocumentId
+    if (!documentId) {
+      return
+    }
+
+    if (activeDocumentReloadTimer) {
+      clearTimeout(activeDocumentReloadTimer)
+    }
+
+    activeDocumentReloadTimer = setTimeout(() => {
+      activeDocumentReloadTimer = null
+      if (activeDocumentId !== documentId) {
+        return
+      }
+      void loadDocument(documentId, { force: true }).catch((cause) =>
+        reportError(cause, fallback)
+      )
+    }, 75)
+  }
+
   // Drafts are created lazily: only when the first prompt is sent, never
   // on open — so a scene without work in progress starts blank.
   async function createBlankDraft() {
@@ -172,12 +194,30 @@
     void refreshDocumentItems().catch((cause) =>
       reportError(cause, 'Failed to load the document workspace.')
     )
+
+    return () => {
+      if (activeDocumentReloadTimer) {
+        clearTimeout(activeDocumentReloadTimer)
+      }
+    }
   })
 
-  // A prompt arriving from the blank-scene entry screen needs a draft to
-  // chat against.
+  // A prompt arriving from the blank-scene entry screen is captured once and
+  // cleared before async draft creation can cause rerenders.
   $effect(() => {
-    if (initialPrompt && !activeDocumentId && canModify) {
+    if (!initialPrompt || !canModify) {
+      return
+    }
+
+    if (!localPendingPrompt) {
+      localPendingPrompt = initialPrompt
+    }
+    onInitialPromptSent()
+  })
+
+  // Pending prompts need a draft to chat against.
+  $effect(() => {
+    if (localPendingPrompt && !activeDocumentId && canModify) {
       void createBlankDraft().catch((cause) =>
         reportError(cause, 'Failed to create a draft.')
       )
@@ -282,14 +322,7 @@
   // Realtime document events from other collaborators are refetch signals.
   $effect(() => {
     if (documentRevision > 0) {
-      void refreshDocumentItems().catch((cause) =>
-        reportError(cause, 'Failed to refresh documents.')
-      )
-      if (activeDocumentId) {
-        void loadDocument(activeDocumentId, { force: true }).catch((cause) =>
-          reportError(cause, 'Failed to refresh the document.')
-        )
-      }
+      scheduleActiveDocumentReload('Failed to refresh the document.')
     }
   })
 
@@ -435,11 +468,7 @@
     void refreshDocumentItems().catch((cause) =>
       reportError(cause, 'Failed to refresh documents.')
     )
-    if (activeDocumentId) {
-      void loadDocument(activeDocumentId, { force: true }).catch((cause) =>
-        reportError(cause, 'Failed to refresh the document.')
-      )
-    }
+    scheduleActiveDocumentReload('Failed to refresh the document.')
   }
 
   function handleMessagesSnapshot(messages: UIMessage[]) {
@@ -704,7 +733,7 @@
                 {canModify}
                 isSaving={isSavingDocument}
                 onSave={(title, markdown) =>
-                  void handleSaveDocument(editingDocumentId, title, markdown)}
+                  handleSaveDocument(editingDocumentId, title, markdown)}
                 onPromote={() => void handlePromote(editingDocumentId)}
                 onBack={() => (view = 'chat')}
               />

@@ -5,6 +5,11 @@
     markdownDocumentContentSchema,
     type SceneDocument
   } from '$lib/scenes/schema'
+  import {
+    sameDocumentSaveSnapshot,
+    shouldAttemptAutosave,
+    type DocumentSaveSnapshot
+  } from '$lib/scenes/document-autosave'
   import { downloadMarkdown } from '$lib/scenes/download'
 
   const AUTO_SAVE_DEBOUNCE_MS = 1200
@@ -20,7 +25,7 @@
     document: SceneDocument
     canModify: boolean
     isSaving?: boolean
-    onSave: (title: string, markdown: string) => void
+    onSave: (title: string, markdown: string) => Promise<void> | void
     onPromote: () => void
     onBack: () => void
   }>()
@@ -38,8 +43,64 @@
   let title = $state(sceneDocument.title)
   // svelte-ignore state_referenced_locally -- seeds the editor once on mount
   let markdown = $state(parseMarkdown(sceneDocument))
+  let pendingSave = $state<DocumentSaveSnapshot | null>(null)
+  let lastSaveAttempt = $state<DocumentSaveSnapshot | null>(null)
 
   const isDirty = $derived(title !== seededTitle || markdown !== seededMarkdown)
+
+  function snapshot(title: string, markdown: string): DocumentSaveSnapshot {
+    return { title, markdown }
+  }
+
+  function currentSnapshot() {
+    return snapshot(title, markdown)
+  }
+
+  function baselineSnapshot() {
+    return snapshot(seededTitle, seededMarkdown)
+  }
+
+  function clearMatchingSaveAttempt(saved: DocumentSaveSnapshot) {
+    if (sameDocumentSaveSnapshot(pendingSave, saved)) {
+      pendingSave = null
+    }
+    if (sameDocumentSaveSnapshot(lastSaveAttempt, saved)) {
+      lastSaveAttempt = null
+    }
+  }
+
+  async function saveSnapshot(
+    next: DocumentSaveSnapshot,
+    options: { manual?: boolean } = {}
+  ) {
+    if (!canModify) {
+      return
+    }
+    if (sameDocumentSaveSnapshot(next, baselineSnapshot())) {
+      return
+    }
+    if (
+      !options.manual &&
+      !shouldAttemptAutosave({
+        current: next,
+        baseline: baselineSnapshot(),
+        pending: pendingSave,
+        lastAttempt: lastSaveAttempt
+      })
+    ) {
+      return
+    }
+
+    pendingSave = next
+    lastSaveAttempt = next
+    try {
+      await onSave(next.title, next.markdown)
+    } finally {
+      if (sameDocumentSaveSnapshot(pendingSave, next)) {
+        pendingSave = null
+      }
+    }
+  }
 
   // Sync remote document changes (AI writes, collaborators, save echoes)
   // into the editor IN PLACE — no remount, so the caret is preserved.
@@ -58,6 +119,7 @@
       if (documentTitle === title && documentMarkdown === markdown) {
         seededTitle = documentTitle
         seededMarkdown = documentMarkdown
+        clearMatchingSaveAttempt(snapshot(documentTitle, documentMarkdown))
         return
       }
       // Remote change while the user has local edits: keep theirs — the
@@ -69,6 +131,7 @@
       seededMarkdown = documentMarkdown
       title = documentTitle
       markdown = documentMarkdown
+      clearMatchingSaveAttempt(snapshot(documentTitle, documentMarkdown))
     })
   })
 
@@ -77,19 +140,23 @@
   $effect(() => {
     const nextTitle = title
     const nextMarkdown = markdown
+    const nextSnapshot = snapshot(nextTitle, nextMarkdown)
     if (!canModify) {
       return
     }
     if (
-      untrack(
-        () => nextTitle === seededTitle && nextMarkdown === seededMarkdown
-      )
+      !shouldAttemptAutosave({
+        current: nextSnapshot,
+        baseline: baselineSnapshot(),
+        pending: pendingSave,
+        lastAttempt: lastSaveAttempt
+      })
     ) {
       return
     }
 
     const timer = setTimeout(() => {
-      onSave(nextTitle, nextMarkdown)
+      void saveSnapshot(nextSnapshot)
     }, AUTO_SAVE_DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
@@ -98,7 +165,7 @@
   // Flush pending edits when the editor unmounts (view switch, close).
   onMount(() => () => {
     if (canModify && (title !== seededTitle || markdown !== seededMarkdown)) {
-      onSave(title, markdown)
+      void saveSnapshot(currentSnapshot(), { manual: true })
     }
   })
 
@@ -159,7 +226,7 @@
         <button
           type="button"
           class="flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground transition disabled:opacity-40"
-          onclick={() => onSave(title, markdown)}
+          onclick={() => void saveSnapshot(currentSnapshot(), { manual: true })}
           disabled={!isDirty || isSaving}
           title="Save now"
         >

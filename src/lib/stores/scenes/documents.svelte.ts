@@ -41,6 +41,7 @@ function createSceneDocumentsStore({
   )
   let fullDocumentsById = $state<Record<string, SceneDocument>>({})
   const pendingRefreshes = new Map<string, Promise<void>>()
+  const pendingDocumentLoads = new Map<string, Promise<SceneDocument>>()
   let revalidateTimer: ReturnType<typeof setTimeout> | null = null
 
   function setCanvas(
@@ -53,6 +54,7 @@ function createSceneDocumentsStore({
 
     if (canvasChanged) {
       pendingRefreshes.clear()
+      pendingDocumentLoads.clear()
       fullDocumentsById = {}
     }
   }
@@ -86,6 +88,11 @@ function createSceneDocumentsStore({
 
   function removeDocument(sceneId: string, documentId: string) {
     const { [documentId]: _removed, ...remaining } = fullDocumentsById
+    for (const key of pendingDocumentLoads.keys()) {
+      if (key.endsWith(`:${documentId}`)) {
+        pendingDocumentLoads.delete(key)
+      }
+    }
     fullDocumentsById = remaining
     itemsBySceneId = {
       ...itemsBySceneId,
@@ -131,13 +138,28 @@ function createSceneDocumentsStore({
     }
 
     const activeCanvasId = canvasId
-    const response = await getSceneDocument(activeCanvasId, sceneId, documentId)
-
-    if (activeCanvasId === canvasId) {
-      upsertFromFullDocument(response.item)
+    const loadKey = `${activeCanvasId}:${sceneId}:${documentId}`
+    const pending = pendingDocumentLoads.get(loadKey)
+    if (pending) {
+      return pending
     }
 
-    return response.item
+    const load = (async () => {
+      const response = await getSceneDocument(
+        activeCanvasId,
+        sceneId,
+        documentId
+      )
+
+      if (activeCanvasId === canvasId) {
+        upsertFromFullDocument(response.item)
+      }
+
+      return response.item
+    })().finally(() => pendingDocumentLoads.delete(loadKey))
+
+    pendingDocumentLoads.set(loadKey, load)
+    return load
   }
 
   function scheduleRevalidation() {
