@@ -42,7 +42,10 @@
     pointsToSvg,
     resolveEndpoint
   } from '$lib/canvas/diagram-utils'
-  import { resolveCanvasDisplayColor } from '$lib/canvas/helpers/display-color'
+  import {
+    resolveCanvasDisplayColor,
+    resolveTextColorOnFill
+  } from '$lib/canvas/helpers/display-color'
   import type { Scene } from '$lib/scenes/schema'
 
   type CanvasSurfaceElements = {
@@ -413,7 +416,10 @@
       {#if shape.text && !isEditingShapeText(shape)}
         <text
           class="select-none"
-          fill={resolveCanvasDisplayColor(shape.textColor ?? '#000000')}
+          fill={resolveTextColorOnFill(
+            shape.textColor ?? '#000000',
+            shape.fillColor
+          )}
           font-size={shapeTextFontSize(shape)}
           font-style={shape.textIsItalic ? 'italic' : 'normal'}
           font-weight={shape.textIsBold ? 'bold' : 'normal'}
