@@ -14,6 +14,42 @@ const PATH_ROTATE_HANDLE_LENGTH = 32
 const MIN_TEXT_FONT_SIZE = 6
 const MAX_TEXT_FONT_SIZE = 256
 
+const CANVAS_FONT_FAMILY =
+  "'Avenir Next', Avenir, 'Segoe UI', ui-sans-serif, system-ui, sans-serif"
+
+let _measureCtx: CanvasRenderingContext2D | null | undefined
+
+function getMeasureCtx(): CanvasRenderingContext2D | null {
+  if (_measureCtx === undefined) {
+    if (typeof document === 'undefined') {
+      _measureCtx = null
+    } else {
+      _measureCtx = document.createElement('canvas').getContext('2d')
+    }
+  }
+  return _measureCtx
+}
+
+function measureTextWidth(
+  text: string,
+  fontSize: number,
+  isBold: boolean,
+  isItalic: boolean
+): number {
+  const ctx = getMeasureCtx()
+  if (!ctx) return text.length * fontSize * 0.6
+  ctx.font = `${isItalic ? 'italic ' : ''}${isBold ? 'bold ' : ''}${fontSize}px ${CANVAS_FONT_FAMILY}`
+  const m = ctx.measureText(text)
+  // actualBoundingBox gives true ink extent; fall back to advance width
+  if (
+    m.actualBoundingBoxLeft !== undefined &&
+    m.actualBoundingBoxRight !== undefined
+  ) {
+    return m.actualBoundingBoxLeft + m.actualBoundingBoxRight
+  }
+  return m.width
+}
+
 export type TextResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
 
 export type TextHandleHit =
@@ -411,8 +447,12 @@ export function pathToSvgPath(points: Point[]): string {
 
 export function calculateTextBounds(text: TextElement) {
   const lines = getTextLines(text.text)
-  const width =
-    getTextContentWidth(lines, text.fontSize) + TEXT_BOUNDS_PADDING * 2
+  const maxLineWidth = Math.max(
+    ...lines.map((line) =>
+      measureTextWidth(line || ' ', text.fontSize, text.isBold, text.isItalic)
+    )
+  )
+  const width = maxLineWidth + TEXT_BOUNDS_PADDING * 2
   const height =
     (lines.length - 1) * getTextLineHeight(text.fontSize) +
     text.fontSize +
