@@ -107,10 +107,18 @@ export function createCanvasConferenceStore({
     get pinnedIdentity() {
       return room.pinnedIdentity
     },
+    get blurEnabled() {
+      return room.blurEnabled
+    },
+    get blurRadius() {
+      return room.blurRadius
+    },
     join: room.join,
     leave: room.leave,
     toggleMic: room.toggleMic,
     toggleCam: room.toggleCam,
+    toggleBlur: room.toggleBlur,
+    setBlurRadius: (value: number) => room.setBlurRadius(value),
     pin: room.pin,
     startAudio: room.startAudio,
 

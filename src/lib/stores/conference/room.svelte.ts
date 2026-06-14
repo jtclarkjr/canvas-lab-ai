@@ -1,4 +1,5 @@
-import type { Room } from 'livekit-client'
+import type { BackgroundProcessorWrapper } from '@livekit/track-processors'
+import type { LocalVideoTrack, Room } from 'livekit-client'
 import { ApiClientError } from '$lib/api-client'
 import { colorFromId } from '$lib/canvas/helpers/color-from-id'
 import { fetchConferenceToken } from '$lib/conference/api'
@@ -84,6 +85,9 @@ export function createConferenceRoomStore({
   let lastActiveSpeaker = $state<string | null>(null)
   let pinnedIdentity = $state<string | null>(null)
   let canPlayAudio = $state(true)
+  let blurEnabled = $state(false)
+  let blurRadius = $state(10)
+  let blurProcessor: BackgroundProcessorWrapper | null = null
 
   const isInCall = $derived(status === 'connected' || status === 'reconnecting')
   const featured = $derived(
@@ -140,7 +144,51 @@ export function createConferenceRoomStore({
     lastActiveSpeaker = null
     pinnedIdentity = null
     canPlayAudio = true
+    blurEnabled = false
+    blurProcessor = null
     onCallEnded()
+  }
+
+  function getLocalCameraTrack() {
+    if (!room || !lk) return null
+    return (
+      room.localParticipant.getTrackPublication(lk.Track.Source.Camera)
+        ?.videoTrack ?? null
+    )
+  }
+
+  async function attachBlurProcessor(track: LocalVideoTrack) {
+    const { BackgroundProcessor } = await import('@livekit/track-processors')
+    if (!blurProcessor) {
+      blurProcessor = BackgroundProcessor({
+        mode: 'background-blur',
+        blurRadius
+      })
+    } else {
+      await blurProcessor.switchTo({ mode: 'background-blur', blurRadius })
+    }
+    await track.setProcessor(blurProcessor)
+  }
+
+  async function toggleBlur() {
+    blurEnabled = !blurEnabled
+    const track = getLocalCameraTrack()
+    if (!track) return
+    if (blurEnabled) {
+      await attachBlurProcessor(track)
+    } else {
+      await track.stopProcessor()
+    }
+  }
+
+  async function setBlurRadius(value: number) {
+    blurRadius = value
+    if (blurEnabled && blurProcessor) {
+      await blurProcessor.switchTo({
+        mode: 'background-blur',
+        blurRadius: value
+      })
+    }
   }
 
   async function join() {
@@ -180,6 +228,15 @@ export function createConferenceRoomStore({
       for (const event of resyncEvents) {
         r.on(event, syncFromRoom)
       }
+      r.on(livekit.RoomEvent.LocalTrackPublished, (pub) => {
+        if (
+          blurEnabled &&
+          pub.source === livekit.Track.Source.Camera &&
+          pub.track
+        ) {
+          void attachBlurProcessor(pub.track as LocalVideoTrack)
+        }
+      })
       r.on(
         livekit.RoomEvent.DataReceived,
         (payload, participant, _kind, topic) => {
@@ -456,10 +513,18 @@ export function createConferenceRoomStore({
     get pinnedIdentity() {
       return pinnedIdentity
     },
+    get blurEnabled() {
+      return blurEnabled
+    },
+    get blurRadius() {
+      return blurRadius
+    },
     join,
     leave,
     toggleMic,
     toggleCam,
+    toggleBlur,
+    setBlurRadius,
     applyDevice,
     pin,
     startAudio,

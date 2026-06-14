@@ -15,6 +15,7 @@
     "@ai-sdk/anthropic": "^3.0.81",
     "@ai-sdk/openai": "^3.0.67",
     "@ai-sdk/svelte": "^4.0.196",
+    "@livekit/track-processors": "^0.7.2",
     "@supabase/supabase-js": "^2.107.0",
     "@vercel/analytics": "^2.0.1",
     "@xyflow/svelte": "^1.6.0",
