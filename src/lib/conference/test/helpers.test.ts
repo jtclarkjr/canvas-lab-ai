@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test'
 import {
   anchorFor,
   clampToViewport,
+  isRenderableVideoTrack,
   nearestCorner,
   pickFeatured,
   PIP_MARGIN,
@@ -79,6 +80,24 @@ describe('clampToViewport', () => {
       x: viewport.width - pip.width,
       y: viewport.height - pip.height
     })
+  })
+})
+
+describe('isRenderableVideoTrack', () => {
+  it('rejects missing tracks', () => {
+    expect(isRenderableVideoTrack(null)).toBe(false)
+  })
+
+  it('accepts live media tracks', () => {
+    expect(
+      isRenderableVideoTrack({ mediaStreamTrack: { readyState: 'live' } })
+    ).toBe(true)
+  })
+
+  it('rejects ended media tracks', () => {
+    expect(
+      isRenderableVideoTrack({ mediaStreamTrack: { readyState: 'ended' } })
+    ).toBe(false)
   })
 })
 

@@ -1,10 +1,15 @@
 import type { BackgroundProcessorWrapper } from '@livekit/track-processors'
-import type { Room } from 'livekit-client'
+import type { AudioTrack, Room, VideoTrack } from 'livekit-client'
 import type { BackgroundEffect } from '$lib/conference/backgrounds'
 import { ApiClientError } from '$lib/api-client'
 import { colorFromId } from '$lib/canvas/helpers/color-from-id'
 import { fetchConferenceToken } from '$lib/conference/api'
-import { loadBgPrefs, pickFeatured, saveBgPrefs } from '$lib/conference/helpers'
+import {
+  isRenderableVideoTrack,
+  loadBgPrefs,
+  pickFeatured,
+  saveBgPrefs
+} from '$lib/conference/helpers'
 import type {
   ConferenceParticipant,
   ConferenceStatus,
@@ -117,27 +122,40 @@ export function createConferenceRoomStore({
     }
 
     const all = [r.localParticipant, ...r.remoteParticipants.values()]
-    participants = all.map((p) => ({
-      identity: p.identity,
-      sid: p.sid,
-      name: p.name || p.identity,
-      isLocal: p === r.localParticipant,
-      isSpeaking: p.isSpeaking,
-      micEnabled: p.isMicrophoneEnabled,
-      camEnabled: p.isCameraEnabled,
-      wantsCaptions: p.attributes?.captions === 'on',
-      color: participantColor(p.metadata, p.identity),
-      videoTrack:
-        p.getTrackPublication(livekit.Track.Source.Camera)?.videoTrack ?? null,
-      screenShareTrack:
+    participants = all.map((p) => {
+      const videoTrack =
+        p.getTrackPublication(livekit.Track.Source.Camera)?.videoTrack ?? null
+      const screenShareTrack =
         p.getTrackPublication(livekit.Track.Source.ScreenShare)?.videoTrack ??
-        null,
-      audioTrack:
-        p === r.localParticipant
-          ? null
-          : (p.getTrackPublication(livekit.Track.Source.Microphone)
-              ?.audioTrack ?? null)
-    }))
+        null
+      let renderableScreenShareTrack: VideoTrack | null = null
+      let audioTrack: AudioTrack | null = null
+
+      if (isRenderableVideoTrack(screenShareTrack)) {
+        renderableScreenShareTrack = screenShareTrack
+      }
+
+      if (p !== r.localParticipant) {
+        audioTrack =
+          p.getTrackPublication(livekit.Track.Source.Microphone)?.audioTrack ??
+          null
+      }
+
+      return {
+        identity: p.identity,
+        sid: p.sid,
+        name: p.name || p.identity,
+        isLocal: p === r.localParticipant,
+        isSpeaking: p.isSpeaking,
+        micEnabled: p.isMicrophoneEnabled,
+        camEnabled: p.isCameraEnabled,
+        wantsCaptions: p.attributes?.captions === 'on',
+        color: participantColor(p.metadata, p.identity),
+        videoTrack,
+        screenShareTrack: renderableScreenShareTrack,
+        audioTrack
+      }
+    })
 
     micEnabled = r.localParticipant.isMicrophoneEnabled
     camEnabled = r.localParticipant.isCameraEnabled
@@ -148,6 +166,15 @@ export function createConferenceRoomStore({
       !participants.some((p) => p.identity === lastActiveSpeaker)
     ) {
       lastActiveSpeaker = null
+    }
+
+    if (
+      pinnedIdentity?.endsWith(':screen') &&
+      !participants.some(
+        (p) => `${p.identity}:screen` === pinnedIdentity && p.screenShareTrack
+      )
+    ) {
+      pinnedIdentity = null
     }
   }
 
@@ -259,6 +286,7 @@ export function createConferenceRoomStore({
         livekit.RoomEvent.ParticipantConnected,
         livekit.RoomEvent.ParticipantDisconnected,
         livekit.RoomEvent.TrackSubscribed,
+        livekit.RoomEvent.TrackUnpublished,
         livekit.RoomEvent.TrackUnsubscribed,
         livekit.RoomEvent.TrackMuted,
         livekit.RoomEvent.TrackUnmuted,

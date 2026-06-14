@@ -1,5 +1,9 @@
 import type { Corner, DevicePrefs, Point, Size } from '$lib/conference/types'
 
+type RenderableVideoTrack = {
+  mediaStreamTrack: Pick<MediaStreamTrack, 'readyState'>
+}
+
 // Anchor geometry mirrors the fixed chrome it has to coexist with:
 // right-6/bottom-6 margins (24px), the top-6 toolbars (h-9/h-10 -> 80px
 // clearance), the bottom-right zoom column (w-10) and the chat window
@@ -68,6 +72,12 @@ export function clampToViewport(
     x: Math.min(Math.max(point.x, 0), Math.max(viewport.width - pip.width, 0)),
     y: Math.min(Math.max(point.y, 0), Math.max(viewport.height - pip.height, 0))
   }
+}
+
+export function isRenderableVideoTrack(
+  track: RenderableVideoTrack | null
+): track is RenderableVideoTrack {
+  return track !== null && track.mediaStreamTrack.readyState !== 'ended'
 }
 
 type Featurable = { identity: string; isLocal: boolean }
