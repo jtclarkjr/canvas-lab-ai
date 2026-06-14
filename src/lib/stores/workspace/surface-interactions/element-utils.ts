@@ -129,25 +129,25 @@ export function allElements(ctx: SurfaceCtx): HitElement[] {
   const items: HitElement[] = [
     ...ctx.getPaths().map((element) => ({
       id: element.id,
-      type: 'path' as CanvasElementType,
+      type: 'path' as const,
       element,
       z: element.z ?? 0
     })),
     ...ctx.getTextElements().map((element) => ({
       id: element.id,
-      type: 'text' as CanvasElementType,
+      type: 'text' as const,
       element,
       z: element.z ?? 0
     })),
     ...ctx.getShapesSafe().map((element) => ({
       id: element.id,
-      type: 'shape' as CanvasElementType,
+      type: 'shape' as const,
       element,
       z: element.z ?? 0
     })),
     ...ctx.getConnectorsSafe().map((element) => ({
       id: element.id,
-      type: 'connector' as CanvasElementType,
+      type: 'connector' as const,
       element,
       z: element.z ?? 0
     })),
@@ -177,22 +177,13 @@ export function findTopElementAtPoint(
   for (const item of ordered) {
     switch (item.type) {
       case 'text':
-        if (isTextElement(item.element)) {
-          const hitText = findTextAtPoint(point, [item.element])
-          if (hitText) return item
-        }
+        if (findTextAtPoint(point, [item.element])) return item
         break
       case 'shape':
-        if (
-          isShapeElement(item.element) &&
-          findShapeAtPoint(point, [item.element])
-        ) {
-          return item
-        }
+        if (findShapeAtPoint(point, [item.element])) return item
         break
       case 'connector':
         if (
-          'start' in item.element &&
           findConnectorAtPoint(
             point,
             [item.element],
@@ -205,17 +196,10 @@ export function findTopElementAtPoint(
         }
         break
       case 'scene':
-        if (isPointInAnchorTarget(point, item.element)) {
-          return item
-        }
+        if (isPointInAnchorTarget(point, item.element)) return item
         break
       case 'path':
-        if (
-          'points' in item.element &&
-          isPointNearPath(point, item.element, threshold)
-        ) {
-          return item
-        }
+        if (isPointNearPath(point, item.element, threshold)) return item
         break
     }
   }

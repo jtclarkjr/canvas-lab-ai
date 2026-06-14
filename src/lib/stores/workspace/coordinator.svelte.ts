@@ -705,6 +705,13 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     get selectedTool() {
       return selectedTool
     },
+    get displayTool() {
+      if (selectedTool !== 'select') return selectedTool
+      if (sceneStore.hasShapeSelection) return 'shape'
+      if (sceneStore.hasConnectorSelection) return 'connector'
+      if (sceneStore.hasPathSelection) return 'pencil'
+      return selectedTool
+    },
     get role() {
       return role
     },
@@ -780,6 +787,9 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     },
     get hasConnectorSelection() {
       return sceneStore.hasConnectorSelection
+    },
+    get hasPathSelection() {
+      return sceneStore.hasPathSelection
     },
     get mode() {
       return modeStore.mode

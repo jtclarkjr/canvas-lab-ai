@@ -17,8 +17,6 @@ import type { SurfaceCtx } from './context'
 import {
   checkDoubleClick,
   findTopElementAtPoint,
-  isConnectorElement,
-  isShapeElement,
   removeElementLocally,
   updateClickTracking
 } from './element-utils'
@@ -98,11 +96,7 @@ export function handleSvgPointerDown(ctx: SurfaceCtx, event: PointerEvent) {
       return
     }
 
-    if (
-      hit?.type === 'connector' &&
-      isConnectorElement(hit.element) &&
-      ctx.canModifyElement(hit.id)
-    ) {
+    if (hit?.type === 'connector' && ctx.canModifyElement(hit.id)) {
       ctx.setSelectedTool('select')
       ctx.setSelectedElementIds(new Set([hit.id]))
       updateClickTracking(ctx, point)
@@ -322,7 +316,6 @@ export function handleSvgPointerDown(ctx: SurfaceCtx, event: PointerEvent) {
   if (
     isDoubleClick &&
     hit?.type === 'connector' &&
-    isConnectorElement(hit.element) &&
     ctx.canModifyElement(hit.id)
   ) {
     const editingText = ctx.getEditingText()
@@ -340,12 +333,7 @@ export function handleSvgPointerDown(ctx: SurfaceCtx, event: PointerEvent) {
     return
   }
 
-  if (
-    isDoubleClick &&
-    hit?.type === 'shape' &&
-    isShapeElement(hit.element) &&
-    ctx.canModifyElement(hit.id)
-  ) {
+  if (isDoubleClick && hit?.type === 'shape' && ctx.canModifyElement(hit.id)) {
     const editingText = ctx.getEditingText()
     if (editingText?.value.trim()) {
       ctx.commitText(editingText)
@@ -364,12 +352,23 @@ export function handleSvgPointerDown(ctx: SurfaceCtx, event: PointerEvent) {
   updateClickTracking(ctx, point)
   const hitElementId = hit && canModifyHit(ctx, hit) ? hit.id : undefined
 
-  if (hitElementId) {
+  if (hitElementId && hit) {
     ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)
     ctx.pendingDrag = { elementId: hitElementId, startPos: point }
     setCursorStyle(ctx, 'move')
     if (!selectedIds.has(hitElementId)) {
       ctx.setSelectedElementIds(new Set([hitElementId]))
+      switch (hit.type) {
+        case 'shape':
+          ctx.formattingStore.syncDiagramFormattingFromShape(hit.element)
+          break
+        case 'connector':
+          ctx.formattingStore.syncDiagramFormattingFromConnector(hit.element)
+          break
+        case 'path':
+          ctx.formattingStore.syncDrawFormattingFromPath(hit.element)
+          break
+      }
     }
   } else {
     ;(event.currentTarget as SVGSVGElement).setPointerCapture(event.pointerId)

@@ -161,7 +161,7 @@
     currentTitle={workspace.currentCanvasTitle}
     canManageCanvas={workspace.canManageCanvas}
     isLoadingCanvases={workspace.isLoadingCanvases}
-    selectedTool={workspace.selectedTool}
+    selectedTool={workspace.displayTool}
     readOnly={!workspace.canEdit || workspace.mode === 'scenes'}
     showNavigation={!workspace.isAnonymousPublicViewer}
     onTitleSave={workspace.saveTitle}
@@ -222,7 +222,8 @@
     style={workspace.drawFormatting.style}
     isHighlighter={workspace.drawFormatting.isHighlighter}
     highlighterOpacity={workspace.drawFormatting.highlighterOpacity}
-    isVisible={workspace.selectedTool === 'pencil'}
+    isVisible={workspace.selectedTool === 'pencil' ||
+      workspace.hasPathSelection}
     onWidthChange={workspace.setDrawWidth}
     onColorChange={workspace.setDrawColor}
     onStyleChange={workspace.setDrawStyle}

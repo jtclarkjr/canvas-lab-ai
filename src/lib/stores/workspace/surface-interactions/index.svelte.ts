@@ -67,6 +67,10 @@ export function createWorkspaceSurfaceInteractionsStore(
       return ctx
         .getConnectorsSafe()
         .some((connector) => selectedIds.has(connector.id))
+    },
+    get hasPathSelection() {
+      const selectedIds = ctx.getSelectedElementIds()
+      return ctx.getPaths().some((path) => selectedIds.has(path.id))
     }
   }
 }

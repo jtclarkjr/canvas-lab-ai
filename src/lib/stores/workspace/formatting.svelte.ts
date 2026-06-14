@@ -1,10 +1,13 @@
 import type {
   Arrowhead,
   ConnectorKind,
+  DiagramConnector,
   DiagramFormatting,
+  DiagramShape,
   DrawFormatting,
   DrawStyle,
   ListStyle,
+  Path,
   ShapeKind,
   StrokeStyle,
   TextElement,
@@ -68,6 +71,39 @@ export function createWorkspaceFormattingStore() {
       isUnderline: element.isUnderline,
       color: element.color,
       listStyle: previous.listStyle
+    }))
+  }
+
+  function syncDiagramFormattingFromShape(shape: DiagramShape) {
+    setDiagramFormatting((previous) => ({
+      ...previous,
+      shapeKind: shape.kind,
+      fillColor: shape.fillColor,
+      strokeColor: shape.strokeColor,
+      strokeWidth: shape.strokeWidth,
+      strokeStyle: shape.strokeStyle,
+      opacity: shape.opacity
+    }))
+  }
+
+  function syncDiagramFormattingFromConnector(connector: DiagramConnector) {
+    setDiagramFormatting((previous) => ({
+      ...previous,
+      connectorKind: connector.kind,
+      strokeColor: connector.strokeColor,
+      strokeWidth: connector.strokeWidth,
+      strokeStyle: connector.strokeStyle,
+      opacity: connector.opacity,
+      startArrow: connector.startArrow,
+      endArrow: connector.endArrow
+    }))
+  }
+
+  function syncDrawFormattingFromPath(path: Path) {
+    setDrawFormatting((previous) => ({
+      ...previous,
+      width: path.width,
+      color: path.color
     }))
   }
 
@@ -163,6 +199,9 @@ export function createWorkspaceFormattingStore() {
   return {
     setTextListStyle,
     syncTextFormattingFromElement,
+    syncDiagramFormattingFromShape,
+    syncDiagramFormattingFromConnector,
+    syncDrawFormattingFromPath,
     setTextFontSize,
     toggleTextBold,
     toggleTextItalic,

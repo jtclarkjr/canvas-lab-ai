@@ -123,18 +123,11 @@ export type WorkspaceSurfaceInteractionsInput = {
 }
 
 export type HitElement =
-  | {
-      id: string
-      type: CanvasElementType
-      element: CanvasDrawableElement
-      z: number
-    }
-  | {
-      id: string
-      type: 'scene'
-      element: Scene
-      z: number
-    }
+  | { id: string; type: 'path'; element: Path; z: number }
+  | { id: string; type: 'text'; element: TextElement; z: number }
+  | { id: string; type: 'shape'; element: DiagramShape; z: number }
+  | { id: string; type: 'connector'; element: DiagramConnector; z: number }
+  | { id: string; type: 'scene'; element: Scene; z: number }
 
 export type ActiveInteraction =
   | {
