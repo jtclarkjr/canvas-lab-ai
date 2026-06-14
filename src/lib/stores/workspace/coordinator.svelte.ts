@@ -241,11 +241,8 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     return role === 'owner' || role === 'admin'
   }
 
-  function canModifyElement(id: string) {
-    if (role === 'owner' || role === 'admin') {
-      return true
-    }
-    return role === 'editor' && elementOwners.get(id) === userId
+  function canModifyElement(_id: string) {
+    return role === 'owner' || role === 'admin' || role === 'editor'
   }
 
   function clearSelection() {
