@@ -98,6 +98,10 @@ export const load: PageServerLoad = async ({
     } else if (resolved.publicAccess) {
       access = { state: 'public-viewer', canvasTitle: resolved.canvas.title }
     } else {
+      if (user.isAnonymous) {
+        const redirectTo = `${url.pathname}${url.search}`
+        throw redirect(303, `/login?redirect=${encodeURIComponent(redirectTo)}`)
+      }
       access = { state: 'no-access' }
     }
 

@@ -1,15 +1,21 @@
-import { invalidateAll } from '$app/navigation'
+import { goto, invalidateAll } from '$app/navigation'
 import { listAccessRequests } from '$lib/workspace/api'
 import type { AccessRequest } from '$lib/canvas/schema'
 import type { CanvasRole } from '$lib/canvas/roles'
 import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
 import { toast } from '$lib/stores/shared/toast.svelte'
+import {
+  CANVAS_VISIBILITY_CHANGED_EVENT,
+  canvasVisibilityChannelName,
+  type CanvasVisibilityChangedPayload
+} from '$lib/workspace/canvas-visibility-realtime'
 
 type WorkspaceAccessInput = {
   getActiveCanvasId: () => string
   getRole: () => CanvasRole
   getUserId: () => string
   getIsPublicViewer: () => boolean
+  getIsAnonymousPublicViewer: () => boolean
   canManageCanvas: () => boolean
 }
 
@@ -18,6 +24,7 @@ export function createWorkspaceAccessStore({
   getRole,
   getUserId,
   getIsPublicViewer,
+  getIsAnonymousPublicViewer,
   canManageCanvas
 }: WorkspaceAccessInput) {
   let shareDialogOpen = $state(false)
@@ -208,26 +215,56 @@ export function createWorkspaceAccessStore({
     }
 
     let cancelled = false
+    let handledPrivateVisibility = false
 
-    const channel = client.channel(`canvas:${id}:visibility`).on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'canvases',
-        filter: `id=eq.${id}`
-      },
-      (payload) => {
-        const next = payload.new as { visibility?: string }
-        if (next.visibility === 'private') {
-          toast.show({
-            title: 'Access changed',
-            description: 'This canvas is now private.'
-          })
-          void invalidateAll()
-        }
+    function handlePrivateVisibility() {
+      if (handledPrivateVisibility) {
+        return
       }
-    )
+      handledPrivateVisibility = true
+
+      toast.show({
+        title: 'Access changed',
+        description: 'This canvas is now private.'
+      })
+
+      if (getIsAnonymousPublicViewer()) {
+        void goto(`/login?redirect=${encodeURIComponent(`/canvas/${id}`)}`, {
+          replaceState: true
+        })
+        return
+      }
+
+      void invalidateAll()
+    }
+
+    const channel = client
+      .channel(canvasVisibilityChannelName(id))
+      .on(
+        'broadcast',
+        { event: CANVAS_VISIBILITY_CHANGED_EVENT },
+        ({ payload }) => {
+          const next = payload as CanvasVisibilityChangedPayload
+          if (next.canvasId === id && next.visibility === 'private') {
+            handlePrivateVisibility()
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'canvases',
+          filter: `id=eq.${id}`
+        },
+        (payload) => {
+          const next = payload.new as { visibility?: string }
+          if (next.visibility === 'private') {
+            handlePrivateVisibility()
+          }
+        }
+      )
 
     void ensureSessionInitialized().then((session) => {
       if (cancelled) return

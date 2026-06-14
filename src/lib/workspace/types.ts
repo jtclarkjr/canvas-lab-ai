@@ -11,7 +11,7 @@ export type CursorCoordinateSpace = 'canvas' | 'viewport'
 export type CursorEventPayload = {
   position: Point
   coordinateSpace?: CursorCoordinateSpace
-  user: { id: string; name: string }
+  user: { id: string; name: string; isAnonymous?: boolean }
   color: string
   timestamp: number
 }
@@ -19,12 +19,14 @@ export type CursorEventPayload = {
 export type WorkspaceMember = {
   name: string
   color: string
+  isAnonymous?: boolean
 }
 
 export type DisplayMember = {
   id: string
   name: string
   color: string
+  isAnonymous?: boolean
 }
 
 export type CanvasWorkspaceStoreInput = {

@@ -1,12 +1,15 @@
 <script lang="ts">
+  import { UserRound } from 'lucide-svelte'
   import type { CanvasRole } from '$lib/canvas/roles'
   import CanvasOptionsButton from '$lib/components/canvas/workspace/CanvasOptionsButton.svelte'
   import ConferenceCallButton from '$lib/components/canvas/conference/ConferenceCallButton.svelte'
+  import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
+  import type { DisplayMember } from '$lib/workspace/types'
 
   let { canvasId, role, members, pendingCount, onShare } = $props<{
     canvasId: string
     role: CanvasRole
-    members: Array<{ id: string; name: string; color: string }>
+    members: DisplayMember[]
     pendingCount: number
     onShare: () => void
   }>()
@@ -22,7 +25,11 @@
         style={`background-color:${member.color};color:var(--canvas-avatar-foreground)`}
         title={member.name}
       >
-        {member.name.trim().slice(0, 2).toUpperCase() || 'ME'}
+        {#if member.isAnonymous}
+          <UserRound class="size-4" aria-label="Guest viewer" />
+        {:else}
+          {getWorkspaceAvatarInitials(member.name)}
+        {/if}
       </span>
     {/each}
     {#if members.length > 5}

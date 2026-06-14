@@ -2,6 +2,7 @@ import { invalidate } from '$app/navigation'
 import { listCanvases } from '$lib/canvas/api'
 import { updateCanvas } from '$lib/workspace/api'
 import { CANVASES_DEPENDENCY } from '$lib/canvas/dependencies'
+import { broadcastCanvasVisibilityChange } from '$lib/workspace/canvas-visibility-realtime'
 import type { Canvas, CanvasVisibility } from '$lib/canvas/schema'
 
 type WorkspaceCanvasesInput = {
@@ -91,6 +92,12 @@ export function createWorkspaceCanvasesStore({
     canvases = canvases.map((entry) =>
       entry.id === canvas.id ? response.item : entry
     )
+    void broadcastCanvasVisibilityChange(
+      canvas.id,
+      response.item.visibility
+    ).catch(() => {
+      // The database update is authoritative; realtime broadcast is best-effort.
+    })
     void invalidate(CANVASES_DEPENDENCY)
   }
 

@@ -114,6 +114,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     getRole: () => role,
     getUserId: () => userId,
     getIsPublicViewer: () => isPublicViewer,
+    getIsAnonymousPublicViewer: () => isAnonymousPublicViewer,
     canManageCanvas
   })
   const presenceStore = createWorkspacePresenceStore({
@@ -121,10 +122,11 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     getCanvasId: () => canvasId,
     getUserId: () => userId,
     getUserEmail: () => userEmail,
+    getIsAnonymousUser: () => isAnonymousPublicViewer,
     screenToCanvasPoint
   })
   createWorkspaceRealtimeElementsStore({
-    getActiveCanvasId: () => activeCanvasId,
+    getActiveCanvasId: () => (isAnonymousPublicViewer ? '' : activeCanvasId),
     getEditingTextId: () => editingText?.id,
     hasElementOwner: (id) => elementOwners.has(id),
     setElementOwner: (id, ownerId) => elementOwners.set(id, ownerId),
@@ -510,7 +512,11 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
   }
 
   function mount() {
-    void canvasesStore.loadCanvasesList()
+    if (isAnonymousPublicViewer) {
+      canvasesStore.setError(null)
+    } else {
+      void canvasesStore.loadCanvasesList()
+    }
     window.addEventListener('keydown', handleWorkspaceKeydown)
 
     return () => {
@@ -569,14 +575,16 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
       modeStore.setMode('editor')
     }
     cameraStore.loadCameraState(nextCanvasId)
-    void loadCanvasElements(nextCanvasId)
     if (isAnonymousPublicViewer) {
+      canvasesStore.setError(null)
       scenesStore.setScenes([])
       workflowsStore.setWorkflows([])
-    } else {
-      void scenesStore.loadScenes(nextCanvasId)
+      return
     }
-    if (workflowEnabled && !isAnonymousPublicViewer) {
+
+    void loadCanvasElements(nextCanvasId)
+    void scenesStore.loadScenes(nextCanvasId)
+    if (workflowEnabled) {
       void workflowsStore.loadWorkflows(nextCanvasId)
     } else {
       workflowsStore.setWorkflows([])

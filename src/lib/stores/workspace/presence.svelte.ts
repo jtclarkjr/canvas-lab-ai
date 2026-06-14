@@ -5,6 +5,7 @@ import {
 import { supabase } from '$lib/auth/session-store'
 import { colorFromId } from '$lib/canvas/helpers/color-from-id'
 import { displayMembers as getDisplayMembers } from '$lib/workspace/display-members'
+import { getPresenceIdentity } from '$lib/workspace/presence-identity'
 import { createThrottledCursorSender } from '$lib/workspace/throttled-cursor-sender'
 import type { Point } from '$lib/canvas/types'
 import type { CursorEventPayload, WorkspaceMember } from '$lib/workspace/types'
@@ -14,6 +15,7 @@ type WorkspacePresenceInput = {
   getCanvasId: () => string
   getUserId: () => string
   getUserEmail: () => string | null | undefined
+  getIsAnonymousUser?: () => boolean
   screenToCanvasPoint: (clientX: number, clientY: number) => Point
 }
 
@@ -22,6 +24,7 @@ export function createWorkspacePresenceStore({
   getCanvasId,
   getUserId,
   getUserEmail,
+  getIsAnonymousUser,
   screenToCanvasPoint
 }: WorkspacePresenceInput) {
   let cursors = $state<Record<string, CursorEventPayload>>({})
@@ -36,6 +39,12 @@ export function createWorkspacePresenceStore({
     const activeCanvasId = getActiveCanvasId()
     const userId = getUserId()
     const userEmail = getUserEmail()
+    const identity = getPresenceIdentity(
+      userId,
+      userEmail,
+      getIsAnonymousUser?.() ?? false,
+      colorFromId
+    )
     if (!client || !activeCanvasId) {
       cursors = {}
       members = {}
@@ -53,8 +62,12 @@ export function createWorkspacePresenceStore({
       const payload: CursorEventPayload = {
         position: screenToCanvasPoint(event.clientX, event.clientY),
         coordinateSpace: 'canvas',
-        user: { id: userId, name: userEmail ?? 'anon' },
-        color: colorFromId(userId),
+        user: {
+          id: userId,
+          name: identity.name,
+          isAnonymous: identity.isAnonymous
+        },
+        color: identity.color,
         timestamp: Date.now()
       }
       lastPayload = payload
@@ -87,14 +100,18 @@ export function createWorkspacePresenceStore({
       .on('presence', { event: 'join' }, () => {
         const state = channel.presenceState() as Record<
           string,
-          Array<{ name: string; color: string }>
+          Array<{ name: string; color: string; isAnonymous?: boolean }>
         >
         const participants = Object.entries(state).reduce<
           Record<string, WorkspaceMember>
         >((accumulator, [key, values]) => {
           const latest = values.length > 0 ? values[values.length - 1] : null
           if (latest) {
-            accumulator[key] = { name: latest.name, color: latest.color }
+            accumulator[key] = {
+              name: latest.name,
+              color: latest.color,
+              isAnonymous: latest.isAnonymous
+            }
           }
           return accumulator
         }, {})
@@ -124,20 +141,25 @@ export function createWorkspacePresenceStore({
         if (status === REALTIME_SUBSCRIBE_STATES.SUBSCRIBED) {
           await channel.track({
             key: userId,
-            name: userEmail ?? 'anon',
-            color: colorFromId(userId)
+            name: identity.name,
+            color: identity.color,
+            isAnonymous: identity.isAnonymous
           })
           currentChannel = channel
           const state = channel.presenceState() as Record<
             string,
-            Array<{ name: string; color: string }>
+            Array<{ name: string; color: string; isAnonymous?: boolean }>
           >
           members = Object.entries(state).reduce<
             Record<string, WorkspaceMember>
           >((accumulator, [key, values]) => {
             const latest = values.length > 0 ? values[values.length - 1] : null
             if (latest) {
-              accumulator[key] = { name: latest.name, color: latest.color }
+              accumulator[key] = {
+                name: latest.name,
+                color: latest.color,
+                isAnonymous: latest.isAnonymous
+              }
             }
             return accumulator
           }, {})
@@ -167,7 +189,8 @@ export function createWorkspacePresenceStore({
         members,
         userId,
         getUserEmail(),
-        colorFromId(userId)
+        colorFromId(userId),
+        getIsAnonymousUser?.() ?? false
       )
     }
   }

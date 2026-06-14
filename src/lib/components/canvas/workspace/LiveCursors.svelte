@@ -1,22 +1,14 @@
 <script lang="ts">
-  import { MousePointer2 } from 'lucide-svelte'
+  import { MousePointer2, UserRound } from 'lucide-svelte'
   import { canvasToScreen } from '$lib/canvas/drawing-utils'
   import type { Camera, Point } from '$lib/canvas/types'
   import type { CursorEventPayload } from '$lib/workspace/types'
+  import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
 
   let { cursors, camera } = $props<{
     cursors: Record<string, CursorEventPayload>
     camera: Camera
   }>()
-
-  function getInitials(name: string) {
-    const parts = name.split(' ')
-    if (parts.length >= 2) {
-      return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase()
-    }
-
-    return name.slice(0, 2).toUpperCase()
-  }
 
   function cursorEntries() {
     return Object.entries(cursors) as Array<[string, CursorEventPayload]>
@@ -53,8 +45,13 @@
           <div
             class="absolute left-5 top-5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background/80 text-xs font-semibold shadow-lg"
             style={`background-color:${cursor.color};color:var(--canvas-avatar-foreground)`}
+            title={cursor.user.name}
           >
-            {getInitials(cursor.user.name)}
+            {#if cursor.user.isAnonymous}
+              <UserRound class="size-4" aria-label="Guest viewer" />
+            {:else}
+              {getWorkspaceAvatarInitials(cursor.user.name)}
+            {/if}
           </div>
         </div>
       </div>
