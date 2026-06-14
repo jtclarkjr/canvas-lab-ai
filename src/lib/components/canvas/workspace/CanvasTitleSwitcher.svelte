@@ -82,7 +82,7 @@
   }
 </script>
 
-<div class="fixed left-4 top-4 z-20 flex items-start gap-3">
+<div class="fixed left-4 top-4 z-30 flex items-start gap-3">
   <div class="flex flex-col gap-2">
     {#if showNavigation}
       <a href="/" class="toolbar-pill toolbar-button" title="Back to dashboard">
@@ -135,9 +135,9 @@
         </button>
         {#if showCanvasSelector}
           <div
-            class="absolute left-0 top-full mt-2 min-w-[200px] rounded-lg border border-border/70 bg-popover text-popover-foreground shadow-xl"
+            class="absolute left-0 top-full mt-1 min-w-[200px] rounded-lg border border-border/70 bg-popover text-popover-foreground shadow-xl"
           >
-            <div class="max-h-[300px] overflow-y-auto p-2">
+            <div class="max-h-[300px] overflow-y-auto p-1">
               {#if canvases.length > 0}
                 {#each canvases as canvas}
                   <button
