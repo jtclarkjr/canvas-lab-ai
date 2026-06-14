@@ -36,7 +36,7 @@
   let isEditingTitle = $state(false)
   let editedTitle = $state('')
 
-  const MAX_TITLE_CHARS = 20
+  const MAX_TITLE_CHARS = 15
   const displayTitle = $derived(
     currentTitle && currentTitle.length > MAX_TITLE_CHARS
       ? currentTitle.slice(0, MAX_TITLE_CHARS) + '…'
@@ -154,7 +154,9 @@
                       }
                     }}
                   >
-                    {canvas.title}
+                    {canvas.title.trim().length > 15
+                      ? canvas.title.trim().slice(0, 15) + '…'
+                      : canvas.title.trim()}
                   </button>
                 {/each}
               {:else if isLoadingCanvases}
