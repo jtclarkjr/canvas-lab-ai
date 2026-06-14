@@ -13,7 +13,7 @@
 
 {#if canUndo || canRedo || selectedCount > 0}
   <div
-    class="fixed bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border/70 bg-card/95 px-3 py-2 text-card-foreground shadow-lg backdrop-blur"
+    class="fixed bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border/70 bg-card/95 px-3 py-2 text-card-foreground shadow-lg backdrop-blur"
   >
     {#if canUndo || canRedo}
       <div class="flex items-center gap-1">
