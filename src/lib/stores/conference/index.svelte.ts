@@ -6,6 +6,7 @@ import type {
 } from '$lib/conference/captions'
 import type {
   ConferenceFullscreenPanel,
+  ConferenceLayoutMode,
   ConferenceViewMode,
   Corner,
   DeviceKind
@@ -154,12 +155,16 @@ export function createCanvasConferenceStore({
     get fullscreenPanel() {
       return view.fullscreenPanel
     },
+    get layoutMode() {
+      return view.layoutMode
+    },
     setCorner: (value: Corner) => view.setCorner(value),
     setChatOpen: (value: boolean) => view.setChatOpen(value),
     setViewMode: (value: ConferenceViewMode) => view.setViewMode(value),
     toggleFullscreenPanel: (
       panel: Exclude<ConferenceFullscreenPanel, 'none'>
     ) => view.toggleFullscreenPanel(panel),
+    setLayoutMode: (mode: ConferenceLayoutMode) => view.setLayoutMode(mode),
 
     // Captions
     get captionsEnabled() {

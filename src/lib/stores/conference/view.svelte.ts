@@ -1,5 +1,6 @@
 import type {
   ConferenceFullscreenPanel,
+  ConferenceLayoutMode,
   ConferenceViewMode,
   Corner
 } from '$lib/conference/types'
@@ -11,6 +12,7 @@ export function createConferenceViewStore() {
   let chatOpen = $state(false)
   let viewMode = $state<ConferenceViewMode>('pip')
   let fullscreenPanel = $state<ConferenceFullscreenPanel>('none')
+  let layoutMode = $state<ConferenceLayoutMode>('auto')
 
   return {
     get corner() {
@@ -25,6 +27,9 @@ export function createConferenceViewStore() {
     get fullscreenPanel() {
       return fullscreenPanel
     },
+    get layoutMode() {
+      return layoutMode
+    },
     setCorner(value: Corner) {
       corner = value
     },
@@ -37,11 +42,15 @@ export function createConferenceViewStore() {
     toggleFullscreenPanel(panel: Exclude<ConferenceFullscreenPanel, 'none'>) {
       fullscreenPanel = fullscreenPanel === panel ? 'none' : panel
     },
+    setLayoutMode(mode: ConferenceLayoutMode) {
+      layoutMode = mode
+    },
     // Corner and chat-open persist across calls by design; only the
     // call-scoped view state resets.
     resetForCallEnd() {
       viewMode = 'pip'
       fullscreenPanel = 'none'
+      layoutMode = 'auto'
     }
   }
 }

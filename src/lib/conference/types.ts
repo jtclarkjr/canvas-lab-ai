@@ -29,6 +29,8 @@ export type ConferenceViewMode = 'pip' | 'bar' | 'fullscreen'
 
 export type ConferenceFullscreenPanel = 'none' | 'chat' | 'people'
 
+export type ConferenceLayoutMode = 'auto' | 'spotlight' | 'sidebar'
+
 // Reactive snapshot of a LiveKit participant (the live Room object itself
 // is never exposed to the UI).
 export type ConferenceParticipant = {

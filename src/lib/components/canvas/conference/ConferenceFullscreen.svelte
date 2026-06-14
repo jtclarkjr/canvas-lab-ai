@@ -2,6 +2,9 @@
   import { fade } from 'svelte/transition'
   import {
     ClosedCaption,
+    LayoutGrid,
+    LayoutPanelLeft,
+    LayoutPanelTop,
     LoaderCircle,
     MessageSquare,
     Mic,
@@ -24,6 +27,10 @@
     type CaptionLanguageCode,
     type CaptionTextSize
   } from '$lib/conference/captions'
+  import type {
+    ConferenceLayoutMode,
+    ConferenceParticipant
+  } from '$lib/conference/types'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
@@ -133,7 +140,94 @@
     }`
 
   let ccSettingsHovered = $state(false)
+
+  // Layout picker
+  let layoutPickerOpen = $state(false)
+
+  $effect(() => {
+    if (!layoutPickerOpen) return
+    const close = (e: MouseEvent) => {
+      const target = e.target as Element
+      if (!target.closest('[data-layout-picker]')) {
+        layoutPickerOpen = false
+      }
+    }
+    document.addEventListener('click', close, { capture: true })
+    return () => document.removeEventListener('click', close, { capture: true })
+  })
+
+  function selectLayout(mode: ConferenceLayoutMode) {
+    store.setLayoutMode(mode)
+    layoutPickerOpen = false
+  }
+
+  const LAYOUTS: { mode: ConferenceLayoutMode; label: string }[] = [
+    { mode: 'auto', label: 'Grid' },
+    { mode: 'spotlight', label: 'Spotlight' },
+    { mode: 'sidebar', label: 'Sidebar' }
+  ]
+
+  // Participants excluding the featured one (for spotlight/sidebar strips)
+  const nonFeatured = $derived(
+    store.participants.filter(
+      (p) => p.identity !== (store.featured?.identity ?? '')
+    )
+  )
 </script>
+
+{#snippet tileButton(participant: ConferenceParticipant, extraClass: string)}
+  {@const pinned = store.pinnedIdentity === participant.identity}
+  <button
+    type="button"
+    class={`relative overflow-hidden bg-secondary/60 text-left transition ${
+      pinned
+        ? 'ring-2 ring-primary'
+        : participant.isSpeaking
+          ? 'ring-2 ring-success'
+          : ''
+    } ${extraClass}`}
+    onclick={() => store.pin(participant.identity)}
+    title={pinned ? 'Unpin' : 'Pin to the floating video'}
+  >
+    {#if participant.videoTrack && participant.camEnabled}
+      <video
+        use:attachTrack={participant.videoTrack}
+        autoplay
+        playsinline
+        muted
+        class={`h-full w-full object-cover ${participant.isLocal ? '-scale-x-100' : ''}`}
+      ></video>
+    {:else}
+      <div class="flex h-full w-full items-center justify-center">
+        <span
+          class="flex size-20 items-center justify-center rounded-full text-2xl font-bold shadow-inner"
+          style={`background-color:${participant.color};color:var(--canvas-avatar-foreground)`}
+        >
+          {participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
+        </span>
+      </div>
+    {/if}
+
+    <span
+      class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
+    >
+      {#if pinned}
+        <Pin class="size-3" />
+      {/if}
+      <span class="truncate">
+        {participant.isLocal ? 'You' : participant.name}
+      </span>
+    </span>
+
+    {#if !participant.micEnabled}
+      <span
+        class="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur"
+      >
+        <MicOff class="size-3" />
+      </span>
+    {/if}
+  </button>
+{/snippet}
 
 <div
   class="fixed inset-0 z-50 flex flex-col bg-background"
@@ -166,65 +260,60 @@
     </div>
   {/if}
   <div class="flex min-h-0 flex-1">
-    <!-- Tile grid -->
-    <div class="min-h-0 flex-1 overflow-y-auto p-4">
-      <div
-        class="participant-tile-grid mx-auto grid h-full w-full max-w-6xl content-center gap-3"
-      >
-        {#each store.participants as participant (participant.identity)}
-          {@const pinned = store.pinnedIdentity === participant.identity}
-          <button
-            type="button"
-            class={`relative aspect-video w-full overflow-hidden rounded-2xl bg-secondary/60 text-left transition ${
-              pinned
-                ? 'ring-2 ring-primary'
-                : participant.isSpeaking
-                  ? 'ring-2 ring-success'
-                  : ''
-            }`}
-            onclick={() => store.pin(participant.identity)}
-            title={pinned ? 'Unpin' : 'Pin to the floating video'}
-          >
-            {#if participant.videoTrack && participant.camEnabled}
-              <video
-                use:attachTrack={participant.videoTrack}
-                autoplay
-                playsinline
-                muted
-                class={`h-full w-full object-cover ${participant.isLocal ? '-scale-x-100' : ''}`}
-              ></video>
-            {:else}
-              <div class="flex h-full w-full items-center justify-center">
-                <span
-                  class="flex size-20 items-center justify-center rounded-full text-2xl font-bold shadow-inner"
-                  style={`background-color:${participant.color};color:var(--canvas-avatar-foreground)`}
-                >
-                  {participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
-                </span>
-              </div>
-            {/if}
-
-            <span
-              class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
-            >
-              {#if pinned}
-                <Pin class="size-3" />
-              {/if}
-              <span class="truncate">
-                {participant.isLocal ? 'You' : participant.name}
-              </span>
-            </span>
-
-            {#if !participant.micEnabled}
-              <span
-                class="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur"
-              >
-                <MicOff class="size-3" />
-              </span>
-            {/if}
-          </button>
-        {/each}
-      </div>
+    <!-- Tile area -->
+    <div
+      class={`min-h-0 flex-1 p-4 ${store.layoutMode === 'auto' ? 'overflow-y-auto' : 'overflow-hidden'}`}
+    >
+      {#if store.layoutMode === 'spotlight' && store.participants.length > 0}
+        <!-- Spotlight: large featured tile + horizontal thumbnail strip -->
+        <div class="flex h-full flex-col gap-3">
+          <div class="min-h-0 flex-1">
+            {@render tileButton(
+              store.featured ?? store.participants[0],
+              'h-full w-full rounded-2xl'
+            )}
+          </div>
+          {#if nonFeatured.length > 0}
+            <div class="flex h-36 shrink-0 gap-3 overflow-x-auto pb-1">
+              {#each nonFeatured as participant (participant.identity)}
+                {@render tileButton(
+                  participant,
+                  'aspect-video h-full w-auto shrink-0 rounded-xl'
+                )}
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {:else if store.layoutMode === 'sidebar' && store.participants.length > 0}
+        <!-- Sidebar: large featured tile + vertical thumbnail strip -->
+        <div class="flex h-full gap-3">
+          <div class="min-h-0 flex-1">
+            {@render tileButton(
+              store.featured ?? store.participants[0],
+              'h-full w-full rounded-2xl'
+            )}
+          </div>
+          {#if nonFeatured.length > 0}
+            <div class="flex w-48 shrink-0 flex-col gap-3 overflow-y-auto">
+              {#each nonFeatured as participant (participant.identity)}
+                {@render tileButton(
+                  participant,
+                  'aspect-video w-full rounded-xl'
+                )}
+              {/each}
+            </div>
+          {/if}
+        </div>
+      {:else}
+        <!-- Auto grid (default) -->
+        <div
+          class="participant-tile-grid mx-auto grid h-full w-full max-w-6xl content-center gap-3"
+        >
+          {#each store.participants as participant (participant.identity)}
+            {@render tileButton(participant, 'aspect-video w-full rounded-2xl')}
+          {/each}
+        </div>
+      {/if}
     </div>
 
     <!-- Side panel -->
@@ -317,7 +406,7 @@
     class="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-3"
   >
     <div
-      class="flex w-40 items-center gap-2 text-sm font-semibold text-muted-foreground"
+      class="flex w-52 items-center gap-2 text-sm font-semibold text-muted-foreground"
     >
       {#if store.status === 'reconnecting'}
         <LoaderCircle class="size-4 animate-spin" />
@@ -512,7 +601,53 @@
       </button>
     </div>
 
-    <div class="flex w-40 items-center justify-end gap-1.5">
+    <div class="flex w-52 items-center justify-end gap-1.5">
+      <!-- Layout picker -->
+      <div class="relative" data-layout-picker>
+        {#if layoutPickerOpen}
+          <div
+            class="absolute bottom-full right-0 mb-3 flex flex-col gap-1 rounded-2xl border border-border/60 bg-popover p-2 shadow-lg"
+            role="menu"
+            aria-label="Change layout"
+          >
+            {#each LAYOUTS as layout (layout.mode)}
+              <button
+                type="button"
+                class={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition ${
+                  store.layoutMode === layout.mode
+                    ? 'bg-primary/15 text-primary'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+                onclick={() => selectLayout(layout.mode)}
+                role="menuitemradio"
+                aria-checked={store.layoutMode === layout.mode}
+              >
+                {#if layout.mode === 'auto'}
+                  <LayoutGrid class="size-4 shrink-0" />
+                {:else if layout.mode === 'spotlight'}
+                  <LayoutPanelTop class="size-4 shrink-0" />
+                {:else}
+                  <LayoutPanelLeft class="size-4 shrink-0" />
+                {/if}
+                <span class="whitespace-nowrap font-medium">{layout.label}</span
+                >
+              </button>
+            {/each}
+          </div>
+        {/if}
+        <button
+          type="button"
+          class={panelToggleClass(layoutPickerOpen)}
+          onclick={() => (layoutPickerOpen = !layoutPickerOpen)}
+          title="Change layout"
+          aria-label="Change layout"
+          aria-expanded={layoutPickerOpen}
+          aria-haspopup="menu"
+        >
+          <LayoutGrid class="size-5" />
+        </button>
+      </div>
+
       <button
         type="button"
         class={panelToggleClass(store.fullscreenPanel === 'people')}
