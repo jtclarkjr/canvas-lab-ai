@@ -141,7 +141,7 @@
 
 <div
   bind:this={rootEl}
-  class="relative h-screen w-screen overflow-hidden"
+  class="canvas-interaction-surface relative h-screen w-screen overflow-hidden"
   onpointerdown={workspace.handleViewportPointerDown}
   onpointermove={workspace.handleViewportPointerMove}
   onpointerup={workspace.handleViewportPointerUp}

@@ -204,4 +204,24 @@
     );
     background-size: 24px 24px;
   }
+
+  .canvas-interaction-surface {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .canvas-interaction-surface
+    :where(
+      input,
+      textarea,
+      [contenteditable='true'],
+      [data-camera-exempt],
+      [data-camera-exempt] *
+    ) {
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
+  }
 }

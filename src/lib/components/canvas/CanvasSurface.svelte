@@ -224,7 +224,7 @@
 <svg
   bind:this={svgEl}
   aria-label="Drawing canvas"
-  class="absolute inset-0 h-full w-full select-none"
+  class="canvas-interaction-surface absolute inset-0 h-full w-full select-none"
   role="img"
   onpointerdown={handlers.pointerDown}
   onpointermove={handlers.pointerMove}
