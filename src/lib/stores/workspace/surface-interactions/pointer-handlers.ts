@@ -149,7 +149,8 @@ export function handleSvgPointerDown(ctx: SurfaceCtx, event: PointerEvent) {
   event.stopPropagation()
   const point = ctx.screenToCanvasPoint(event.clientX, event.clientY)
   const selectedIds = ctx.getSelectedElementIds()
-  const handleThreshold = 10 / ctx.getCameraScale()
+  const handleThreshold =
+    (event.pointerType === 'mouse' ? 10 : 18) / ctx.getCameraScale()
 
   const sceneHandle = findAnchorTargetHandleAtPoint(
     point,

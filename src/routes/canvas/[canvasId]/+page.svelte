@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import CanvasWorkspace from '$lib/components/canvas/workspace/CanvasWorkspace.svelte'
+  import CanvasWorkspaceRouter from '$lib/workspace/CanvasWorkspaceRouter.svelte'
   import RequestAccessScreen from '$lib/components/canvas/RequestAccessScreen.svelte'
   import type { CanvasRole } from '$lib/canvas/roles'
   import type { Canvas } from '$lib/canvas/schema'
@@ -86,7 +86,7 @@
     </a>
   </main>
 {:else if data.access?.state === 'public-viewer' || data.access?.state === 'anonymous-public-viewer'}
-  <CanvasWorkspace
+  <CanvasWorkspaceRouter
     canvasId={data.canvasId}
     userId={data.userId ?? ''}
     userEmail={data.userEmail}
@@ -101,7 +101,7 @@
     workflowEnabled={data.workflowEnabled ?? false}
   />
 {:else}
-  <CanvasWorkspace
+  <CanvasWorkspaceRouter
     canvasId={data.canvasId}
     userId={data.userId ?? ''}
     userEmail={data.userEmail}

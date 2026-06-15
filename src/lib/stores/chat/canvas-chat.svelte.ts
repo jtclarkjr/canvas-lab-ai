@@ -464,3 +464,7 @@ export function useCanvasChatStore() {
 
   return store
 }
+
+export function useCanvasChatStoreOptional() {
+  return getContext<CanvasChatStore | undefined>(CANVAS_CHAT_CONTEXT)
+}
