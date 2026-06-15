@@ -170,11 +170,15 @@ if (import.meta.vitest) {
           createUser({
             identities: [
               {
+                id: 'identity-1',
+                user_id: 'user-1',
+                identity_id: 'identity-1',
+                provider: 'github',
                 identity_data: {
                   avatar_url: 'https://avatars.example.com/github-user.png'
                 }
               }
-            ] as unknown as User['identities']
+            ] satisfies User['identities']
           })
         )
       ).toBe('https://avatars.example.com/github-user.png')

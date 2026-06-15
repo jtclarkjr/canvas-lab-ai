@@ -44,15 +44,12 @@ export type SceneActivity = {
   textDelta?: string
 }
 
+import type { UIMessage } from 'ai'
+
 // AI chat message parts
 export type ChatPartLike = { type: string } & Record<string, unknown>
 
-export type DisplayMessage = {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  parts: unknown[]
-  metadata?: unknown
-}
+export type DisplayMessage = UIMessage
 
 export type DraftToolPart = {
   state: string

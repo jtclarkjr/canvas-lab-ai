@@ -145,11 +145,11 @@ export function createCanvasChatStore({
         return
       }
 
-      const messages = response.items.map((item) => ({
+      const messages: UIMessage[] = response.items.map((item) => ({
         id: item.id,
         role: item.role,
         parts: item.parts
-      })) as unknown as UIMessage[]
+      }))
 
       assistantMessagesCache.set(canvasId, messages)
       // Don't clobber a thread the panel already mounted from cache — the

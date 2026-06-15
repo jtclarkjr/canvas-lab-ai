@@ -193,7 +193,7 @@ export const POST: RequestHandler = async (event) =>
             }
           : null
 
-      const messages = input.messages as unknown as UIMessage[]
+      const messages = input.messages as UIMessage[]
 
       const result = await streamDocumentChat({
         resolved,

@@ -85,7 +85,7 @@ export async function persistDocumentChat({
             canvas_id: scene.canvas_id,
             document_id: documentId,
             role: 'user',
-            parts: lastUserMessage.parts as unknown as Json,
+            parts: JSON.parse(JSON.stringify(lastUserMessage.parts)) as Json,
             // Author display info is denormalized so realtime INSERT
             // payloads (which can't join profiles) carry attribution.
             metadata: { author } as Json,
@@ -100,7 +100,7 @@ export async function persistDocumentChat({
       canvas_id: scene.canvas_id,
       document_id: documentId,
       role: 'assistant',
-      parts: responseMessage.parts as unknown as Json,
+      parts: JSON.parse(JSON.stringify(responseMessage.parts)) as Json,
       // author on an assistant message = the user who requested the turn.
       metadata: { modelId, author } as Json,
       created_by: userId,

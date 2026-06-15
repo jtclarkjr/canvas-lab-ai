@@ -84,7 +84,7 @@
     }
   })
 
-  const displayMessages = $derived(chat.messages as unknown as DisplayMessage[])
+  const displayMessages = $derived(chat.messages)
 </script>
 
 <div class="flex h-full min-h-0 flex-col">

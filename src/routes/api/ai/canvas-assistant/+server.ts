@@ -75,7 +75,7 @@ export const POST: RequestHandler = async (event) =>
         title: row.title
       }))
 
-      const messages = input.messages as unknown as UIMessage[]
+      const messages = input.messages as UIMessage[]
 
       const result = await streamCanvasAssistant({
         resolved,

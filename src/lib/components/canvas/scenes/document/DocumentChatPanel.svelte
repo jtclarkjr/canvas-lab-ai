@@ -84,7 +84,7 @@
   // Merge this client's chat with messages other collaborators produced
   // (delivered over realtime, deduped by message id).
   const displayMessages = $derived.by(() => {
-    const own = chat.messages as unknown as DisplayMessage[]
+    const own = chat.messages
     const ownIds = new Set(own.map((message) => message.id))
     const remote = liveMessages
       .filter((message: SceneMessage) => !ownIds.has(message.id))
@@ -113,7 +113,7 @@
           role: message.role,
           parts: message.parts,
           metadata: { ...message.metadata, author: message.author ?? undefined }
-        })) as unknown as UIMessage[])
+        })) as UIMessage[])
       ]
     }
   }
@@ -136,7 +136,7 @@
     }
 
     let draft: DraftToolPart | null = null
-    for (const part of asParts((last as unknown as DisplayMessage).parts)) {
+    for (const part of asParts(last.parts)) {
       draft = writeDocumentPart(part) ?? draft
     }
     return draft
@@ -172,7 +172,7 @@
         onBroadcastActivity('generating')
       }
       if (last?.role === 'assistant') {
-        const text = messageText(last as unknown as DisplayMessage)
+        const text = messageText(last)
         if (text.length > broadcastTextLength) {
           onBroadcastActivity('generating', text.slice(broadcastTextLength))
           broadcastTextLength = text.length

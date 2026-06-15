@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { UIMessage } from 'ai'
 import { messageAuthorSchema, uiMessageSchema } from '$lib/scenes/schema'
 
 // canvas chat messages (member chatroom)
@@ -65,7 +66,7 @@ export function chatMessageRowToMessage(
 export const assistantMessageSchema = z.object({
   id: z.string(),
   role: z.enum(['user', 'assistant', 'system']),
-  parts: z.array(z.unknown()),
+  parts: z.custom<UIMessage['parts']>(() => true),
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   createdAt: z.string().optional()
 })

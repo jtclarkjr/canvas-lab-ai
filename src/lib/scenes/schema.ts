@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import type { UIMessage } from 'ai'
+import type { Path, TextElement } from '$lib/canvas/types'
 
 // ── scenes ──────────────────────────────────────────────────────────────
 
@@ -140,11 +142,32 @@ export const listSceneDocumentItemsResponseSchema = z.object({
   items: z.array(sceneDocumentListItemSchema)
 })
 
-// Freehand annotations drawn over a document ({ paths, textElements }).
-// Elements are validated loosely — the canvas types own their exact shape.
+export const pathSchema: z.ZodType<Path> = z.looseObject({
+  id: z.string(),
+  points: z.array(z.object({ x: z.number(), y: z.number() })),
+  color: z.string(),
+  width: z.number(),
+  opacity: z.number(),
+  z: z.number().nullable().optional()
+})
+
+export const textElementSchema: z.ZodType<TextElement> = z.looseObject({
+  id: z.string(),
+  text: z.string(),
+  x: z.number(),
+  y: z.number(),
+  rotation: z.number().optional(),
+  color: z.string(),
+  fontSize: z.number(),
+  isBold: z.boolean(),
+  isItalic: z.boolean(),
+  isUnderline: z.boolean(),
+  z: z.number().nullable().optional()
+})
+
 export const documentAnnotationsSchema = z.object({
-  paths: z.array(z.looseObject({ id: z.string() })).default([]),
-  textElements: z.array(z.looseObject({ id: z.string() })).default([])
+  paths: z.array(pathSchema).default([]),
+  textElements: z.array(textElementSchema).default([])
 })
 
 // Markdown document content payload. Annotations (the notes view's drawing
@@ -165,7 +188,7 @@ export const sceneMessageRowSchema = z.object({
   canvas_id: z.string(),
   document_id: z.string().nullable().optional(),
   role: sceneMessageRoleSchema,
-  parts: z.array(z.unknown()),
+  parts: z.custom<UIMessage['parts']>(() => true),
   metadata: z.record(z.string(), z.unknown()).nullable(),
   created_by: z.string().nullable(),
   created_at: z.string()
@@ -181,7 +204,7 @@ export const sceneMessageSchema = z.object({
   sceneId: z.string(),
   documentId: z.string().nullable().optional(),
   role: sceneMessageRoleSchema,
-  parts: z.array(z.unknown()),
+  parts: z.custom<UIMessage['parts']>(() => true),
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   author: messageAuthorSchema.nullable().optional(),
   createdBy: z.string().nullable().optional(),
@@ -198,7 +221,7 @@ export const listSceneMessagesResponseSchema = z.object({
 export const uiMessageSchema = z.looseObject({
   id: z.string(),
   role: z.enum(['user', 'assistant', 'system']),
-  parts: z.array(z.unknown())
+  parts: z.custom<UIMessage['parts']>(() => true)
 })
 
 export const documentChatRequestSchema = z.object({

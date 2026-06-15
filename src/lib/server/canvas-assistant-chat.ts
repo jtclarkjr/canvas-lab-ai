@@ -38,7 +38,7 @@ export async function persistCanvasAssistantChat({
             canvas_id: canvasId,
             user_id: userId,
             role: 'user',
-            parts: lastUserMessage.parts as unknown as Json,
+            parts: JSON.parse(JSON.stringify(lastUserMessage.parts)) as Json,
             created_at: new Date(finishedAt - 1000).toISOString()
           }
         ]
@@ -48,7 +48,7 @@ export async function persistCanvasAssistantChat({
       canvas_id: canvasId,
       user_id: userId,
       role: 'assistant',
-      parts: responseMessage.parts as unknown as Json,
+      parts: JSON.parse(JSON.stringify(responseMessage.parts)) as Json,
       metadata: { modelId } as Json,
       created_at: new Date(finishedAt).toISOString()
     }

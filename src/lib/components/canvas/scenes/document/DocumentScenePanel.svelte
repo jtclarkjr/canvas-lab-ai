@@ -293,7 +293,7 @@
     void (async () => {
       try {
         const history = await listSceneMessages(canvasId, scene.id, documentId)
-        const messages = history.items.map((message) => ({
+        const messages: UIMessage[] = history.items.map((message) => ({
           id: message.id,
           role: message.role,
           parts: message.parts,
@@ -301,7 +301,7 @@
             ...message.metadata,
             author: message.author ?? undefined
           }
-        })) as unknown as UIMessage[]
+        }))
 
         messagesCache.set(documentId, messages)
         if (activeDocumentId !== documentId) {

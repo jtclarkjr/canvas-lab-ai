@@ -179,8 +179,8 @@ export function createNotesSceneStore({
 
     const parsed = markdownDocumentContentSchema.safeParse(content)
     const annotations = parsed.success ? parsed.data.annotations : undefined
-    paths = (annotations?.paths ?? []) as unknown as Path[]
-    textElements = (annotations?.textElements ?? []) as unknown as TextElement[]
+    paths = annotations?.paths ?? []
+    textElements = annotations?.textElements ?? []
   }
 
   // The injected mutations are the persistence hooks of the reused stores;
