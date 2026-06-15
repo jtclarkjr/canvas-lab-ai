@@ -7,12 +7,14 @@
     modelId,
     onModelChange,
     disabled = false,
-    side = 'bottom'
+    side = 'bottom',
+    compact = false
   } = $props<{
     modelId: string
     onModelChange: (modelId: string) => void
     disabled?: boolean
     side?: 'top' | 'bottom'
+    compact?: boolean
   }>()
 
   let open = $state(false)
@@ -31,7 +33,11 @@
   {#snippet trigger({ id: popoverId, expanded })}
     <button
       type="button"
-      class="flex h-8 items-center gap-1.5 rounded-full border border-border/60 bg-background/70 px-3 text-xs text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+      class={`flex items-center rounded-full border border-border/60 bg-background/70 text-muted-foreground transition hover:text-foreground disabled:opacity-50 ${
+        compact
+          ? 'h-7 max-w-[112px] gap-1 px-2 text-[11px]'
+          : 'h-8 gap-1.5 px-3 text-xs'
+      }`}
       onclick={() => (open = !open)}
       aria-expanded={expanded}
       aria-haspopup="menu"
@@ -39,8 +45,8 @@
       aria-label={`AI model: ${selected?.label ?? 'Model'}`}
       {disabled}
     >
-      <Cpu class="size-3.5" aria-hidden="true" />
-      {selected?.label ?? 'Model'}
+      <Cpu class="size-3.5 shrink-0" aria-hidden="true" />
+      <span class="min-w-0 truncate">{selected?.label ?? 'Model'}</span>
     </button>
   {/snippet}
 

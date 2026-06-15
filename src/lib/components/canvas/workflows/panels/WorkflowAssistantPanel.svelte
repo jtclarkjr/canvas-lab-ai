@@ -1,19 +1,21 @@
 <script lang="ts">
   import {
+    ArrowUp,
     Bot,
     Check,
-    ClipboardList,
     Database,
     Loader2,
     MessageSquare,
     Minus
   } from 'lucide-svelte'
-  import { defaultModelId, modelOptions } from '$lib/scenes/models'
+  import { defaultModelId } from '$lib/scenes/models'
   import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
   import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
   import { requestWorkflowAssistant } from '$lib/workflows/api'
   import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
   import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
+  import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
+  import WorkflowContextPicker from '$lib/components/canvas/workflows/panels/WorkflowContextPicker.svelte'
   import WorkflowDraggablePanel from '$lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
   import type {
     UpdateWorkflowInput,
@@ -28,7 +30,10 @@
     role: 'user' | 'assistant'
     text: string
     proposal?: WorkflowProposal | null
+    streaming?: boolean
   }
+
+  const APPLIED_RESPONSE_STREAM_DELAY_MS = 14
 
   let {
     canvasId,
@@ -51,10 +56,13 @@
   }>()
 
   let prompt = $state('')
+  let textareaEl = $state<HTMLTextAreaElement | null>(null)
   let modelId = $state(defaultModelId)
   let isAsking = $state(false)
   let error = $state<string | null>(null)
   let messages = $state<ChatEntry[]>([])
+  let applyingProposalIds = $state<string[]>([])
+  let appliedProposalIds = $state<string[]>([])
   let lastWorkflowId = $state('')
 
   const context = $derived(workflow.settings.context)
@@ -67,6 +75,7 @@
     flowTypeDefinition.assistant.promptPlaceholder
   )
   const aiPromptSubject = $derived(flowTypeDefinition.assistant.promptSubject)
+  const canSend = $derived(canModify && !isAsking && prompt.trim().length > 0)
   const savedDocuments = $derived.by(() =>
     scenes.flatMap((scene: Scene) =>
       sceneDocumentsStore
@@ -84,6 +93,8 @@
   $effect(() => {
     if (workflow.id !== lastWorkflowId) {
       messages = []
+      applyingProposalIds = []
+      appliedProposalIds = []
       lastWorkflowId = workflow.id
     }
   })
@@ -111,10 +122,31 @@
     updateContext({ ...context, sceneIds })
   }
 
-  async function askAssistant() {
-    if (!prompt.trim() || isAsking) return
+  function autogrow() {
+    if (!textareaEl) return
+    textareaEl.style.height = 'auto'
+    textareaEl.style.height = `${Math.min(textareaEl.scrollHeight, 160)}px`
+  }
+
+  function send() {
+    if (!canSend) return
     const text = prompt.trim()
     prompt = ''
+    if (textareaEl) {
+      textareaEl.style.height = 'auto'
+    }
+    void askAssistant(text)
+  }
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      send()
+    }
+  }
+
+  async function askAssistant(text: string) {
+    if (!text || isAsking) return
     error = null
     isAsking = true
     messages = [
@@ -152,17 +184,92 @@
     }
   }
 
-  async function applyProposal(proposal: WorkflowProposal) {
+  async function applyProposal(messageId: string, proposal: WorkflowProposal) {
+    if (
+      applyingProposalIds.includes(messageId) ||
+      appliedProposalIds.includes(messageId)
+    ) {
+      return
+    }
+
     error = null
+    applyingProposalIds = [...applyingProposalIds, messageId]
     try {
       await onPatchWorkflow({
         definition: proposal.definition,
         configYaml: proposal.configYaml
       })
+      if (!appliedProposalIds.includes(messageId)) {
+        appliedProposalIds = [...appliedProposalIds, messageId]
+      }
+      void streamAppliedResponse(buildAppliedProposalMessage(proposal))
     } catch (cause) {
       error =
         cause instanceof Error ? cause.message : 'Failed to apply proposal.'
+    } finally {
+      applyingProposalIds = applyingProposalIds.filter((id) => id !== messageId)
     }
+  }
+
+  function buildAppliedProposalMessage(proposal: WorkflowProposal) {
+    const definition = proposal.definition
+    if (isDatabaseFlowDefinition(definition)) {
+      const tableCount = definition.tables.length
+      const columnCount = definition.tables.reduce(
+        (count, table) => count + table.columns.length,
+        0
+      )
+      const relationCount = definition.relations.length
+      return `Applied ${definition.name}: updated ${plural(tableCount, 'table')}, ${plural(columnCount, 'column')}, and ${plural(relationCount, 'relation')}. The schema diagram and YAML are now in sync.`
+    }
+
+    const stepCount = definition.steps.length
+    const dependencyCount = definition.steps.reduce(
+      (count, step) => count + step.needs.length,
+      0
+    )
+    return `Applied ${definition.name}: updated ${plural(stepCount, 'step')} and ${plural(dependencyCount, 'connection')}. The workflow diagram and YAML are now in sync.`
+  }
+
+  function plural(count: number, singular: string) {
+    return `${count} ${count === 1 ? singular : `${singular}s`}`
+  }
+
+  async function streamAppliedResponse(text: string) {
+    const messageId = crypto.randomUUID()
+    messages = [
+      ...messages,
+      {
+        id: messageId,
+        role: 'assistant',
+        text: '',
+        streaming: true
+      }
+    ]
+
+    for (const character of text) {
+      await wait(APPLIED_RESPONSE_STREAM_DELAY_MS)
+      const messageIndex = messages.findIndex(
+        (message) => message.id === messageId
+      )
+      if (messageIndex === -1) return
+
+      const nextMessages = [...messages]
+      const message = nextMessages[messageIndex]
+      nextMessages[messageIndex] = {
+        ...message,
+        text: `${message.text}${character}`
+      }
+      messages = nextMessages
+    }
+
+    messages = messages.map((message) =>
+      message.id === messageId ? { ...message, streaming: false } : message
+    )
+  }
+
+  function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 </script>
 
@@ -204,80 +311,10 @@
     </button>
   {/snippet}
 
-  <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-auto p-3">
-    <label class="grid gap-1 text-xs font-medium text-muted-foreground">
-      Model
-      <select
-        bind:value={modelId}
-        class="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
-      >
-        {#each modelOptions as model (model.id)}
-          <option value={model.id}>{model.label}</option>
-        {/each}
-      </select>
-    </label>
-
-    <section class="grid gap-2">
-      <div
-        class="flex items-center gap-2 text-xs font-semibold text-muted-foreground"
-      >
-        <ClipboardList class="size-3.5" />
-        Context
-      </div>
-      <label class="flex items-center gap-2 text-xs text-foreground">
-        <input
-          type="checkbox"
-          checked={context.includeLinkedScenes}
-          disabled={!canModify}
-          onchange={(event) =>
-            updateContext({
-              ...context,
-              includeLinkedScenes: event.currentTarget.checked
-            })}
-        />
-        Include linked scenes
-      </label>
-      <div
-        class="grid max-h-28 gap-1 overflow-auto rounded-md border border-border/70 p-2"
-      >
-        {#each scenes as scene (scene.id)}
-          <label class="flex min-w-0 items-center gap-2 text-xs">
-            <input
-              type="checkbox"
-              checked={context.sceneIds.includes(scene.id)}
-              disabled={!canModify}
-              onchange={() => toggleScene(scene.id)}
-            />
-            <span class="min-w-0 truncate">{scene.title || 'Scene'}</span>
-          </label>
-        {:else}
-          <p class="text-xs text-muted-foreground">No scenes available.</p>
-        {/each}
-      </div>
-      <div
-        class="grid max-h-32 gap-1 overflow-auto rounded-md border border-border/70 p-2"
-      >
-        {#each savedDocuments as document (document.id)}
-          <label class="flex min-w-0 items-center gap-2 text-xs">
-            <input
-              type="checkbox"
-              checked={context.documentIds.includes(document.id)}
-              disabled={!canModify}
-              onchange={() => toggleDocument(document.id)}
-            />
-            <span class="min-w-0 flex-1 truncate">
-              {document.title || 'Untitled'}
-            </span>
-          </label>
-        {:else}
-          <p class="text-xs text-muted-foreground">No saved documents.</p>
-        {/each}
-      </div>
-    </section>
-
+  <div class="flex min-h-0 flex-1 flex-col">
     {#if error}
       <div
-        class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+        class="m-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
         role="alert"
       >
         {error}
@@ -285,9 +322,11 @@
     {/if}
 
     <div
-      class="flex min-h-[120px] flex-1 flex-col gap-2 overflow-auto rounded-md border border-border/70 bg-background/60 p-2"
+      class="m-3 mb-0 flex min-h-[120px] flex-1 flex-col gap-2 overflow-auto rounded-md border border-border/70 bg-background/60 p-2"
     >
       {#each messages as message (message.id)}
+        {@const proposalApplying = applyingProposalIds.includes(message.id)}
+        {@const proposalApplied = appliedProposalIds.includes(message.id)}
         <div
           class={`rounded-md px-2 py-1.5 text-xs ${
             message.role === 'user'
@@ -295,17 +334,39 @@
               : 'bg-muted text-foreground'
           }`}
         >
-          <p class="whitespace-pre-wrap">{message.text}</p>
+          <p class="whitespace-pre-wrap">
+            {message.text}
+            {#if message.streaming}
+              <span
+                class="ml-0.5 inline-block h-3 w-1 animate-pulse bg-current align-[-1px]"
+                aria-hidden="true"
+              ></span>
+            {/if}
+          </p>
           {#if message.proposal}
             <button
               type="button"
-              class="mt-2 flex h-7 items-center gap-1.5 rounded bg-background px-2 text-xs font-medium text-foreground hover:bg-background/80"
+              class={`mt-2 flex h-7 items-center gap-1.5 rounded px-2 text-xs font-medium transition ${
+                proposalApplied
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-background text-foreground hover:bg-background/80'
+              }`}
               onclick={() =>
-                applyProposal(message.proposal as WorkflowProposal)}
-              disabled={!canModify}
+                applyProposal(message.id, message.proposal as WorkflowProposal)}
+              disabled={!canModify || proposalApplying || proposalApplied}
             >
-              <Check class="size-3.5" />
-              Apply proposal
+              {#if proposalApplying}
+                <Loader2 class="size-3.5 animate-spin" />
+              {:else}
+                <Check class="size-3.5" />
+              {/if}
+              {#if proposalApplied}
+                Applied
+              {:else if proposalApplying}
+                Applying
+              {:else}
+                Apply proposal
+              {/if}
             </button>
           {/if}
         </div>
@@ -319,25 +380,60 @@
       {/each}
     </div>
 
-    <textarea
-      bind:value={prompt}
-      class="min-h-20 resize-none rounded-md border border-input bg-background p-2 text-sm text-foreground"
-      placeholder={aiPromptPlaceholder}
-      aria-label={`Describe the ${aiPromptSubject} to build`}
-      disabled={!canModify || isAsking}
-    ></textarea>
-    <button
-      type="button"
-      class="flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
-      onclick={askAssistant}
-      disabled={!canModify || isAsking || !prompt.trim()}
-    >
-      {#if isAsking}
-        <Loader2 class="size-4 animate-spin" />
-      {:else}
-        <Bot class="size-4" />
-      {/if}
-      Ask
-    </button>
+    <div class="border-t border-border/50 p-2">
+      <div class="surface-card flex flex-col gap-1.5 rounded-xl p-2">
+        <textarea
+          bind:this={textareaEl}
+          bind:value={prompt}
+          oninput={autogrow}
+          onkeydown={handleKeydown}
+          rows="1"
+          class="max-h-24 min-h-5 w-full resize-none bg-transparent text-xs leading-5 outline-none"
+          placeholder={aiPromptPlaceholder}
+          aria-label={`Describe the ${aiPromptSubject} to build`}
+          disabled={!canModify || isAsking}
+        ></textarea>
+
+        <div class="flex items-center justify-between gap-1.5">
+          <div class="flex min-w-0 flex-1 items-center gap-1">
+            <ModelPicker
+              {modelId}
+              onModelChange={(next) => (modelId = next)}
+              disabled={!canModify || isAsking}
+              side="top"
+              compact
+            />
+            <WorkflowContextPicker
+              {scenes}
+              {savedDocuments}
+              includeLinkedScenes={context.includeLinkedScenes}
+              selectedSceneIds={context.sceneIds}
+              selectedDocumentIds={context.documentIds}
+              disabled={!canModify || isAsking}
+              side="top"
+              compact
+              onIncludeLinkedScenesChange={(checked) =>
+                updateContext({ ...context, includeLinkedScenes: checked })}
+              onToggleScene={toggleScene}
+              onToggleDocument={toggleDocument}
+            />
+          </div>
+
+          <button
+            type="button"
+            class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition disabled:opacity-40"
+            onclick={send}
+            disabled={!canSend}
+            aria-label="Ask workflow AI"
+          >
+            {#if isAsking}
+              <Loader2 class="size-4 animate-spin" />
+            {:else}
+              <ArrowUp class="size-4" aria-hidden="true" />
+            {/if}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </WorkflowDraggablePanel>

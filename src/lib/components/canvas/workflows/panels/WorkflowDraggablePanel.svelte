@@ -271,7 +271,7 @@
 {#if !minimized}
   <div
     bind:this={panelEl}
-    class={`pointer-events-auto fixed ${panelSideClass} ${panelZIndexClass} flex flex-col overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-xl backdrop-blur`}
+    class={`pointer-events-auto fixed ${panelSideClass} ${panelZIndexClass} flex flex-col overflow-visible rounded-lg border border-border/80 bg-card/95 shadow-xl backdrop-blur`}
     style={panelStyle}
     role="dialog"
     aria-label={ariaLabel}

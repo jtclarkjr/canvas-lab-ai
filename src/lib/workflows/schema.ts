@@ -85,6 +85,64 @@ export const workflowGraphDefinitionSchema = z
     }
   })
 
+const workflowAssistantPositionSchema = z.object({
+  x: z.number(),
+  y: z.number()
+})
+
+const workflowAssistantStepSchema = z.object({
+  id: z.string().trim().min(1),
+  title: z.string().trim().min(1).max(120),
+  type: workflowStepTypeSchema,
+  description: z.string(),
+  needs: z.array(z.string().trim().min(1)),
+  position: workflowAssistantPositionSchema
+})
+
+const workflowAssistantGraphDefinitionSchema = z.object({
+  version: z.literal(1),
+  flowType: z.literal('workflow'),
+  name: z.string().trim().min(1).max(120),
+  description: z.string(),
+  steps: z.array(workflowAssistantStepSchema)
+})
+
+const databaseAssistantColumnSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(120),
+  dataType: z.string().trim().min(1).max(120),
+  nullable: z.boolean(),
+  primaryKey: z.boolean(),
+  unique: z.boolean(),
+  identity: z.boolean()
+})
+
+const databaseAssistantTableSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(1).max(120),
+  schema: z.string().trim().min(1).max(120),
+  description: z.string(),
+  position: workflowAssistantPositionSchema,
+  columns: z.array(databaseAssistantColumnSchema)
+})
+
+const databaseAssistantRelationSchema = z.object({
+  id: z.string().trim().min(1),
+  sourceTableId: z.string().trim().min(1),
+  sourceColumnId: z.string().trim().min(1),
+  targetTableId: z.string().trim().min(1),
+  targetColumnId: z.string().trim().min(1)
+})
+
+const databaseAssistantFlowDefinitionSchema = z.object({
+  version: z.literal(1),
+  flowType: z.literal('database'),
+  name: z.string().trim().min(1).max(120),
+  description: z.string(),
+  tables: z.array(databaseAssistantTableSchema),
+  relations: z.array(databaseAssistantRelationSchema)
+})
+
 export const workflowDefinitionSchema = z.preprocess(
   (input) => {
     if (input && typeof input === 'object' && !Array.isArray(input)) {
@@ -227,11 +285,40 @@ export const listWorkflowVersionsResponseSchema = z.object({
   items: z.array(workflowVersionSchema)
 })
 
+function createWorkflowProposalSchema<DefinitionSchema extends z.ZodType>(
+  definitionSchema: DefinitionSchema
+) {
+  return z.object({
+    summary: z.string().min(1),
+    definition: definitionSchema,
+    configYaml: z.string()
+  })
+}
+
+export const workflowGraphProposalSchema = createWorkflowProposalSchema(
+  workflowAssistantGraphDefinitionSchema
+)
+
+export const databaseWorkflowProposalSchema = createWorkflowProposalSchema(
+  databaseAssistantFlowDefinitionSchema
+)
+
 export const workflowProposalSchema = z.object({
   summary: z.string().min(1),
   definition: workflowDefinitionSchema,
   configYaml: z.string()
 })
+
+const workflowProposalSchemas = {
+  workflow: workflowGraphProposalSchema,
+  database: databaseWorkflowProposalSchema
+} satisfies Record<z.infer<typeof workflowFlowTypeSchema>, z.ZodType>
+
+export function getWorkflowProposalSchema(
+  flowType: z.infer<typeof workflowFlowTypeSchema>
+) {
+  return workflowProposalSchemas[flowType]
+}
 
 export const workflowAssistantRequestSchema = z.object({
   canvasId: z.string().min(1),

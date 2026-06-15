@@ -23,6 +23,7 @@ import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
 import {
   workflowAssistantRequestSchema,
   workflowAssistantResponseSchema,
+  getWorkflowProposalSchema,
   workflowProposalSchema
 } from '$lib/workflows/schema'
 import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
@@ -117,10 +118,13 @@ export const POST: RequestHandler = async (event) =>
       )
       const { proposalKind, system, finalInstruction } =
         flowTypeDefinition.assistant
+      const proposalSchema = getWorkflowProposalSchema(
+        input.workflow.definition.flowType
+      )
 
       const result = await generateObject({
         model: resolved.model,
-        schema: workflowProposalSchema,
+        schema: proposalSchema,
         schemaName: 'WorkflowProposal',
         system,
         prompt: [
@@ -140,9 +144,12 @@ export const POST: RequestHandler = async (event) =>
         ].join('\n\n---\n\n')
       })
 
+      const generatedProposal = workflowProposalSchema.parse(
+        proposalSchema.parse(result.object)
+      )
       const proposal = workflowProposalSchema.parse({
-        ...result.object,
-        configYaml: definitionToYaml(result.object.definition)
+        ...generatedProposal,
+        configYaml: definitionToYaml(generatedProposal.definition)
       })
 
       return json(

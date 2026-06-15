@@ -30,7 +30,7 @@ export const workflowFlowTypeDefinition = {
     promptPlaceholder: 'Describe the workflow tree to build...',
     promptSubject: 'workflow',
     system:
-      'You design node-graph workflows. Return a valid workflow proposal only. Nodes may include inert action metadata, but do not claim execution is implemented.',
+      'You design node-graph workflows. Return a valid workflow proposal only. Nodes include labels, types, descriptions, dependencies, and positions, but do not claim execution is implemented.',
     finalInstruction:
       'Return a complete replacement workflow definition. Keep version as 1 and flowType as workflow. Provide configYaml matching the definition.'
   },
