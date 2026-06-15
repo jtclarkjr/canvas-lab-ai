@@ -51,21 +51,29 @@ const basicFlowTemplateSpec: DiagramTemplateSpec = {
 }
 
 const decisionBranchTemplateSpec: DiagramTemplateSpec = {
-  width: 878,
+  width: 898,
   height: 360,
   shapes: [
     shape('input', 'rectangle', 0, 144, 148, 72, 'Input'),
     shape('decision', 'diamond', 220, 126, 148, 108, 'Decision?'),
     shape('yes', 'rectangle', 470, 20, 168, 72, 'Yes path'),
     shape('no', 'rectangle', 470, 268, 168, 72, 'No path'),
-    shape('merge', 'rectangle', 730, 144, 148, 72, 'Merge')
+    shape('merge', 'rectangle', 750, 144, 148, 72, 'Merge')
   ],
   connectors: [
     connector('input-decision', 'input', 'right', 'decision', 'left', 'check'),
     connector('decision-yes', 'decision', 'top', 'yes', 'left', 'yes', 'elbow'),
     connector('decision-no', 'decision', 'bottom', 'no', 'left', 'no', 'elbow'),
-    connector('yes-merge', 'yes', 'right', 'merge', 'top', 'continue', 'elbow'),
-    connector('no-merge', 'no', 'right', 'merge', 'bottom', 'continue', 'elbow')
+    connector(
+      'yes-merge',
+      'yes',
+      'right',
+      'merge',
+      'left',
+      'continue',
+      'elbow'
+    ),
+    connector('no-merge', 'no', 'right', 'merge', 'left', 'continue', 'elbow')
   ]
 }
 

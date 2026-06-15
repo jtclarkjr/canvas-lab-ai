@@ -236,11 +236,6 @@
 >
   <g transform={`translate(${camera.x}, ${camera.y}) scale(${camera.scale})`}>
     {#each sortedConnectors as connector (connector.id)}
-      {@const terminalSegments = getConnectorTerminalSegments(
-        connector,
-        shapes,
-        scenes
-      )}
       {@const labelFrame =
         connector.text && !isEditingConnectorText(connector)
           ? connectorTextFrame(connector)
@@ -289,20 +284,6 @@
             {/each}
           </text>
         </g>
-      {/if}
-      {#if connector.startArrow === 'arrow'}
-        <polygon
-          fill={resolveCanvasDisplayColor(connector.strokeColor)}
-          opacity={connector.opacity}
-          points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
-        />
-      {/if}
-      {#if connector.endArrow === 'arrow'}
-        <polygon
-          fill={resolveCanvasDisplayColor(connector.strokeColor)}
-          opacity={connector.opacity}
-          points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
-        />
       {/if}
     {/each}
 
@@ -474,6 +455,28 @@
         />
       {/if}
     {/if}
+
+    {#each sortedConnectors as connector (connector.id)}
+      {@const terminalSegments = getConnectorTerminalSegments(
+        connector,
+        shapes,
+        scenes
+      )}
+      {#if connector.startArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
+        />
+      {/if}
+      {#if connector.endArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
+        />
+      {/if}
+    {/each}
 
     {#each sortedPaths as path (path.id)}
       <path
