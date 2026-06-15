@@ -33,7 +33,7 @@
   let syncedKey = $state('')
 
   const nodeTypes: NodeTypes = {
-    workflow: WorkflowNode
+    workflow: WorkflowNode as unknown as NodeTypes[string]
   }
 
   $effect(() => {

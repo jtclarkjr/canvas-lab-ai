@@ -8,10 +8,7 @@
     FileOutput,
     StickyNote
   } from 'lucide-svelte'
-  import type {
-    WorkflowFlowNode,
-    WorkflowNodeData
-  } from '$lib/workflows/definition'
+  import type { WorkflowFlowNode, WorkflowNodeData } from '$lib/workflows/types'
 
   let { data, selected = false } = $props<
     NodeProps<WorkflowFlowNode> & { data: WorkflowNodeData }

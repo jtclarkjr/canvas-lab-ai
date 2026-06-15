@@ -6,7 +6,7 @@
     signInWithOAuth,
     signUpWithEmail
   } from '$lib/auth/session-service'
-  import type { AuthConfig } from '$lib/server/auth-config'
+  import type { AuthConfig } from '$lib/server/types'
 
   type AuthMode = 'sign-in' | 'sign-up'
 
