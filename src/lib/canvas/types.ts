@@ -146,7 +146,7 @@ export type DiagramFormatting = {
 
 export type EditingText = {
   id?: string
-  target?: 'text' | 'shape' | 'connector'
+  target?: Exclude<CanvasElementType, 'path'>
   x: number
   y: number
   value: string
@@ -161,24 +161,19 @@ export type Camera = {
   scale: number
 }
 
-// Text and path resize handles
-export type TextResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
+// Resize and hit testing
+export type ResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
 
 export type TextHandleHit =
-  | { type: 'resize'; handle: TextResizeHandle; text: TextElement }
+  | { type: 'resize'; handle: ResizeHandle; text: TextElement }
   | { type: 'rotate'; text: TextElement }
 
-export type PathResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
-
 export type PathHandleHit =
-  | { type: 'resize'; handle: PathResizeHandle; path: Path }
+  | { type: 'resize'; handle: ResizeHandle; path: Path }
   | { type: 'rotate'; path: Path }
 
-// Shape and anchor hit testing
-export type ShapeResizeHandle = 'nw' | 'ne' | 'se' | 'sw'
-
 export type ShapeHandleHit =
-  | { type: 'resize'; handle: ShapeResizeHandle; shape: DiagramShape }
+  | { type: 'resize'; handle: ResizeHandle; shape: DiagramShape }
   | { type: 'rotate'; shape: DiagramShape }
 
 export type AnchorTarget = {

@@ -5,7 +5,6 @@ import type { AudioTrack, VideoTrack } from 'livekit-client'
 
 // PiP geometry
 export type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
-export type Point = { x: number; y: number }
 export type Size = { width: number; height: number }
 
 // Device selection
@@ -73,7 +72,7 @@ export type BgPreset =
   | { id: string; label: string; type: 'virtual'; imagePath: string }
 
 export type BgPrefs = {
-  effect: 'none' | 'blur' | 'virtual'
+  effect: BackgroundEffect
   imagePath: string | null
   blurRadius: number
 }

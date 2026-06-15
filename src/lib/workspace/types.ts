@@ -16,18 +16,14 @@ export type CursorEventPayload = {
   timestamp: number
 }
 
-export type WorkspaceMember = {
-  name: string
-  color: string
-  isAnonymous?: boolean
-}
-
 export type DisplayMember = {
   id: string
   name: string
   color: string
   isAnonymous?: boolean
 }
+
+export type WorkspaceMember = Omit<DisplayMember, 'id'>
 
 export type CanvasWorkspaceStoreInput = {
   canvasId: string

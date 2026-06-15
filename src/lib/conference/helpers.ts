@@ -1,10 +1,5 @@
-import type {
-  BgPrefs,
-  Corner,
-  DevicePrefs,
-  Point,
-  Size
-} from '$lib/conference/types'
+import type { Point } from '$lib/canvas/types'
+import type { BgPrefs, Corner, DevicePrefs, Size } from '$lib/conference/types'
 
 type RenderableVideoTrack = {
   mediaStreamTrack: Pick<MediaStreamTrack, 'readyState'>

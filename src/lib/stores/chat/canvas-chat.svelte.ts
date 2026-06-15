@@ -8,10 +8,10 @@ import {
   listChatMessages,
   sendChatMessage
 } from '$lib/chat/api'
+import type { MessageAuthor } from '$lib/scenes/schema'
 import {
   chatMessageRowSchema,
   chatMessageRowToMessage,
-  type ChatMember,
   type ChatMessage
 } from '$lib/chat/schema'
 
@@ -31,7 +31,7 @@ export type ChatEntry = {
 // first-ever load of a canvas; reopening renders instantly from cache.
 const chatMessagesCache = new Map<string, ChatMessage[]>()
 const assistantMessagesCache = new Map<string, UIMessage[]>()
-const chatMembersCache = new Map<string, ChatMember[]>()
+const chatMembersCache = new Map<string, MessageAuthor[]>()
 
 type CanvasChatStoreInput = {
   getCanvasId: () => string
@@ -54,7 +54,7 @@ export function createCanvasChatStore({
   let isLoadingChat = $state(false)
   let chatLoadError = $state<string | null>(null)
   let unreadCount = $state(0)
-  let mentionMembers = $state<ChatMember[]>([])
+  let mentionMembers = $state<MessageAuthor[]>([])
 
   let assistantInitialMessages = $state<UIMessage[] | null>(null)
   let assistantLoadError = $state<string | null>(null)

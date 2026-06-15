@@ -10,9 +10,9 @@ import type {
   DiagramFormatting,
   DiagramShape,
   Point,
+  ResizeHandle,
   ShapeHandleHit,
   ShapeKind,
-  ShapeResizeHandle,
   StrokeStyle
 } from '$lib/canvas/types'
 
@@ -106,7 +106,7 @@ export function getAnchorTargetAnchors(
 }
 
 export function getShapeResizeCursor(
-  handle: ShapeResizeHandle,
+  handle: ResizeHandle,
   rotation: number
 ): string {
   let baseAngle = 45
@@ -594,7 +594,7 @@ export function findConnectorAtPoint(
 
 export function getAnchorTargetResizeHandles(
   target: AnchorTarget
-): Array<{ handle: ShapeResizeHandle; point: Point }> {
+): Array<{ handle: ResizeHandle; point: Point }> {
   const [nw, ne, se, sw] = getAnchorTargetOutlinePoints(target)
   return [
     { handle: 'nw', point: nw ?? { x: target.x, y: target.y } },
@@ -615,7 +615,7 @@ export function getAnchorTargetResizeHandles(
 
 export function getShapeResizeHandles(
   shape: DiagramShape
-): Array<{ handle: ShapeResizeHandle; point: Point }> {
+): Array<{ handle: ResizeHandle; point: Point }> {
   return getAnchorTargetResizeHandles(shape)
 }
 
@@ -642,7 +642,7 @@ export function findAnchorTargetHandleAtPoint<T extends AnchorTarget>(
   selectedIds: Set<string>,
   threshold: number
 ):
-  | { type: 'resize'; handle: ShapeResizeHandle; target: T }
+  | { type: 'resize'; handle: ResizeHandle; target: T }
   | { type: 'rotate'; target: T }
   | null {
   for (let i = targets.length - 1; i >= 0; i -= 1) {
@@ -810,7 +810,7 @@ export function makeConnector(
 
 export function resizeShapeFromHandle(
   shape: DiagramShape,
-  handle: ShapeResizeHandle,
+  handle: ResizeHandle,
   point: Point
 ): DiagramShape {
   return resizeAnchorTargetFromHandle(shape, handle, point, {
@@ -821,7 +821,7 @@ export function resizeShapeFromHandle(
 
 export function resizeAnchorTargetFromHandle<T extends AnchorTarget>(
   target: T,
-  handle: ShapeResizeHandle,
+  handle: ResizeHandle,
   point: Point,
   options: {
     minWidth?: number

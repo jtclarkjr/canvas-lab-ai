@@ -2,18 +2,16 @@
 // typed, but messages arriving over realtime or loaded from the database
 // carry `parts: unknown[]` — these helpers narrow both uniformly.
 
+import type { MessageAuthor } from '$lib/scenes/schema'
 import type {
   ChatPartLike,
   DisplayMessage,
-  DraftToolPart,
-  MessageAuthorInfo
+  DraftToolPart
 } from '$lib/scenes/types'
 
 // Author/model attribution rides on message metadata (stamped server-side
 // at persist time; local messages have none and belong to the viewer).
-export function messageAuthor(
-  message: DisplayMessage
-): MessageAuthorInfo | null {
+export function messageAuthor(message: DisplayMessage): MessageAuthor | null {
   const metadata = message.metadata
   if (typeof metadata !== 'object' || metadata === null) {
     return null
@@ -25,7 +23,7 @@ export function messageAuthor(
     typeof (author as { id?: unknown }).id === 'string' &&
     typeof (author as { name?: unknown }).name === 'string'
   ) {
-    return author as MessageAuthorInfo
+    return author as MessageAuthor
   }
   return null
 }

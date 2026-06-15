@@ -1,9 +1,5 @@
 import type { Command } from '$lib/canvas/commands'
-import type {
-  PathResizeHandle,
-  ShapeResizeHandle,
-  TextResizeHandle
-} from '$lib/canvas/types'
+import type { ResizeHandle } from '$lib/canvas/types'
 import type {
   Arrowhead,
   CanvasDrawableElement,
@@ -145,7 +141,7 @@ export type ActiveInteraction =
   | {
       type: 'shape-resize'
       shapeId: string
-      handle: ShapeResizeHandle
+      handle: ResizeHandle
       original: DiagramShape
     }
   | {
@@ -156,7 +152,7 @@ export type ActiveInteraction =
   | {
       type: 'scene-resize'
       sceneId: string
-      handle: ShapeResizeHandle
+      handle: ResizeHandle
       original: Scene
     }
   | {
@@ -167,7 +163,7 @@ export type ActiveInteraction =
   | {
       type: 'text-resize'
       textId: string
-      handle: TextResizeHandle
+      handle: ResizeHandle
       original: TextElement
     }
   | {
@@ -178,7 +174,7 @@ export type ActiveInteraction =
   | {
       type: 'path-resize'
       pathId: string
-      handle: PathResizeHandle
+      handle: ResizeHandle
       original: Path
     }
   | {

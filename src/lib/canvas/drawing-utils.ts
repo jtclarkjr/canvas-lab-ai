@@ -2,11 +2,10 @@ import type {
   Camera,
   Path,
   PathHandleHit,
-  PathResizeHandle,
   Point,
+  ResizeHandle,
   TextElement,
-  TextHandleHit,
-  TextResizeHandle
+  TextHandleHit
 } from '$lib/canvas/types'
 import {
   getShapeResizeCursor,
@@ -204,7 +203,7 @@ export function getTextOutlinePoints(text: TextElement): Point[] {
 
 export function getTextResizeHandles(
   text: TextElement
-): Array<{ handle: TextResizeHandle; point: Point }> {
+): Array<{ handle: ResizeHandle; point: Point }> {
   const [nw, ne, se, sw] = getTextOutlinePoints(text)
   const bounds = calculateTextBounds(text)
   return [
@@ -242,7 +241,7 @@ export function getTextRotateHandle(text: TextElement): Point {
 }
 
 export function getTextResizeCursor(
-  handle: TextResizeHandle,
+  handle: ResizeHandle,
   rotation: number
 ): string {
   return getShapeResizeCursor(handle, rotation)
@@ -297,7 +296,7 @@ export function findTextAtPoint(
 
 export function resizeTextFromHandle(
   text: TextElement,
-  handle: TextResizeHandle,
+  handle: ResizeHandle,
   point: Point
 ): TextElement {
   const bounds = calculateTextBounds(text)
@@ -511,7 +510,7 @@ export function getPathOutlinePoints(path: Path): Point[] {
 
 export function getPathResizeHandles(
   path: Path
-): Array<{ handle: PathResizeHandle; point: Point }> {
+): Array<{ handle: ResizeHandle; point: Point }> {
   const [nw, ne, se, sw] = getPathOutlinePoints(path)
   const bb = getPathBoundingBox(path, path.width / 2)
   return [
@@ -558,7 +557,7 @@ export function findPathHandleAtPoint(
 
 export function resizePathFromHandle(
   original: Path,
-  handle: PathResizeHandle,
+  handle: ResizeHandle,
   point: Point
 ): Path {
   const bb = getPathBoundingBox(original)

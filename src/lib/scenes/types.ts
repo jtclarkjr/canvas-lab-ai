@@ -54,11 +54,6 @@ export type DisplayMessage = {
   metadata?: unknown
 }
 
-export type MessageAuthorInfo = {
-  id: string
-  name: string
-}
-
 export type DraftToolPart = {
   state: string
   title: string

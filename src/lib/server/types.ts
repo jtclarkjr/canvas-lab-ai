@@ -35,7 +35,7 @@ export type ServerErrorLogEvent = {
   method: string
   path: string
   code?: string
-  issues?: Record<string, string[]>
+  issues?: ApiErrorIssues
   details?: Record<string, unknown>
   stack?: string
 }
