@@ -5,7 +5,7 @@
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
-  import ConferenceCallChatPanel from './ConferenceCallChatPanel.svelte'
+  import ConferenceCallChatPanel from '../ConferenceCallChatPanel.svelte'
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()

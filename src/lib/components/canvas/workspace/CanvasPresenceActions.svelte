@@ -2,7 +2,7 @@
   import { UserRound } from 'lucide-svelte'
   import type { CanvasRole } from '$lib/canvas/roles'
   import CanvasOptionsButton from '$lib/components/canvas/workspace/CanvasOptionsButton.svelte'
-  import ConferenceCallButton from '$lib/components/canvas/conference/ConferenceCallButton.svelte'
+  import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
   import Popover from '$lib/components/shared/Popover.svelte'
   import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
   import type { DisplayMember } from '$lib/workspace/types'

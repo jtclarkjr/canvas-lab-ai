@@ -2,7 +2,7 @@
   import { MonitorUp } from 'lucide-svelte'
   import type { ConferenceParticipant } from '$lib/conference/types'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import { attachTrack } from './media-actions'
+  import { attachTrack } from '../media-actions'
 
   const store = useCanvasConferenceStore()
 

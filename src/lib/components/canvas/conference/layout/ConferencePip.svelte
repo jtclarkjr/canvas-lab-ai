@@ -19,7 +19,7 @@
   } from '$lib/conference/helpers'
   import type { Point, Size } from '$lib/conference/types'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import ConferenceParticipantStrip from '$lib/components/canvas/conference/ConferenceParticipantStrip.svelte'
+  import ConferenceParticipantStrip from '$lib/components/canvas/conference/tiles/ConferenceParticipantStrip.svelte'
   import { attachTrack } from '$lib/components/canvas/conference/media-actions'
 
   const store = useCanvasConferenceStore()

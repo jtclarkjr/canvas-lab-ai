@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import ConferenceFullscreen from '$lib/components/canvas/conference/ConferenceFullscreen.svelte'
-  import ConferencePip from '$lib/components/canvas/conference/ConferencePip.svelte'
+  import ConferenceFullscreen from '$lib/components/canvas/conference/layout/ConferenceFullscreen.svelte'
+  import ConferencePip from '$lib/components/canvas/conference/layout/ConferencePip.svelte'
   import ConferenceSettingsDialog from '$lib/components/canvas/conference/ConferenceSettingsDialog.svelte'
   import { attachTrack } from '$lib/components/canvas/conference/media-actions'
 
