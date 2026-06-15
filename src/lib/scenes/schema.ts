@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { UIMessage } from 'ai'
 import type { Path, TextElement } from '$lib/canvas/types'
 
-// ── scenes ──────────────────────────────────────────────────────────────
+// scenes
 
 export const sceneRowSchema = z.object({
   id: z.string(),
@@ -72,7 +72,7 @@ export const listScenesResponseSchema = z.object({
   items: z.array(sceneSchema)
 })
 
-// ── scene documents (drafts + saved library) ────────────────────────────
+// scene documents (drafts + saved library)
 
 export const sceneDocumentStatusSchema = z.enum(['draft', 'saved'])
 
@@ -178,7 +178,7 @@ export const markdownDocumentContentSchema = z.object({
   annotations: documentAnnotationsSchema.optional()
 })
 
-// ── scene chat messages ─────────────────────────────────────────────────
+// scene chat messages
 
 export const sceneMessageRoleSchema = z.enum(['user', 'assistant', 'system'])
 
@@ -215,7 +215,7 @@ export const listSceneMessagesResponseSchema = z.object({
   items: z.array(sceneMessageSchema)
 })
 
-// ── AI document chat request ────────────────────────────────────────────
+// AI document chat request
 
 // UIMessages are validated loosely: the AI SDK owns their internal shape.
 export const uiMessageSchema = z.looseObject({
@@ -235,7 +235,7 @@ export const documentChatRequestSchema = z.object({
   messages: z.array(uiMessageSchema).min(1)
 })
 
-// ── inferred types ──────────────────────────────────────────────────────
+// inferred types
 
 export type SceneRow = z.infer<typeof sceneRowSchema>
 export type Scene = z.infer<typeof sceneSchema>

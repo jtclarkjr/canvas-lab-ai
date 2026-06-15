@@ -26,7 +26,7 @@
   let text = $state('')
   let textareaEl = $state<HTMLTextAreaElement | null>(null)
 
-  // ── @mention ──────────────────────────────────────────────────────────────
+  //  @mention
   // atIndex: position of the '@' that opened the picker; null = picker closed.
   let atIndex = $state<number | null>(null)
   let query = $state('')
@@ -81,7 +81,7 @@
     })
   }
 
-  // ── core ──────────────────────────────────────────────────────────────────
+  // core
 
   const canSend = $derived(!disabled && !isStreaming && text.trim().length > 0)
 

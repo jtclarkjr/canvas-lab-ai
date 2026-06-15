@@ -217,7 +217,7 @@ export function createWorkspaceScenesStore({
     }
   }
 
-  // ── card drag (move) ──────────────────────────────────────────────────
+  // card drag (move)
 
   function handleCardPointerDown(event: PointerEvent, sceneId: string) {
     if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -317,7 +317,7 @@ export function createWorkspaceScenesStore({
     draggingSceneId = null
   }
 
-  // ── card resize ───────────────────────────────────────────────────────
+  // card resize
 
   function handleResizePointerDown(event: PointerEvent, sceneId: string) {
     if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -390,7 +390,7 @@ export function createWorkspaceScenesStore({
     resizingSceneId = null
   }
 
-  // ── open/close + realtime hooks ───────────────────────────────────────
+  // open/close + realtime hooks
 
   function openSceneById(sceneId: string, originRect: DOMRect | null) {
     openScene = { sceneId, originRect }
