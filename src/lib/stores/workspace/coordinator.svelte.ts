@@ -38,6 +38,7 @@ import { createWorkspaceKeyboardStore } from '$lib/stores/workspace/keyboard.sve
 import { createWorkspacePresenceStore } from '$lib/stores/workspace/presence.svelte'
 import { createWorkspaceRealtimeElementsStore } from '$lib/stores/workspace/realtime-elements.svelte'
 import { createWorkspaceSurfaceInteractionsStore } from '$lib/stores/workspace/surface-interactions/index.svelte'
+import { createWorkspaceTempleStore } from '$lib/stores/workspace/temple.svelte'
 import { createWorkspaceTextEditorStore } from '$lib/stores/workspace/text-editor.svelte'
 
 type WorkspaceElements = {
@@ -413,6 +414,47 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     deleteSelectedElements: sceneStore.deleteSelectedElements,
     clearSelection
   })
+  const templeStore = createWorkspaceTempleStore({
+    getActiveCanvasId: () => activeCanvasId,
+    getUserId: () => userId,
+    getRootElement: () => rootEl,
+    getMode: () => modeStore.mode,
+    canEdit,
+    screenToCanvasPoint,
+    getEditingText: () => editingText,
+    commitText: textEditorStore.commitText,
+    getDiagramFormatting: () => formattingStore.diagramFormatting,
+    applyCommand,
+    addHistoryCommand: historyStore.addCommand,
+    setElementOwner: (id, ownerId) => elementOwners.set(id, ownerId),
+    setSelectedElementIds: (next) => {
+      selectedElementIds = next
+    },
+    setSelectedTool: (tool) => {
+      selectedTool = tool
+    },
+    setHoverCursorStyle: (next) => {
+      sceneCursorStyle = next
+    },
+    setSelectionStart: (next) => {
+      selectionStart = next
+    },
+    setSelectionEnd: (next) => {
+      selectionEnd = next
+    },
+    setIsSelecting: (next) => {
+      isSelecting = next
+    },
+    setCurrentPath: (next) => {
+      currentPath = next
+    },
+    setDraftShape: (next) => {
+      draftShape = next
+    },
+    setDraftConnector: (next) => {
+      draftConnector = next
+    }
+  })
 
   function applyCommand(command: Command) {
     createApplyCommand({
@@ -606,6 +648,7 @@ export function createCanvasWorkspaceStore(input: CanvasWorkspaceStoreInput) {
     saveTitle: canvasesStore.saveTitle,
     saveVisibility: canvasesStore.saveVisibility,
     handleToolChange,
+    insertDiagramTemplate: templeStore.insertDiagramTemplate,
     handleModeChange,
     createScene: scenesStore.createSceneAtViewportCenter,
     createWorkflow: () =>

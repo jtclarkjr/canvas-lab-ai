@@ -9,8 +9,11 @@
     CornerDownRight,
     Diamond,
     Spline,
-    Square
+    Square,
+    Workflow
   } from 'lucide-svelte'
+  import { onMount } from 'svelte'
+  import type { DiagramTemplateId } from '$lib/canvas/temple/types'
   import type {
     Arrowhead,
     ConnectorKind,
@@ -19,6 +22,7 @@
     StrokeStyle,
     Tool
   } from '$lib/canvas/types'
+  import DiagramTemplateMenu from '$lib/components/canvas/workspace/DiagramTemplateMenu.svelte'
 
   let {
     formatting,
@@ -36,6 +40,7 @@
     onOpacityChange,
     onStartArrowChange,
     onEndArrowChange,
+    onTemplateInsert,
     onArrange
   } = $props<{
     formatting: DiagramFormatting
@@ -53,8 +58,12 @@
     onOpacityChange: (opacity: number) => void
     onStartArrowChange: (arrowhead: Arrowhead) => void
     onEndArrowChange: (arrowhead: Arrowhead) => void
+    onTemplateInsert?: (templateId: DiagramTemplateId) => void
     onArrange: (action: 'front' | 'forward' | 'backward' | 'back') => void
   }>()
+
+  let templateMenuEl = $state<HTMLDivElement | null>(null)
+  let isTemplateMenuOpen = $state(false)
 
   const strokeColors = [
     '#000000',
@@ -81,6 +90,34 @@
     selectedTool === 'connector' || hasConnectorSelection
   )
 
+  onMount(() => {
+    const handlePointerDownOutside = (event: PointerEvent) => {
+      if (!isTemplateMenuOpen || !templateMenuEl) {
+        return
+      }
+
+      if (event.composedPath().includes(templateMenuEl)) {
+        return
+      }
+
+      isTemplateMenuOpen = false
+    }
+
+    document.addEventListener('pointerdown', handlePointerDownOutside, true)
+    return () =>
+      document.removeEventListener(
+        'pointerdown',
+        handlePointerDownOutside,
+        true
+      )
+  })
+
+  $effect(() => {
+    if (!isVisible) {
+      isTemplateMenuOpen = false
+    }
+  })
+
   function preventEditorBlur(event: MouseEvent) {
     event.preventDefault()
   }
@@ -105,6 +142,19 @@
     return `size-6 rounded-md border transition ${
       active ? 'border-primary ring-2 ring-primary/25' : 'border-border'
     }`
+  }
+
+  function toggleTemplateMenu() {
+    isTemplateMenuOpen = !isTemplateMenuOpen
+  }
+
+  function closeTemplateMenu() {
+    isTemplateMenuOpen = false
+  }
+
+  function insertTemplate(templateId: DiagramTemplateId) {
+    onTemplateInsert?.(templateId)
+    closeTemplateMenu()
   }
 </script>
 
@@ -145,6 +195,36 @@
         >
           <Circle class="size-4" aria-hidden="true" />
         </button>
+      </div>
+    {/if}
+
+    {#if onTemplateInsert}
+      <div
+        bind:this={templateMenuEl}
+        class="relative flex items-center border-r border-border/70 pr-1"
+      >
+        <button
+          type="button"
+          class={buttonClass(isTemplateMenuOpen)}
+          onmousedown={preventEditorBlur}
+          onclick={toggleTemplateMenu}
+          aria-label="Diagram templates"
+          aria-expanded={isTemplateMenuOpen}
+          aria-haspopup="menu"
+        >
+          <Workflow class="size-4" aria-hidden="true" />
+        </button>
+
+        {#if isTemplateMenuOpen}
+          <div
+            class="absolute left-0 top-full mt-2 min-w-[220px] rounded-lg border border-border/70 bg-popover text-popover-foreground shadow-xl"
+          >
+            <DiagramTemplateMenu
+              onTemplateInsert={insertTemplate}
+              onClose={closeTemplateMenu}
+            />
+          </div>
+        {/if}
       </div>
     {/if}
 

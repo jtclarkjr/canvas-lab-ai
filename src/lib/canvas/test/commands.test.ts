@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
 import {
+  createCreateMultipleCommand,
   createCreatePathCommand,
   createCreateShapeCommand,
   createDeleteMultipleCommand,
@@ -92,6 +93,42 @@ describe('canvas commands', () => {
     if (inverse.type === 'CREATE_MULTIPLE') {
       expect(inverse.elements).toHaveLength(1)
       expect(inverse.elements[0]?.element).toEqual(text)
+    }
+  })
+
+  it('creates multiple elements as one undoable command', () => {
+    const shape: DiagramShape = {
+      id: 'shape-1',
+      kind: 'rectangle',
+      x: 10,
+      y: 20,
+      width: 100,
+      height: 60,
+      rotation: 0,
+      fillColor: '#ffffff',
+      strokeColor: '#000000',
+      strokeWidth: 2,
+      strokeStyle: 'solid',
+      opacity: 1,
+      z: 1
+    }
+
+    const command = createCreateMultipleCommand(
+      [{ element: shape, type: 'shape' }],
+      'user-1'
+    )
+    shape.x = 99
+    const inverse = getInverseCommand(command)
+
+    expect(command.type).toBe('CREATE_MULTIPLE')
+    expect(command.elements[0]?.element).toMatchObject({
+      id: 'shape-1',
+      x: 10
+    })
+    expect(inverse.type).toBe('DELETE_MULTIPLE')
+    if (inverse.type === 'DELETE_MULTIPLE') {
+      expect(inverse.elements[0]?.element.id).toBe('shape-1')
+      expect(inverse.elements[0]?.type).toBe('shape')
     }
   })
 

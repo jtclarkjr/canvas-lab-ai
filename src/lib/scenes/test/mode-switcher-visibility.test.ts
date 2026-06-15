@@ -28,6 +28,11 @@ describe('scene mode switcher visibility', () => {
     expect(renderWorkspace('owner')).toContain('Scenes')
   })
 
+  it('keeps diagram templates inside the collapsed editing toolbar', () => {
+    expect(renderWorkspace('editor')).toContain('Drawing tools')
+    expect(renderWorkspace('reader')).not.toContain('Diagram templates')
+  })
+
   it('server-renders initial drawing elements and scene cards', () => {
     const timestamp = '2026-06-12T00:00:00.000Z'
     const initialElements: CanvasElement[] = [
@@ -70,6 +75,106 @@ describe('scene mode switcher visibility', () => {
         createdBy: 'user-1',
         updatedBy: 'user-1',
         updatedAt: timestamp
+      },
+      {
+        id: 'shape-1',
+        canvasId: 'canvas-1',
+        type: 'shape',
+        data: {
+          kind: 'rectangle',
+          width: 120,
+          height: 72,
+          rotation: 0,
+          fillColor: '#ffffff',
+          strokeColor: '#000000',
+          strokeWidth: 2,
+          strokeStyle: 'solid',
+          opacity: 1,
+          text: 'Shape A',
+          textColor: '#000000',
+          textFontSize: 16,
+          textIsBold: false,
+          textIsItalic: false,
+          textIsUnderline: false
+        },
+        x: 160,
+        y: 20,
+        z: 1,
+        createdBy: 'user-1',
+        updatedBy: 'user-1',
+        updatedAt: timestamp
+      },
+      {
+        id: 'shape-2',
+        canvasId: 'canvas-1',
+        type: 'shape',
+        data: {
+          kind: 'rectangle',
+          width: 120,
+          height: 72,
+          rotation: 0,
+          fillColor: '#ffffff',
+          strokeColor: '#000000',
+          strokeWidth: 2,
+          strokeStyle: 'solid',
+          opacity: 1,
+          text: 'Shape B',
+          textColor: '#000000',
+          textFontSize: 16,
+          textIsBold: false,
+          textIsItalic: false,
+          textIsUnderline: false
+        },
+        x: 360,
+        y: 20,
+        z: 2,
+        createdBy: 'user-1',
+        updatedBy: 'user-1',
+        updatedAt: timestamp
+      },
+      {
+        id: 'connector-1',
+        canvasId: 'canvas-1',
+        type: 'connector',
+        data: {
+          kind: 'straight',
+          start: {
+            x: 280,
+            y: 56,
+            binding: {
+              targetType: 'shape',
+              targetId: 'shape-1',
+              anchor: 'right'
+            }
+          },
+          end: {
+            x: 360,
+            y: 56,
+            binding: {
+              targetType: 'shape',
+              targetId: 'shape-2',
+              anchor: 'left'
+            }
+          },
+          strokeColor: '#000000',
+          strokeWidth: 2,
+          strokeStyle: 'solid',
+          opacity: 1,
+          startArrow: 'none',
+          endArrow: 'arrow',
+          text: 'handoff',
+          textColor: '#000000',
+          textFontSize: 14,
+          textIsBold: false,
+          textIsItalic: false,
+          textIsUnderline: false
+        },
+        x: 0,
+        y: 0,
+        z: 3,
+        createdBy: 'user-1',
+        updatedBy: 'user-1',
+        updatedAt: timestamp
       }
     ]
     const initialScenes: Scene[] = [
@@ -103,6 +208,9 @@ describe('scene mode switcher visibility', () => {
     }).body
 
     expect(body).toContain('M 1 2 L 3 4')
+    expect(body).toContain('M 280 56 L 360 56')
+    expect(body).toContain('handoff')
+    expect(body).not.toContain('connector-label-mask')
     expect(body).toContain('Server seeded text')
     expect(body).toContain('Server seeded scene')
   })

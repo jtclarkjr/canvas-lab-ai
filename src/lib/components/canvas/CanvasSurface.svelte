@@ -206,10 +206,6 @@
     }
   }
 
-  function connectorLabelMaskId(connector: DiagramConnector) {
-    return `connector-label-mask-${connector.id}`
-  }
-
   function isEditingShapeText(shape: DiagramShape) {
     return editingText?.target === 'shape' && editingText.id === shape.id
   }
@@ -249,31 +245,9 @@
         connector.text && !isEditingConnectorText(connector)
           ? connectorTextFrame(connector)
           : null}
-      {#if labelFrame}
-        <mask id={connectorLabelMaskId(connector)} maskUnits="userSpaceOnUse">
-          <rect
-            fill="white"
-            height="200000"
-            width="200000"
-            x="-100000"
-            y="-100000"
-          />
-          <rect
-            fill="black"
-            height={labelFrame.height}
-            rx={2 / camera.scale}
-            width={labelFrame.width}
-            x={labelFrame.x}
-            y={labelFrame.y}
-          />
-        </mask>
-      {/if}
       <path
         d={connectorToSvgPath(connector, shapes, scenes)}
         fill="none"
-        mask={labelFrame
-          ? `url(#${connectorLabelMaskId(connector)})`
-          : undefined}
         stroke={resolveCanvasDisplayColor(connector.strokeColor)}
         stroke-dasharray={getStrokeDashArray(
           connector.strokeStyle,
@@ -284,28 +258,17 @@
         stroke-opacity={connector.opacity}
         stroke-width={connector.strokeWidth}
       />
-      {#if connector.startArrow === 'arrow'}
-        <polygon
-          fill={resolveCanvasDisplayColor(connector.strokeColor)}
-          mask={labelFrame
-            ? `url(#${connectorLabelMaskId(connector)})`
-            : undefined}
-          opacity={connector.opacity}
-          points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
-        />
-      {/if}
-      {#if connector.endArrow === 'arrow'}
-        <polygon
-          fill={resolveCanvasDisplayColor(connector.strokeColor)}
-          mask={labelFrame
-            ? `url(#${connectorLabelMaskId(connector)})`
-            : undefined}
-          opacity={connector.opacity}
-          points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
-        />
-      {/if}
       {#if labelFrame}
         <g style="pointer-events:none">
+          <rect
+            fill="var(--canvas-surface)"
+            height={labelFrame.height}
+            opacity="0.96"
+            rx={2 / camera.scale}
+            width={labelFrame.width}
+            x={labelFrame.x}
+            y={labelFrame.y}
+          />
           <text
             class="select-none"
             fill={resolveCanvasDisplayColor(connector.textColor ?? '#000000')}
@@ -326,6 +289,20 @@
             {/each}
           </text>
         </g>
+      {/if}
+      {#if connector.startArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.start, connector.strokeWidth)}
+        />
+      {/if}
+      {#if connector.endArrow === 'arrow'}
+        <polygon
+          fill={resolveCanvasDisplayColor(connector.strokeColor)}
+          opacity={connector.opacity}
+          points={arrowPoints(terminalSegments.end, connector.strokeWidth)}
+        />
       {/if}
     {/each}
 

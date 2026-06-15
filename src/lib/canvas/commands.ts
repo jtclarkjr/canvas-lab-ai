@@ -202,6 +202,22 @@ export const createCreateConnectorCommand = (
   element: cloneConnector(connector)
 })
 
+export const createCreateMultipleCommand = (
+  elements: Array<{
+    element: CanvasDrawableElement
+    type: CanvasElementType
+  }>,
+  userId: string
+): CreateMultipleCommand => ({
+  type: 'CREATE_MULTIPLE',
+  timestamp: Date.now(),
+  userId,
+  elements: elements.map((element) => ({
+    element: cloneCanvasElement(element.element, element.type),
+    type: element.type
+  }))
+})
+
 export const createUpdateTextCommand = (
   elementId: string,
   before: TextElement,

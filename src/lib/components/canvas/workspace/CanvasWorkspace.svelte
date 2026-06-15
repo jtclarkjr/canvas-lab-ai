@@ -251,6 +251,7 @@
     onOpacityChange={workspace.setDiagramOpacity}
     onStartArrowChange={workspace.setDiagramStartArrow}
     onEndArrowChange={workspace.setDiagramEndArrow}
+    onTemplateInsert={workspace.insertDiagramTemplate}
     onArrange={workspace.arrangeSelectedElements}
   />
 
