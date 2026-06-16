@@ -4,7 +4,7 @@
     Bot,
     Check,
     Database,
-    Loader2,
+    LoaderCircle,
     MessageSquare,
     Minus
   } from 'lucide-svelte'
@@ -356,7 +356,7 @@
               disabled={!canModify || proposalApplying || proposalApplied}
             >
               {#if proposalApplying}
-                <Loader2 class="size-3.5 animate-spin" />
+                <LoaderCircle class="size-3.5 animate-spin" />
               {:else}
                 <Check class="size-3.5" />
               {/if}
@@ -427,7 +427,7 @@
             aria-label="Ask workflow AI"
           >
             {#if isAsking}
-              <Loader2 class="size-4 animate-spin" />
+              <LoaderCircle class="size-4 animate-spin" />
             {:else}
               <ArrowUp class="size-4" aria-hidden="true" />
             {/if}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Handle, Position } from '@xyflow/svelte'
   import {
-    CheckCircle2,
+    CircleCheck,
     CircleDot,
     Diamond,
     FileInput,
@@ -27,7 +27,7 @@
         return StickyNote
       case 'task':
       default:
-        return CheckCircle2
+        return CircleCheck
     }
   })
 

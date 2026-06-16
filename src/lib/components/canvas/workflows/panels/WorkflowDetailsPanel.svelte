@@ -1,9 +1,9 @@
 <script lang="ts">
   import {
-    Code2,
+    CodeXml,
     FileText,
     History,
-    Loader2,
+    LoaderCircle,
     Minus,
     NotebookPen,
     RotateCcw,
@@ -31,7 +31,7 @@
   type PanelTabOption = {
     id: PanelTab
     label: string
-    icon: typeof Code2
+    icon: typeof CodeXml
   }
 
   let {
@@ -73,7 +73,7 @@
     ...(isDatabaseFlow
       ? [{ id: 'schema' as PanelTab, label: 'Schema', icon: Table2 }]
       : []),
-    { id: 'code' as PanelTab, label: 'Code', icon: Code2 },
+    { id: 'code' as PanelTab, label: 'Code', icon: CodeXml },
     { id: 'notepad' as PanelTab, label: 'Notepad', icon: NotebookPen },
     { id: 'versions' as PanelTab, label: 'Versions', icon: History }
   ])
@@ -294,7 +294,7 @@
         disabled={!canModify || isSavingYaml}
       >
         {#if isSavingYaml}
-          <Loader2 class="size-4 animate-spin" />
+          <LoaderCircle class="size-4 animate-spin" />
         {:else}
           <Save class="size-4" />
         {/if}
@@ -317,7 +317,7 @@
         disabled={!canModify || isSavingNotes}
       >
         {#if isSavingNotes}
-          <Loader2 class="size-4 animate-spin" />
+          <LoaderCircle class="size-4 animate-spin" />
         {:else}
           <Save class="size-4" />
         {/if}
@@ -333,7 +333,7 @@
         disabled={!canModify || isSavingVersion}
       >
         {#if isSavingVersion}
-          <Loader2 class="size-4 animate-spin" />
+          <LoaderCircle class="size-4 animate-spin" />
         {:else}
           <Save class="size-4" />
         {/if}
@@ -346,7 +346,7 @@
           <div
             class="flex h-24 items-center justify-center text-xs text-muted-foreground"
           >
-            <Loader2 class="mr-2 size-4 animate-spin" />
+            <LoaderCircle class="mr-2 size-4 animate-spin" />
             Loading versions
           </div>
         {:else}
