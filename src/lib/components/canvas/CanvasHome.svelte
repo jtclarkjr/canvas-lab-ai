@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { tick } from 'svelte'
-  import { FileText, LoaderCircle, Plus, Trash2 } from 'lucide-svelte'
+  import { onMount, tick } from 'svelte'
+  import { FileText, LoaderCircle, Plus, Search, Trash2 } from 'lucide-svelte'
   import { goto, invalidate } from '$app/navigation'
   import { fade, scale } from 'svelte/transition'
   import { flip } from 'svelte/animate'
   import { createCanvas, deleteCanvas, listCanvases } from '$lib/canvas/api'
   import { CANVASES_DEPENDENCY } from '$lib/canvas/dependencies'
   import { isAnonymousUser } from '$lib/auth/anonymous'
+  import CanvasSearchDialog from '$lib/components/canvas/CanvasSearchDialog.svelte'
   import Modal from '$lib/components/shared/Modal.svelte'
   import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
   import type { Canvas } from '$lib/canvas/schema'
@@ -42,6 +43,7 @@
   })
   let isLoading = $state(false)
   let isCreating = $state(false)
+  let isSearchOpen = $state(false)
   let isDeleteDialogOpen = $state(false)
   let deleteTarget = $state<Canvas | null>(null)
   let isDeletingId = $state<string | null>(null)
@@ -61,6 +63,7 @@
     if (!activeUser) {
       canvases = []
       isLoading = false
+      isSearchOpen = false
       return
     }
 
@@ -120,6 +123,21 @@
     }
 
     event.preventDefault()
+    if (openingCanvasId) {
+      return
+    }
+
+    try {
+      await openCanvas(canvas)
+    } catch (nextError) {
+      localError =
+        nextError instanceof Error
+          ? nextError.message
+          : 'Failed to open canvas.'
+    }
+  }
+
+  async function handleSearchSelect(canvas: Canvas) {
     if (openingCanvasId) {
       return
     }
@@ -211,23 +229,60 @@
       void loadCanvases()
     }
   })
+
+  onMount(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key.toLowerCase() !== 'k' ||
+        (!event.metaKey && !event.ctrlKey) ||
+        !activeUser ||
+        isDeleteDialogOpen
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      isSearchOpen = true
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
 </script>
 
 <section
   class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
 >
-  <div class="grid gap-3">
-    <p class="m-0 text-sm font-bold uppercase tracking-[0.2em] text-primary">
-      Canvas
-    </p>
-    <h1
-      class="m-0 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl"
-    >
-      Recent canvases
-    </h1>
-    <p class="m-0 max-w-3xl text-lg leading-8 text-muted-foreground">
-      Create a new canvas or reopen a previous one to keep drawing.
-    </p>
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+  >
+    <div class="grid gap-3">
+      <p class="m-0 text-sm font-bold uppercase tracking-[0.2em] text-primary">
+        Canvas
+      </p>
+      <h1
+        class="m-0 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl"
+      >
+        Recent canvases
+      </h1>
+      <p class="m-0 max-w-3xl text-lg leading-8 text-muted-foreground">
+        Create a new canvas or reopen a previous one to keep drawing.
+      </p>
+    </div>
+
+    {#if activeUser}
+      <button
+        type="button"
+        class="inline-flex h-10 w-fit shrink-0 items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/50 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring sm:mt-1"
+        onclick={() => {
+          isSearchOpen = true
+        }}
+        aria-label="Search canvases"
+      >
+        <Search class="size-4 text-muted-foreground" aria-hidden="true" />
+        <span>Search</span>
+      </button>
+    {/if}
   </div>
 
   {#if error}
@@ -424,6 +479,16 @@
       Opening {openingCanvasTitle ?? 'canvas'}
     </div>
   </div>
+{/if}
+
+{#if activeUser}
+  <CanvasSearchDialog
+    bind:open={isSearchOpen}
+    {canvases}
+    {isLoading}
+    {openingCanvasId}
+    onSelect={(canvas) => void handleSearchSelect(canvas)}
+  />
 {/if}
 
 <Modal
