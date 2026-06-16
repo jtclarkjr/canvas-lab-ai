@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { cubicOut } from 'svelte/easing'
+  import { scale } from 'svelte/transition'
   import { LoaderCircle, MessageSquare, Minimize2, Users } from 'lucide-svelte'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
@@ -55,6 +57,13 @@
 
 <div
   class="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background"
+  style="transform-origin:top center"
+  transition:scale={{
+    start: 0.94,
+    opacity: 0.35,
+    duration: 220,
+    easing: cubicOut
+  }}
   role="dialog"
   aria-label="Call"
   data-camera-exempt

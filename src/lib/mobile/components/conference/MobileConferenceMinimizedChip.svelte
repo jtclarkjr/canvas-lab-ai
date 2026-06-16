@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { cubicOut } from 'svelte/easing'
+  import { scale } from 'svelte/transition'
   import { LoaderCircle, Maximize2, Phone } from 'lucide-svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
 
@@ -19,6 +21,13 @@
 >
   <div
     class="toolbar-pill pointer-events-auto flex h-10 w-full items-center gap-1 p-1"
+    style="transform-origin:top center"
+    transition:scale={{
+      start: 0.82,
+      opacity: 0,
+      duration: 170,
+      easing: cubicOut
+    }}
   >
     <button
       type="button"

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { MessageSquare, Mic, MicOff, Pin, Users, X } from 'lucide-svelte'
+  import { MessageSquare, Mic, MicOff, Pin, Users } from 'lucide-svelte'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
@@ -9,7 +9,10 @@
   const chatStore = useCanvasChatStore()
 
   let dragPointerId: number | null = null
+  let dragStartX = 0
   let dragStartY = 0
+  let dragStartScrollable: HTMLElement | null = null
+  let dragActive = false
   let dragY = $state(0)
   let dragging = $state(false)
 
@@ -33,21 +36,70 @@
     }
   }
 
+  function closestScrollable(target: EventTarget | null) {
+    if (!(target instanceof HTMLElement)) {
+      return null
+    }
+
+    let current: HTMLElement | null = target
+    while (current) {
+      const style = window.getComputedStyle(current)
+      const canScroll =
+        /(auto|scroll)/.test(style.overflowY) &&
+        current.scrollHeight > current.clientHeight
+
+      if (canScroll) {
+        return current
+      }
+
+      if (current.getAttribute('role') === 'dialog') {
+        return null
+      }
+
+      current = current.parentElement
+    }
+
+    return null
+  }
+
   function handleDragStart(event: PointerEvent) {
     dragPointerId = event.pointerId
+    dragStartX = event.clientX
     dragStartY = event.clientY - dragY
-    dragging = true
+    dragStartScrollable = closestScrollable(event.target)
+    dragActive = false
+    dragging = false
     ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
   }
 
   function handleDragMove(event: PointerEvent) {
-    if (!dragging || event.pointerId !== dragPointerId) return
-    dragY = Math.max(0, event.clientY - dragStartY)
+    if (event.pointerId !== dragPointerId) return
+
+    const deltaX = event.clientX - dragStartX
+    const deltaY = event.clientY - dragStartY
+
+    if (!dragActive) {
+      if (
+        deltaY <= 10 ||
+        Math.abs(deltaX) > Math.abs(deltaY) ||
+        (dragStartScrollable && dragStartScrollable.scrollTop > 0)
+      ) {
+        return
+      }
+
+      dragActive = true
+      dragging = true
+    }
+
+    event.preventDefault()
+    dragY = Math.max(0, deltaY)
   }
 
   function handleDragEnd(event: PointerEvent) {
-    if (!dragging || event.pointerId !== dragPointerId) return
+    if (event.pointerId !== dragPointerId) return
     dragging = false
+    dragActive = false
+    dragStartScrollable = null
     dragPointerId = null
 
     if (dragY > 80) {
@@ -69,27 +121,28 @@
   ></button>
 
   <div
-    class={`absolute inset-x-0 bottom-0 z-10 flex max-h-[78dvh] min-h-[20rem] flex-col overflow-hidden rounded-t-2xl border border-border/70 bg-card text-card-foreground shadow-2xl ${
+    class={`absolute inset-x-0 bottom-0 z-10 flex h-[94dvh] max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] min-h-[20rem] flex-col overflow-hidden rounded-t-2xl border border-border/70 bg-card text-card-foreground shadow-2xl ${
       dragging ? '' : 'transition-transform duration-150'
     }`}
     style={sheetStyle}
     role="dialog"
     aria-label={title}
+    tabindex="-1"
+    onpointerdown={handleDragStart}
+    onpointermove={handleDragMove}
+    onpointerup={handleDragEnd}
+    onpointercancel={handleDragEnd}
   >
     <header class="shrink-0 border-b border-border/60 px-4 pb-3 pt-2">
       <button
         type="button"
-        class="mx-auto mb-3 block h-5 w-16 touch-none rounded-full"
-        onpointerdown={handleDragStart}
-        onpointermove={handleDragMove}
-        onpointerup={handleDragEnd}
-        onpointercancel={handleDragEnd}
+        class="mx-auto mb-3 block h-5 w-16 rounded-full"
         aria-label="Drag down to close panel"
       >
         <span class="mx-auto block h-1 w-10 rounded-full bg-muted-foreground/30"
         ></span>
       </button>
-      <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
         <h2 class="flex min-w-0 items-center gap-2 text-sm font-bold">
           {#if store.fullscreenPanel === 'chat'}
             <MessageSquare class="size-4 shrink-0" aria-hidden="true" />
@@ -98,14 +151,6 @@
           {/if}
           <span class="truncate">{title}</span>
         </h2>
-        <button
-          type="button"
-          class="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          onclick={closePanel}
-          aria-label="Close panel"
-        >
-          <X class="size-4" aria-hidden="true" />
-        </button>
       </div>
     </header>
 

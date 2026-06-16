@@ -33,6 +33,19 @@
   const tools = $derived(
     readOnly ? allTools.filter((tool) => tool.id === 'hand') : allTools
   )
+
+  const activeIndex = $derived(
+    Math.max(
+      0,
+      tools.findIndex((tool) => tool.id === selectedTool)
+    )
+  )
+  const dockStyle = $derived(
+    [
+      `--mobile-tool-width:${100 / tools.length}%`,
+      `--mobile-tool-offset:${activeIndex * 100}%`
+    ].join(';')
+  )
 </script>
 
 <div
@@ -40,17 +53,24 @@
   data-camera-exempt
 >
   <div
-    class="toolbar-pill flex w-full items-center justify-between gap-0.5 p-1"
+    class="mobile-tool-dock toolbar-pill relative flex w-full items-center justify-between gap-0.5 overflow-hidden p-1"
+    style={dockStyle}
     role="toolbar"
     aria-label="Drawing tools"
   >
+    <span
+      class="pointer-events-none absolute inset-y-1 left-1 right-1"
+      aria-hidden="true"
+    >
+      <span
+        class="mobile-tool-dock__thumb block h-full rounded-full bg-primary shadow-sm"
+      ></span>
+    </span>
     {#each tools as tool}
       <button
         type="button"
-        class={`flex h-10 min-w-0 flex-1 items-center justify-center rounded-full transition ${
-          selectedTool === tool.id
-            ? 'bg-primary text-primary-foreground'
-            : 'text-muted-foreground'
+        class={`relative z-10 flex h-10 min-w-0 flex-1 items-center justify-center rounded-full transition ${
+          selectedTool === tool.id ? 'text-white' : 'text-muted-foreground'
         }`}
         onclick={() => onToolChange(tool.id)}
         aria-label={tool.label}
@@ -61,3 +81,24 @@
     {/each}
   </div>
 </div>
+
+<style>
+  .mobile-tool-dock {
+    --mobile-tool-width: 14.285714%;
+    --mobile-tool-offset: 0%;
+  }
+
+  .mobile-tool-dock__thumb {
+    width: var(--mobile-tool-width);
+    transform: translateX(var(--mobile-tool-offset));
+    transition:
+      transform 220ms ease-out,
+      width 220ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-tool-dock__thumb {
+      transition: none;
+    }
+  }
+</style>

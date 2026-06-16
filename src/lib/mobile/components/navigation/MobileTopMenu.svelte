@@ -3,17 +3,13 @@
   import {
     ChevronDown,
     House,
-    LayoutGrid,
     Link,
     Menu,
     MessageCircle,
-    PenLine,
-    Share2,
-    Workflow as WorkflowIcon
+    Share2
   } from 'lucide-svelte'
   import { onMount } from 'svelte'
   import type { Canvas } from '$lib/canvas/schema'
-  import type { WorkspaceMode } from '$lib/scenes/types'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import { useCanvasChatStoreOptional } from '$lib/stores/chat/canvas-chat.svelte'
   import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
@@ -26,10 +22,7 @@
     isLoadingCanvases,
     showNavigation = true,
     canvasId,
-    mode,
-    workflowEnabled = false,
     pendingCount = 0,
-    onModeChange,
     onShare,
     onTitleSave
   } = $props<{
@@ -40,10 +33,7 @@
     isLoadingCanvases: boolean
     showNavigation?: boolean
     canvasId: string
-    mode: WorkspaceMode
-    workflowEnabled?: boolean
     pendingCount?: number
-    onModeChange: (mode: WorkspaceMode) => void
     onShare: () => void
     onTitleSave: (title: string) => void | Promise<void>
   }>()
@@ -57,19 +47,6 @@
   let editedTitle = $state('')
 
   const chatStore = useCanvasChatStoreOptional()
-  const modeOptions = $derived([
-    { id: 'editor' as WorkspaceMode, icon: PenLine, label: 'Editor' },
-    { id: 'scenes' as WorkspaceMode, icon: LayoutGrid, label: 'Scenes' },
-    ...(workflowEnabled
-      ? [
-          {
-            id: 'workflows' as WorkspaceMode,
-            icon: WorkflowIcon,
-            label: 'Workflows'
-          }
-        ]
-      : [])
-  ])
 
   onMount(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -125,11 +102,6 @@
         description: 'People with the link must request access.'
       })
     })
-    mobileMenuOpen = false
-  }
-
-  function selectMode(nextMode: WorkspaceMode) {
-    onModeChange(nextMode)
     mobileMenuOpen = false
   }
 </script>
@@ -199,25 +171,6 @@
                 Dashboard
               </a>
             {/if}
-
-            <div class="grid grid-cols-3 gap-1 rounded-lg bg-secondary/70 p-1">
-              {#each modeOptions as entry (entry.id)}
-                <button
-                  type="button"
-                  class={`flex h-10 items-center justify-center gap-1.5 rounded-md text-xs font-medium transition ${
-                    mode === entry.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground'
-                  }`}
-                  onclick={() => selectMode(entry.id)}
-                  aria-label={`Switch to ${entry.label} mode`}
-                  aria-pressed={mode === entry.id}
-                >
-                  <entry.icon class="size-4" aria-hidden="true" />
-                  <span>{entry.label}</span>
-                </button>
-              {/each}
-            </div>
 
             <div class="flex items-center gap-2 pt-1">
               <button

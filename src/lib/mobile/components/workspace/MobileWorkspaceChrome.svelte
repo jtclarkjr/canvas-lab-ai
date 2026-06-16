@@ -20,11 +20,8 @@
   isLoadingCanvases={workspace.isLoadingCanvases}
   showNavigation={!workspace.isAnonymousPublicViewer}
   canvasId={workspace.canvasIdForActions}
-  mode={workspace.mode}
-  workflowEnabled={workspace.workflowEnabled}
   pendingCount={workspace.pendingRequests.length}
   onTitleSave={workspace.saveTitle}
-  onModeChange={workspace.handleModeChange}
   onShare={workspace.openShareDialog}
 />
 
