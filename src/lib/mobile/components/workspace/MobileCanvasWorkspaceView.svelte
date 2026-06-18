@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type WorkflowLayer from '$lib/components/canvas/workflows/WorkflowLayer.svelte'
   import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
   import type { WorkflowFlowType } from '$lib/workflows/schema'
   import type { CanvasWorkspaceStore } from '$lib/mobile/types'
@@ -13,6 +12,7 @@
   import MobileSceneDialog from '$lib/mobile/components/scenes/MobileSceneDialog.svelte'
   import MobileSceneCardLayer from '$lib/mobile/components/scenes/MobileSceneCardLayer.svelte'
   import MobileWorkspaceChrome from '$lib/mobile/components/workspace/MobileWorkspaceChrome.svelte'
+  import MobileWorkflowLayer from '$lib/mobile/components/workflows/MobileWorkflowLayer.svelte'
   import ShareDialogRouter from '$lib/workspace/ShareDialogRouter.svelte'
 
   let {
@@ -20,7 +20,6 @@
     userId,
     deviceProfile,
     sceneDocumentsStore,
-    WorkflowLayerComponent,
     svgEl = $bindable(null),
     textInputEl = $bindable(null)
   } = $props<{
@@ -28,7 +27,6 @@
     userId: string
     deviceProfile: WorkspaceDeviceProfile
     sceneDocumentsStore: SceneDocumentsStore
-    WorkflowLayerComponent: typeof WorkflowLayer | null
     svgEl?: SVGSVGElement | null
     textInputEl?: HTMLTextAreaElement | null
   }>()
@@ -90,9 +88,8 @@
   />
 {/if}
 
-{#if !workspace.isAnonymousPublicViewer && workspace.workflowEnabled && WorkflowLayerComponent}
-  <WorkflowLayerComponent
-    {deviceProfile}
+{#if !workspace.isAnonymousPublicViewer && workspace.workflowEnabled}
+  <MobileWorkflowLayer
     canvasId={workspace.canvasIdForActions}
     workflows={workspace.workflows}
     focusedWorkflow={workspace.focusedWorkflow}
@@ -156,6 +153,7 @@
       {userId}
       originRect={open.originRect}
       canModify={workspace.canModifyScene(open.scene.id)}
+      {sceneDocumentsStore}
       documentRevision={workspace.sceneDocumentRevisions[open.scene.id] ?? 0}
       liveMessages={workspace.sceneLiveMessages[open.scene.id] ?? []}
       remoteActivity={workspace.sceneActivity[open.scene.id] ?? null}

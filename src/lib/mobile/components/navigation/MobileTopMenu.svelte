@@ -3,15 +3,19 @@
   import {
     ChevronDown,
     House,
+    LayoutGrid,
     Link,
     Menu,
     MessageCircle,
-    Share2
+    PenLine,
+    Share2,
+    Workflow as WorkflowIcon
   } from 'lucide-svelte'
   import { onMount } from 'svelte'
   import { cubicOut } from 'svelte/easing'
   import { fade, fly, slide } from 'svelte/transition'
   import type { Canvas } from '$lib/canvas/schema'
+  import type { WorkspaceMode } from '$lib/scenes/types'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import { useCanvasChatStoreOptional } from '$lib/stores/chat/canvas-chat.svelte'
   import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
@@ -24,9 +28,12 @@
     isLoadingCanvases,
     showNavigation = true,
     canvasId,
+    mode,
+    workflowEnabled = false,
     pendingCount = 0,
     onShare,
-    onTitleSave
+    onTitleSave,
+    onModeChange
   } = $props<{
     canvases: Canvas[]
     activeCanvasId: string
@@ -35,9 +42,12 @@
     isLoadingCanvases: boolean
     showNavigation?: boolean
     canvasId: string
+    mode: WorkspaceMode
+    workflowEnabled?: boolean
     pendingCount?: number
     onShare: () => void
     onTitleSave: (title: string) => void | Promise<void>
+    onModeChange: (mode: WorkspaceMode) => void
   }>()
 
   let titleInputEl = $state<HTMLInputElement | null>(null)
@@ -52,6 +62,19 @@
   const hasMenuNotifications = $derived(
     pendingCount > 0 || (chatStore?.unreadCount ?? 0) > 0
   )
+  const modeItems = $derived([
+    { id: 'editor' as WorkspaceMode, label: 'Editor', icon: PenLine },
+    { id: 'scenes' as WorkspaceMode, label: 'Scenes', icon: LayoutGrid },
+    ...(workflowEnabled
+      ? [
+          {
+            id: 'workflows' as WorkspaceMode,
+            label: 'Workflows',
+            icon: WorkflowIcon
+          }
+        ]
+      : [])
+  ])
 
   onMount(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -179,6 +202,27 @@
 
             {#if showNavigation}
               <div class="border-t border-border/60 pt-1">
+                <div class="grid grid-cols-3 gap-1 px-1 py-1">
+                  {#each modeItems as item (item.id)}
+                    <button
+                      type="button"
+                      class={`flex h-10 min-w-0 items-center justify-center gap-1 rounded-lg px-2 text-xs font-semibold transition ${
+                        mode === item.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      }`}
+                      onclick={() => {
+                        mobileMenuOpen = false
+                        onModeChange(item.id)
+                      }}
+                      aria-pressed={mode === item.id}
+                    >
+                      <item.icon class="size-4 shrink-0" aria-hidden="true" />
+                      <span class="truncate">{item.label}</span>
+                    </button>
+                  {/each}
+                </div>
+
                 <button
                   type="button"
                   class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-secondary"
@@ -300,5 +344,24 @@
         </div>
       {/if}
     </div>
+
+    {#if workflowEnabled}
+      <button
+        type="button"
+        class={`pointer-events-auto toolbar-pill relative flex size-11 items-center justify-center transition ${
+          mode === 'workflows'
+            ? 'border-primary/60 bg-primary text-primary-foreground'
+            : ''
+        }`}
+        onclick={() =>
+          onModeChange(mode === 'workflows' ? 'editor' : 'workflows')}
+        aria-label={mode === 'workflows'
+          ? 'Return to editor mode'
+          : 'Open workflows'}
+        aria-pressed={mode === 'workflows'}
+      >
+        <WorkflowIcon class="size-5" aria-hidden="true" />
+      </button>
+    {/if}
   </div>
 </div>

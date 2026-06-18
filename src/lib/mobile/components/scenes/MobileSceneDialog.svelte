@@ -8,15 +8,16 @@
   import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
   import { getSceneType } from '$lib/scenes/registry'
   import { toast } from '$lib/stores/shared/toast.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
   import {
     desktopDeviceProfile,
     type WorkspaceDeviceProfile
   } from '$lib/workspace/device-profile.svelte'
   import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
-  import SceneEntry, {
-    type SceneEntryStart
-  } from '$lib/components/canvas/scenes/SceneEntry.svelte'
-  import DocumentScenePanel from '$lib/components/canvas/scenes/document/DocumentScenePanel.svelte'
+  import MobileDocumentScenePanel from '$lib/mobile/components/scenes/MobileDocumentScenePanel.svelte'
+  import MobileSceneEntry, {
+    type MobileSceneEntryStart
+  } from '$lib/mobile/components/scenes/MobileSceneEntry.svelte'
 
   let {
     canvasId,
@@ -24,6 +25,7 @@
     userId,
     originRect,
     canModify,
+    sceneDocumentsStore,
     documentRevision,
     liveMessages,
     remoteActivity,
@@ -39,6 +41,7 @@
     userId: string
     originRect: DOMRect | null
     canModify: boolean
+    sceneDocumentsStore: SceneDocumentsStore
     documentRevision: number
     liveMessages: SceneMessage[]
     remoteActivity: SceneActivity | null
@@ -167,7 +170,7 @@
     }
   }
 
-  async function handleStart(start: SceneEntryStart) {
+  async function handleStart(start: MobileSceneEntryStart) {
     initialPrompt = start.prompt
     await onPatchScene({
       type: start.type,
@@ -250,13 +253,14 @@
 
   <div class="min-h-0 flex-1">
     {#if !hasStarted}
-      <SceneEntry readOnly={!canModify} onStart={handleStart} />
+      <MobileSceneEntry readOnly={!canModify} onStart={handleStart} />
     {:else}
-      <DocumentScenePanel
+      <MobileDocumentScenePanel
         {canvasId}
         {scene}
         {userId}
         {canModify}
+        {sceneDocumentsStore}
         {documentRevision}
         {liveMessages}
         {remoteActivity}

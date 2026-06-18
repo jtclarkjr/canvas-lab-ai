@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { FileText, Maximize2, NotebookPen, Sparkles } from 'lucide-svelte'
+  import {
+    FileText,
+    GripVertical,
+    Maximize2,
+    NotebookPen,
+    Sparkles
+  } from 'lucide-svelte'
   import type { Camera } from '$lib/canvas/types'
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneActivity } from '$lib/scenes/types'
   import { getSceneType } from '$lib/scenes/registry'
   import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
-  import SceneResizeHandle from '$lib/components/canvas/scenes/SceneResizeHandle.svelte'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void
@@ -58,25 +63,41 @@
   const activityLabel = $derived(
     activity ? (activityLabels[activity.kind] ?? null) : null
   )
+
+  function handleOpen(event: Event) {
+    handlers.open(event, scene.id)
+  }
+
+  function dragDown(event: PointerEvent) {
+    event.stopPropagation()
+    handlers.pointerDown(event, scene.id)
+  }
+
+  function dragMove(event: PointerEvent) {
+    event.stopPropagation()
+    handlers.pointerMove(event, scene.id)
+  }
+
+  function dragUp(event: PointerEvent) {
+    event.stopPropagation()
+    handlers.pointerUp(event, scene.id)
+  }
+
+  function dragCancel(event: PointerEvent) {
+    event.stopPropagation()
+    handlers.pointerCancel(event, scene.id)
+  }
 </script>
 
 <div
-  class={`glass-card group ${interactive ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex ${
-    interactive && canModify
-      ? 'cursor-grab active:cursor-grabbing'
-      : 'cursor-default'
-  } flex-col overflow-hidden p-3 transition-shadow hover:shadow-[0_18px_60px_rgba(15,23,42,0.2)]`}
+  class={`glass-card group ${touchLike ? 'pointer-events-auto' : interactive ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex cursor-pointer flex-col overflow-hidden p-3 text-left transition-shadow active:scale-[0.99]`}
   style={cardStyle}
   data-scene-id={scene.id}
   role="button"
   tabindex="0"
-  title="Double-click to open"
+  title="Open scene"
   aria-label={`Open scene ${scene.title || sceneType?.defaultTitle || 'scene'}`}
-  onpointerdown={(event) => handlers.pointerDown(event, scene.id)}
-  onpointermove={(event) => handlers.pointerMove(event, scene.id)}
-  onpointerup={(event) => handlers.pointerUp(event, scene.id)}
-  onpointercancel={(event) => handlers.pointerCancel(event, scene.id)}
-  ondblclick={(event) => handlers.open(event, scene.id)}
+  onclick={handleOpen}
   onkeydown={(event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
@@ -92,10 +113,27 @@
     <span class="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
       {scene.title || sceneType?.defaultTitle || 'Scene'}
     </span>
+    {#if interactive && canModify}
+      <button
+        type="button"
+        class="flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-muted-foreground transition active:cursor-grabbing active:bg-secondary"
+        onpointerdown={dragDown}
+        onpointermove={dragMove}
+        onpointerup={dragUp}
+        onpointercancel={dragCancel}
+        onclick={(event) => event.stopPropagation()}
+        aria-label="Move scene"
+      >
+        <GripVertical class="size-4" aria-hidden="true" />
+      </button>
+    {/if}
     <button
       type="button"
-      class={`${touchLike ? 'flex size-8' : 'hidden size-6 group-hover:flex'} shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary`}
-      onclick={(event) => handlers.open(event, scene.id)}
+      class="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary"
+      onclick={(event) => {
+        event.stopPropagation()
+        handlers.open(event, scene.id)
+      }}
       title="Open scene"
       aria-label="Open scene"
     >
@@ -126,8 +164,4 @@
       <span class="italic opacity-70">Click to open</span>
     {/if}
   </div>
-
-  {#if interactive && canModify}
-    <SceneResizeHandle sceneId={scene.id} {handlers} />
-  {/if}
 </div>

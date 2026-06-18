@@ -20,14 +20,17 @@
   isLoadingCanvases={workspace.isLoadingCanvases}
   showNavigation={!workspace.isAnonymousPublicViewer}
   canvasId={workspace.canvasIdForActions}
+  mode={workspace.mode}
+  workflowEnabled={workspace.workflowEnabled}
   pendingCount={workspace.pendingRequests.length}
   onTitleSave={workspace.saveTitle}
   onShare={workspace.openShareDialog}
+  onModeChange={workspace.handleModeChange}
 />
 
 <MobileToolDock
   selectedTool={workspace.displayTool}
-  readOnly={!workspace.canEdit || workspace.mode === 'scenes'}
+  readOnly={!workspace.canEdit || workspace.mode !== 'editor'}
   onToolChange={workspace.handleToolChange}
 />
 

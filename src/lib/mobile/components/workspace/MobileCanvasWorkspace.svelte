@@ -5,7 +5,6 @@
   import type { CanvasElement } from '$lib/workspace/schema'
   import type { Scene } from '$lib/scenes/schema'
   import type { Workflow } from '$lib/workflows/schema'
-  import type WorkflowLayer from '$lib/components/canvas/workflows/WorkflowLayer.svelte'
   import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
   import { createCanvasWorkspaceStore } from '$lib/stores/workspace/index.svelte'
   import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
@@ -91,7 +90,6 @@
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
   let textInputEl = $state<HTMLTextAreaElement | null>(null)
-  let WorkflowLayerComponent = $state<typeof WorkflowLayer | null>(null)
   let phonePanDefaultCanvasId = $state<string | null>(null)
 
   $effect(() => {
@@ -119,25 +117,6 @@
     phonePanDefaultCanvasId = activeCanvasId
   })
 
-  $effect(() => {
-    if (!workflowEnabled || WorkflowLayerComponent) {
-      return
-    }
-
-    let cancelled = false
-    void import('$lib/components/canvas/workflows/WorkflowLayer.svelte').then(
-      (module) => {
-        if (!cancelled) {
-          WorkflowLayerComponent = module.default
-        }
-      }
-    )
-
-    return () => {
-      cancelled = true
-    }
-  })
-
   onMount(workspace.mount)
 </script>
 
@@ -158,7 +137,6 @@
     {userId}
     {deviceProfile}
     {sceneDocumentsStore}
-    {WorkflowLayerComponent}
     bind:svgEl
     bind:textInputEl
   />
