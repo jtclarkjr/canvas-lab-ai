@@ -1,6 +1,7 @@
 # Canvas App V4
 
 A real-time collaborative canvas application built with SvelteKit and Supabase.
+
 Goal: Building a agentic enabled platform for live collaboration.
 
 ## Features
