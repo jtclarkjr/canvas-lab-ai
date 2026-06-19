@@ -13,26 +13,29 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { listSceneDocumentItemsForScene } from '$lib/server/scene-documents'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId } = event.params
-
-      if (!canvasId || !sceneId) {
-        return json(
-          { message: 'Canvas and scene ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
       await requireScene(supabase, canvasId, sceneId)
@@ -86,14 +89,16 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId } = event.params
-
-      if (!canvasId || !sceneId) {
-        return json(
-          { message: 'Canvas and scene ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,
@@ -115,7 +120,7 @@ export const POST: RequestHandler = async (event) =>
           kind: input.kind,
           status: input.status,
           title: input.title,
-          content: input.content as Json,
+          content: toDbJson(input.content),
           created_by: user.id,
           updated_by: user.id
         })

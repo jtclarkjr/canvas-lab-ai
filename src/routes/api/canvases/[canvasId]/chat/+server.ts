@@ -12,11 +12,12 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 // Older history is out of scope: the chatroom loads the latest window only.
 const MESSAGE_LIMIT = 200
@@ -26,11 +27,11 @@ export const GET: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 
@@ -89,11 +90,11 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 
@@ -113,7 +114,7 @@ export const POST: RequestHandler = async (event) =>
           content: input.content,
           // Denormalized so realtime INSERT payloads (which can't join
           // profiles) carry attribution.
-          metadata: { author } as Json,
+          metadata: toDbJson({ author }),
           created_by: user.id
         })
         .select('*')

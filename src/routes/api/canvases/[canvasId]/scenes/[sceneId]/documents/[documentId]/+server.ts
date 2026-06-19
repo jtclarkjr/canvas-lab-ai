@@ -15,22 +15,33 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId, documentId } = event.params
-
-      if (!canvasId || !sceneId || !documentId) {
-        return json({ message: 'Ids are required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
+      const documentId = requireRouteParam(
+        event.params.documentId,
+        'Document id',
+        'documentId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
       await requireScene(supabase, canvasId, sceneId)
@@ -53,11 +64,21 @@ export const PATCH: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId, documentId } = event.params
-
-      if (!canvasId || !sceneId || !documentId) {
-        return json({ message: 'Ids are required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
+      const documentId = requireRouteParam(
+        event.params.documentId,
+        'Document id',
+        'documentId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,
@@ -78,7 +99,7 @@ export const PATCH: RequestHandler = async (event) =>
           ...(input.title !== undefined ? { title: input.title } : null),
           ...(input.status !== undefined ? { status: input.status } : null),
           ...(input.content !== undefined
-            ? { content: input.content as Json }
+            ? { content: toDbJson(input.content) }
             : null),
           updated_by: user.id
         })
@@ -105,11 +126,21 @@ export const DELETE: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId, documentId } = event.params
-
-      if (!canvasId || !sceneId || !documentId) {
-        return json({ message: 'Ids are required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
+      const documentId = requireRouteParam(
+        event.params.documentId,
+        'Document id',
+        'documentId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,

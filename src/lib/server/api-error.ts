@@ -143,6 +143,21 @@ export async function parseJsonBody(request: Request): Promise<unknown> {
   }
 }
 
+export function requireRouteParam(
+  value: string | undefined,
+  label: string,
+  param = label
+) {
+  if (!value) {
+    throw badRequest(`${label} is required.`, {
+      code: 'missing_route_param',
+      details: { param }
+    })
+  }
+
+  return value
+}
+
 export function parseInput<TSchema extends ZodType>(
   schema: TSchema,
   payload: unknown,

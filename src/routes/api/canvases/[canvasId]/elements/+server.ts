@@ -13,23 +13,24 @@ import {
   notFound,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth,
   withAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toNullableDbJson } from '$lib/server/json'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
@@ -48,11 +49,11 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'editor')
 
@@ -73,7 +74,7 @@ export const POST: RequestHandler = async (event) =>
 
       const updates = {
         type: input.type,
-        data: (input.data ?? null) as Json | null,
+        data: toNullableDbJson(input.data),
         x: input.x,
         y: input.y,
         z: input.z ?? null,

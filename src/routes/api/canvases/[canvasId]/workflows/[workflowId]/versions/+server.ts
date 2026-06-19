@@ -4,7 +4,6 @@ import {
   listCanvasWorkflowVersions,
   toCanvasWorkflowVersion
 } from '$lib/server/canvas-workflows'
-import type { Json } from '$lib/server/database.types'
 import {
   assertWorkflowModify,
   requireWorkflow
@@ -13,11 +12,13 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 import { requireWorkflowsEnabled } from '$lib/server/features'
+import { toDbJson } from '$lib/server/json'
 import {
   createWorkflowVersionInputSchema,
   workflowVersionResponseSchema
@@ -29,14 +30,16 @@ export const GET: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, workflowId } = event.params
-
-      if (!canvasId || !workflowId) {
-        return json(
-          { message: 'Canvas and workflow ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const workflowId = requireRouteParam(
+        event.params.workflowId,
+        'Workflow id',
+        'workflowId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
       const workflow = await requireWorkflow(supabase, canvasId, workflowId)
@@ -53,14 +56,16 @@ export const POST: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, workflowId } = event.params
-
-      if (!canvasId || !workflowId) {
-        return json(
-          { message: 'Canvas and workflow ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const workflowId = requireRouteParam(
+        event.params.workflowId,
+        'Workflow id',
+        'workflowId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,
@@ -80,7 +85,7 @@ export const POST: RequestHandler = async (event) =>
           workflow_id: workflow.id,
           canvas_id: canvasId,
           title: input.title ?? workflow.title,
-          definition: workflow.definition as Json,
+          definition: toDbJson(workflow.definition),
           config_yaml: workflow.config_yaml,
           notes: workflow.notes,
           created_by: user.id

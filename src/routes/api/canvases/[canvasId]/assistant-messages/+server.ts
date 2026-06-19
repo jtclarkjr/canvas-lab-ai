@@ -1,7 +1,11 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
 import { listAssistantMessagesResponseSchema } from '$lib/chat/schema'
 import { requireCanvasMember } from '$lib/server/canvas-access'
-import { handleApiError, withAuth } from '$lib/server/api-error'
+import {
+  handleApiError,
+  requireRouteParam,
+  withAuth
+} from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 
@@ -13,11 +17,11 @@ export const GET: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 

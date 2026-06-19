@@ -11,22 +11,23 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
@@ -41,11 +42,11 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'editor')
 
@@ -71,7 +72,7 @@ export const POST: RequestHandler = async (event) =>
           width: input.width ?? sceneType.defaultSize.width,
           height: input.height ?? sceneType.defaultSize.height,
           rotation: input.rotation ?? 0,
-          settings: (input.settings ?? {}) as Json,
+          settings: toDbJson(input.settings ?? {}),
           created_by: user.id,
           updated_by: user.id
         })

@@ -80,6 +80,10 @@ vp fmt . --write
 
 ## Technical Docs
 
+- [Audit notes](docs/AUDIT.md)
+- [Onboarding](docs/ONBOARDING.md)
+- [Runbooks](docs/RUNBOOKS.md)
+- [Release notes](docs/RELEASE_NOTES.md)
 - [Canvas workspace architecture](docs/CANVAS_WORKSPACE.md)
 - [Canvas chat architecture](docs/CHAT_ARCHITECTURE.md)
 - [Scenes and document workspace architecture](docs/SCENES_ARCHITECTURE.md)

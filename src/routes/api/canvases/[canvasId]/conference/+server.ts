@@ -3,7 +3,11 @@ import {
   conferenceRoomName,
   conferenceStatusResponseSchema
 } from '$lib/conference/schema'
-import { handleApiError, withAuth } from '$lib/server/api-error'
+import {
+  handleApiError,
+  requireRouteParam,
+  withAuth
+} from '$lib/server/api-error'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import { getRoomService } from '$lib/server/livekit'
 import { withRateLimit } from '$lib/server/rate-limit'
@@ -14,11 +18,11 @@ export const GET: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 

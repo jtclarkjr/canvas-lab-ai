@@ -1,5 +1,4 @@
 import type { RequestHandler } from '@sveltejs/kit'
-import type { UIMessage } from 'ai'
 import {
   documentChatRequestSchema,
   markdownDocumentContentSchema
@@ -193,7 +192,7 @@ export const POST: RequestHandler = async (event) =>
             }
           : null
 
-      const messages = input.messages as UIMessage[]
+      const messages = input.messages
 
       const result = await streamDocumentChat({
         resolved,

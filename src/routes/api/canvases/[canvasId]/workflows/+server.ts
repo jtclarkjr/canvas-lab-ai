@@ -4,17 +4,18 @@ import {
   listCanvasWorkflowsForCanvas,
   toCanvasWorkflow
 } from '$lib/server/canvas-workflows'
-import type { Json } from '$lib/server/database.types'
 import {
   badRequest,
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 import { requireWorkflowsEnabled } from '$lib/server/features'
+import { toDbJson } from '$lib/server/json'
 import {
   createDefaultDefinitionForFlowType,
   getWorkflowFlowTypeDefinition
@@ -50,11 +51,11 @@ export const GET: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
@@ -70,11 +71,11 @@ export const POST: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'editor')
 
@@ -100,16 +101,18 @@ export const POST: RequestHandler = async (event) =>
           width: input.width ?? DEFAULT_WORKFLOW_SIZE.width,
           height: input.height ?? DEFAULT_WORKFLOW_SIZE.height,
           rotation: input.rotation ?? 0,
-          definition: definition as Json,
+          definition: toDbJson(definition),
           config_yaml: configYaml,
           notes: input.notes ?? '',
-          settings: (input.settings ?? {
-            context: {
-              documentIds: [],
-              sceneIds: [],
-              includeLinkedScenes: true
+          settings: toDbJson(
+            input.settings ?? {
+              context: {
+                documentIds: [],
+                sceneIds: [],
+                includeLinkedScenes: true
+              }
             }
-          }) as Json,
+          ),
           created_by: user.id,
           updated_by: user.id
         })

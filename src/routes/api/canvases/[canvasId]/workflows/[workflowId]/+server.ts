@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit'
 import { requireCanvasRole } from '$lib/server/canvas-access'
 import { toCanvasWorkflow } from '$lib/server/canvas-workflows'
-import type { Database, Json } from '$lib/server/database.types'
+import type { Database } from '$lib/server/database.types'
 import {
   assertWorkflowModify,
   requireWorkflow
@@ -11,11 +11,13 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 import { requireWorkflowsEnabled } from '$lib/server/features'
+import { toDbJson } from '$lib/server/json'
 import {
   workflowDefinitionFromYaml,
   workflowDefinitionToYaml
@@ -47,14 +49,16 @@ export const PATCH: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, workflowId } = event.params
-
-      if (!canvasId || !workflowId) {
-        return json(
-          { message: 'Canvas and workflow ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const workflowId = requireRouteParam(
+        event.params.workflowId,
+        'Workflow id',
+        'workflowId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,
@@ -76,14 +80,15 @@ export const PATCH: RequestHandler = async (event) =>
       if (input.height !== undefined) update.height = input.height
       if (input.rotation !== undefined) update.rotation = input.rotation
       if (input.notes !== undefined) update.notes = input.notes
-      if (input.settings !== undefined) update.settings = input.settings as Json
+      if (input.settings !== undefined)
+        update.settings = toDbJson(input.settings)
 
       if (input.configYaml !== undefined) {
         const definition = parseWorkflowYaml(input.configYaml)
-        update.definition = definition as Json
+        update.definition = toDbJson(definition)
         update.config_yaml = input.configYaml
       } else if (input.definition !== undefined) {
-        update.definition = input.definition as Json
+        update.definition = toDbJson(input.definition)
         update.config_yaml = workflowDefinitionToYaml(input.definition)
       }
 
@@ -112,14 +117,16 @@ export const DELETE: RequestHandler = async (event) =>
       requireWorkflowsEnabled()
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, workflowId } = event.params
-
-      if (!canvasId || !workflowId) {
-        return json(
-          { message: 'Canvas and workflow ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const workflowId = requireRouteParam(
+        event.params.workflowId,
+        'Workflow id',
+        'workflowId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,

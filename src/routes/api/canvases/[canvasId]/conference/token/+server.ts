@@ -5,7 +5,11 @@ import {
   conferenceRoomName,
   conferenceTokenResponseSchema
 } from '$lib/conference/schema'
-import { handleApiError, withAuth } from '$lib/server/api-error'
+import {
+  handleApiError,
+  requireRouteParam,
+  withAuth
+} from '$lib/server/api-error'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import { getLiveKitConfig, getRoomService } from '$lib/server/livekit'
 import { withRateLimit } from '$lib/server/rate-limit'
@@ -22,11 +26,11 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       // Members-only, matching canvas chat: public viewers of public
       // canvases cannot join calls.

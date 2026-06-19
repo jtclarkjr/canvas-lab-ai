@@ -6,7 +6,11 @@ import {
 import { requireCanvasRole } from '$lib/server/canvas-access'
 import { requireScene } from '$lib/server/scene-access'
 import { sceneMessageRowToMessage } from '$lib/scenes/mapping'
-import { handleApiError, withAccountAuth } from '$lib/server/api-error'
+import {
+  handleApiError,
+  requireRouteParam,
+  withAccountAuth
+} from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 
@@ -17,14 +21,16 @@ export const GET: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId } = event.params
-
-      if (!canvasId || !sceneId) {
-        return json(
-          { message: 'Canvas and scene ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
       await requireScene(supabase, canvasId, sceneId)

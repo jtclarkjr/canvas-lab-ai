@@ -5,6 +5,7 @@ import { toCanvasElement } from '$lib/server/canvas-elements'
 import {
   handleApiError,
   notFound,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
@@ -15,15 +16,16 @@ export const DELETE: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const canvasId = event.params.canvasId
-      const elementId = event.params.elementId
-
-      if (!canvasId || !elementId) {
-        return json(
-          { message: 'Canvas id and element id are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const elementId = requireRouteParam(
+        event.params.elementId,
+        'Element id',
+        'elementId'
+      )
 
       await requireCanvasRole(supabase, canvasId, user.id, 'editor')
 

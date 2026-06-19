@@ -62,6 +62,24 @@ export async function parseResponse<T>(
   return parse(payload)
 }
 
+type ApiRequestOptions<T> = Omit<RequestInit, 'headers'> & {
+  headers?: HeadersInit
+  parse: (payload: unknown) => T
+  fallbackMessage: string
+}
+
+export async function apiRequest<T>(
+  input: RequestInfo | URL,
+  { headers, parse, fallbackMessage, ...init }: ApiRequestOptions<T>
+) {
+  const response = await fetch(input, {
+    ...init,
+    headers: await getApiHeaders(headers ?? { accept: 'application/json' })
+  })
+
+  return parseResponse(response, parse, fallbackMessage)
+}
+
 export function isSchemaError(error: unknown): error is ZodError {
   return error instanceof ZodError
 }

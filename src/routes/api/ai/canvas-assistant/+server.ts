@@ -1,5 +1,4 @@
 import type { RequestHandler } from '@sveltejs/kit'
-import type { UIMessage } from 'ai'
 import { canvasAssistantRequestSchema } from '$lib/chat/schema'
 import { markdownDocumentContentSchema } from '$lib/scenes/schema'
 import { isKnownModelId } from '$lib/scenes/models'
@@ -75,7 +74,7 @@ export const POST: RequestHandler = async (event) =>
         title: row.title
       }))
 
-      const messages = input.messages as UIMessage[]
+      const messages = input.messages
 
       const result = await streamCanvasAssistant({
         resolved,

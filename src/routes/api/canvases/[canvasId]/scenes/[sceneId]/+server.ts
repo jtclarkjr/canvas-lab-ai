@@ -9,25 +9,28 @@ import {
   handleApiError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAccountAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-import type { Json } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 export const PATCH: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId } = event.params
-
-      if (!canvasId || !sceneId) {
-        return json(
-          { message: 'Canvas and scene ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,
@@ -61,7 +64,7 @@ export const PATCH: RequestHandler = async (event) =>
             ? { rotation: input.rotation }
             : null),
           ...(input.settings !== undefined
-            ? { settings: input.settings as Json }
+            ? { settings: toDbJson(input.settings) }
             : null),
           updated_by: user.id
         })
@@ -84,14 +87,16 @@ export const DELETE: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      const { canvasId, sceneId } = event.params
-
-      if (!canvasId || !sceneId) {
-        return json(
-          { message: 'Canvas and scene ids are required.' },
-          { status: 400 }
-        )
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
+      const sceneId = requireRouteParam(
+        event.params.sceneId,
+        'Scene id',
+        'sceneId'
+      )
 
       const { role } = await requireCanvasRole(
         supabase,

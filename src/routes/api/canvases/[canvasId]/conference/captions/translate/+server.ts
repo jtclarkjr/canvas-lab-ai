@@ -12,6 +12,7 @@ import {
   internalServerError,
   parseInput,
   parseJsonBody,
+  requireRouteParam,
   withAuth
 } from '$lib/server/api-error'
 import { requireCanvasMember } from '$lib/server/canvas-access'
@@ -29,11 +30,11 @@ export const POST: RequestHandler = async (event) =>
     try {
       const supabase = getSupabase()
       const user = withAuth(event.locals.user)
-      const { canvasId } = event.params
-
-      if (!canvasId) {
-        return json({ message: 'Canvas id is required.' }, { status: 400 })
-      }
+      const canvasId = requireRouteParam(
+        event.params.canvasId,
+        'Canvas id',
+        'canvasId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 

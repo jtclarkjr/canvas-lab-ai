@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { UIMessage } from 'ai'
-import type { Database, Json } from '$lib/server/database.types'
+import type { Database } from '$lib/server/database.types'
+import { toDbJson } from '$lib/server/json'
 
 type SceneRow = Database['public']['Tables']['canvas_scenes']['Row']
 
@@ -85,10 +86,10 @@ export async function persistDocumentChat({
             canvas_id: scene.canvas_id,
             document_id: documentId,
             role: 'user',
-            parts: JSON.parse(JSON.stringify(lastUserMessage.parts)) as Json,
+            parts: toDbJson(lastUserMessage.parts),
             // Author display info is denormalized so realtime INSERT
             // payloads (which can't join profiles) carry attribution.
-            metadata: { author } as Json,
+            metadata: toDbJson({ author }),
             created_by: userId,
             created_at: new Date(finishedAt - 1000).toISOString()
           }
@@ -100,9 +101,9 @@ export async function persistDocumentChat({
       canvas_id: scene.canvas_id,
       document_id: documentId,
       role: 'assistant',
-      parts: JSON.parse(JSON.stringify(responseMessage.parts)) as Json,
+      parts: toDbJson(responseMessage.parts),
       // author on an assistant message = the user who requested the turn.
-      metadata: { modelId, author } as Json,
+      metadata: toDbJson({ modelId, author }),
       created_by: userId,
       created_at: new Date(finishedAt).toISOString()
     }
@@ -138,13 +139,13 @@ export async function persistDocumentChat({
     .update({
       title: draft.title,
       kind: 'markdown',
-      content: {
+      content: toDbJson({
         ...(currentContent.annotations !== undefined
           ? { annotations: currentContent.annotations }
           : null),
         docType: draft.docType,
         markdown: draft.content
-      } as Json,
+      }),
       updated_by: userId
     })
     .eq('id', documentId)
@@ -159,12 +160,12 @@ export async function persistDocumentChat({
   const settings = {
     ...(scene.settings as Record<string, unknown>),
     preview
-  } as Json
+  }
 
   const { error: sceneError } = await supabase
     .from('canvas_scenes')
     .update({
-      settings,
+      settings: toDbJson(settings),
       ...(scene.title === '' || scene.title === 'New document'
         ? { title: draft.title }
         : null),
