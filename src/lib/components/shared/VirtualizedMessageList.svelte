@@ -4,7 +4,8 @@
   import { get } from 'svelte/store'
   import { cn } from '$lib/utils'
 
-  type FollowMode = 'when-at-end' | 'always'
+  type ScrollAnchor = 'start' | 'end'
+  type FollowMode = 'none' | 'when-at-end' | 'always'
   type ScrollToEndBehavior = 'auto' | 'smooth' | 'instant'
 
   let {
@@ -14,6 +15,8 @@
     overscan = 8,
     gap = 12,
     active = true,
+    anchorTo = 'end',
+    initialScroll = anchorTo,
     followMode = 'when-at-end',
     followKey = '',
     scrollEndThreshold = 32,
@@ -31,6 +34,8 @@
     overscan?: number
     gap?: number
     active?: boolean
+    anchorTo?: ScrollAnchor
+    initialScroll?: ScrollAnchor
     followMode?: FollowMode
     followKey?: unknown
     scrollEndThreshold?: number
@@ -76,8 +81,9 @@
       },
       overscan,
       gap,
-      anchorTo: 'end',
-      followOnAppend: 'auto',
+      anchorTo,
+      followOnAppend:
+        anchorTo === 'end' && followMode !== 'none' ? 'auto' : false,
       scrollEndThreshold,
       useCachedMeasurements: !active
     })
@@ -107,6 +113,23 @@
     })
   }
 
+  function scrollToStart(behavior: ScrollToEndBehavior = 'auto') {
+    requestAnimationFrame(() => {
+      get(virtualizer).scrollToOffset(0, {
+        align: 'start',
+        behavior: behavior === 'instant' ? 'auto' : behavior
+      })
+      requestAnimationFrame(() => {
+        if (!scrollEl) return
+        scrollEl.scrollTo({
+          top: 0,
+          behavior: behavior === 'instant' ? 'auto' : behavior
+        })
+        pinnedToEnd = false
+      })
+    })
+  }
+
   function measureVirtualItem(node: HTMLDivElement) {
     get(virtualizer).measureElement(node)
 
@@ -121,7 +144,11 @@
 
   $effect(() => {
     if (active && !wasActive) {
-      scrollToEnd('instant')
+      if (initialScroll === 'end') {
+        scrollToEnd('instant')
+      } else {
+        scrollToStart('instant')
+      }
     }
     wasActive = active
   })
@@ -131,6 +158,7 @@
     void followKey
 
     if (!active) return
+    if (followMode === 'none') return
     if (followMode === 'always' || pinnedToEnd) {
       scrollToEnd('auto')
     }

@@ -18,6 +18,7 @@
     toCanvasHistoryEntry
   } from '$lib/workspace/canvas-history'
   import type { CanvasHistoryEntry } from '$lib/workspace/schema'
+  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
 
   const PAGE_SIZE = 50
 
@@ -201,9 +202,9 @@
       </div>
     </header>
 
-    <div class="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+    <div class="flex min-h-0 flex-1 flex-col">
       {#if isLoading && entries.length === 0}
-        <div class="grid gap-2" aria-hidden="true">
+        <div class="grid gap-2 px-3 py-3" aria-hidden="true">
           {#each Array.from({ length: 6 }) as _, index (index)}
             <div
               class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-muted/25 px-3 py-3"
@@ -220,7 +221,7 @@
         </div>
       {:else if error && entries.length === 0}
         <div
-          class="flex h-full min-h-48 flex-col items-center justify-center gap-3 text-center"
+          class="flex h-full min-h-48 flex-col items-center justify-center gap-3 px-3 py-3 text-center"
         >
           <p class="m-0 text-sm font-medium text-foreground">{error}</p>
           <button
@@ -233,14 +234,24 @@
         </div>
       {:else if entries.length === 0}
         <div
-          class="flex h-full min-h-48 flex-col items-center justify-center gap-2 text-center text-muted-foreground"
+          class="flex h-full min-h-48 flex-col items-center justify-center gap-2 px-3 py-3 text-center text-muted-foreground"
         >
           <Clock3 class="size-5" aria-hidden="true" />
           <p class="m-0 text-sm">No element history yet.</p>
         </div>
       {:else}
-        <div class="grid gap-2">
-          {#each entries as entry (entry.id)}
+        <VirtualizedMessageList
+          items={entries}
+          keyForItem={(entry) => entry.id}
+          estimateSize={76}
+          gap={8}
+          active={open}
+          anchorTo="start"
+          initialScroll="start"
+          followMode="none"
+          className="px-3 py-3"
+        >
+          {#snippet item(entry)}
             <article
               class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-background/45 px-3 py-3"
             >
@@ -269,24 +280,29 @@
                 </p>
               </div>
             </article>
-          {/each}
-        </div>
+          {/snippet}
 
-        <div class="mt-3 flex justify-center">
-          {#if hasMore}
-            <button
-              type="button"
-              class="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
-              onclick={() => void loadHistory(false)}
-              disabled={isLoadingMore}
-            >
-              {#if isLoadingMore}
-                <LoaderCircle class="size-4 animate-spin" aria-hidden="true" />
+          {#snippet after()}
+            <div class="mt-3 flex justify-center">
+              {#if hasMore}
+                <button
+                  type="button"
+                  class="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
+                  onclick={() => void loadHistory(false)}
+                  disabled={isLoadingMore}
+                >
+                  {#if isLoadingMore}
+                    <LoaderCircle
+                      class="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                  {/if}
+                  Load more
+                </button>
               {/if}
-              Load more
-            </button>
-          {/if}
-        </div>
+            </div>
+          {/snippet}
+        </VirtualizedMessageList>
       {/if}
     </div>
   </div>
