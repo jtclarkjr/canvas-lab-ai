@@ -156,11 +156,22 @@
       void client.removeChannel(channel)
     }
   })
+
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node)
+
+    return {
+      destroy() {
+        node.parentNode?.removeChild(node)
+      }
+    }
+  }
 </script>
 
 {#if open}
   <div
     {id}
+    use:portal
     class="fixed right-0 top-0 z-50 flex h-screen w-[min(28rem,calc(100vw-2rem))] flex-col border-l border-border/70 bg-card/95 text-card-foreground shadow-2xl backdrop-blur-xl"
     role="dialog"
     aria-label="Canvas history"
