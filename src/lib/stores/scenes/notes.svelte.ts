@@ -314,9 +314,9 @@ export function createNotesSceneStore({
     handleTextInputBlur: textEditorStore.handleTextInputBlur,
     handleTextEditorKeydown: textEditorStore.handleTextEditorKeydown,
     syncEditorSelection: textEditorStore.syncEditorSelection,
-    setDrawColor: formattingStore.setDrawColor,
-    setDrawWidth: formattingStore.setDrawWidth,
-    toggleHighlighter: formattingStore.toggleHighlighter,
+    setDrawColor: interactionsStore.setDrawColor,
+    setDrawWidth: interactionsStore.setDrawWidth,
+    toggleHighlighter: interactionsStore.toggleHighlighter,
     get camera() {
       return notesCamera
     },

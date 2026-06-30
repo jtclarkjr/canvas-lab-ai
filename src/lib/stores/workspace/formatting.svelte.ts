@@ -100,10 +100,15 @@ export function createWorkspaceFormattingStore() {
   }
 
   function syncDrawFormattingFromPath(path: Path) {
+    const isHighlighter = path.opacity < 1
     setDrawFormatting((previous) => ({
       ...previous,
       width: path.width,
-      color: path.color
+      color: path.color,
+      isHighlighter,
+      highlighterOpacity: isHighlighter
+        ? path.opacity
+        : previous.highlighterOpacity
     }))
   }
 

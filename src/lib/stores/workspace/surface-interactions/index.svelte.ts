@@ -17,7 +17,12 @@ import {
   setDiagramStrokeColor,
   setDiagramStrokeStyle,
   setDiagramStrokeWidth,
-  setShapeKind
+  setDrawColor,
+  setDrawStyle,
+  setDrawWidth,
+  setHighlighterOpacity,
+  setShapeKind,
+  toggleHighlighter
 } from './formatting'
 
 export type { WorkspaceSurfaceInteractionsInput }
@@ -55,6 +60,13 @@ export function createWorkspaceSurfaceInteractionsStore(
     ) => setDiagramStartArrow(ctx, startArrow),
     setDiagramEndArrow: (endArrow: Parameters<typeof setDiagramEndArrow>[1]) =>
       setDiagramEndArrow(ctx, endArrow),
+    setDrawWidth: (width: number) => setDrawWidth(ctx, width),
+    setDrawColor: (color: string) => setDrawColor(ctx, color),
+    setDrawStyle: (style: Parameters<typeof setDrawStyle>[1]) =>
+      setDrawStyle(ctx, style),
+    toggleHighlighter: () => toggleHighlighter(ctx),
+    setHighlighterOpacity: (opacity: number) =>
+      setHighlighterOpacity(ctx, opacity),
     arrangeSelectedElements: (
       action: Parameters<typeof arrangeSelectedElements>[1]
     ) => arrangeSelectedElements(ctx, action),

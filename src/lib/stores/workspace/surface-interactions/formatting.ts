@@ -11,6 +11,8 @@ import type {
   ConnectorKind,
   DiagramConnector,
   DiagramShape,
+  DrawStyle,
+  Path,
   ShapeKind,
   StrokeStyle
 } from './types'
@@ -21,6 +23,42 @@ import {
   isTextElement,
   persistElement
 } from './element-utils'
+
+export function updateSelectedPathElements(
+  ctx: SurfaceCtx,
+  pathUpdater: (path: Path) => Path
+) {
+  const selectedIds = ctx.getSelectedElementIds()
+  const updates: Array<{
+    id: string
+    type: CanvasElementType
+    before: CanvasDrawableElement
+    after: CanvasDrawableElement
+  }> = []
+
+  ctx.setPaths((previous) =>
+    previous.map((path) => {
+      if (!selectedIds.has(path.id) || !ctx.canModifyElement(path.id)) {
+        return path
+      }
+      const after = pathUpdater(path)
+      updates.push({
+        id: path.id,
+        type: 'path',
+        before: cloneCanvasElement(path, 'path'),
+        after
+      })
+      return after
+    })
+  )
+
+  if (updates.length > 0) {
+    ctx.addHistoryCommand(createUpdateMultipleCommand(updates, ctx.getUserId()))
+    for (const update of updates) {
+      persistElement(ctx, update.type, update.after)
+    }
+  }
+}
 
 export function updateSelectedDiagramElements(
   ctx: SurfaceCtx,
@@ -80,6 +118,43 @@ export function updateSelectedDiagramElements(
       persistElement(ctx, update.type, update.after)
     }
   }
+}
+
+export function setDrawWidth(ctx: SurfaceCtx, width: number) {
+  ctx.formattingStore.setDrawWidth(width)
+  updateSelectedPathElements(ctx, (path) => ({ ...path, width }))
+}
+
+export function setDrawColor(ctx: SurfaceCtx, color: string) {
+  ctx.formattingStore.setDrawColor(color)
+  updateSelectedPathElements(ctx, (path) => ({ ...path, color }))
+}
+
+export function setDrawStyle(ctx: SurfaceCtx, style: DrawStyle) {
+  ctx.formattingStore.setDrawStyle(style)
+}
+
+export function toggleHighlighter(ctx: SurfaceCtx) {
+  const isHighlighter = !ctx.formattingStore.drawFormatting.isHighlighter
+  ctx.formattingStore.toggleHighlighter()
+  updateSelectedPathElements(ctx, (path) => ({
+    ...path,
+    opacity: isHighlighter
+      ? ctx.formattingStore.drawFormatting.highlighterOpacity
+      : 1
+  }))
+}
+
+export function setHighlighterOpacity(
+  ctx: SurfaceCtx,
+  highlighterOpacity: number
+) {
+  ctx.formattingStore.setHighlighterOpacity(highlighterOpacity)
+  if (!ctx.formattingStore.drawFormatting.isHighlighter) return
+  updateSelectedPathElements(ctx, (path) => ({
+    ...path,
+    opacity: highlighterOpacity
+  }))
 }
 
 export function setShapeKind(ctx: SurfaceCtx, kind: ShapeKind) {
