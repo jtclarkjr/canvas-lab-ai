@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ArrowUp, Globe } from 'lucide-svelte'
+  import { cn } from '$lib/utils'
 
   type MentionMember = { id: string; name: string; color: string }
 
@@ -7,6 +8,7 @@
     disabled = false,
     isStreaming = false,
     placeholder = 'Message…',
+    className = '',
     webSearch,
     onWebSearchToggle,
     onSend,
@@ -15,6 +17,7 @@
     disabled?: boolean
     isStreaming?: boolean
     placeholder?: string
+    className?: string
     // Optional web-search pill (the Assistant tab uses it; the chatroom
     // composer leaves it off).
     webSearch?: boolean
@@ -134,7 +137,7 @@
   }
 </script>
 
-<div class="relative border-t border-border/50 px-3 py-2.5">
+<div class={cn('relative border-t border-border/50 px-3 py-2.5', className)}>
   {#if atIndex !== null && matches.length > 0}
     <div
       class="absolute right-3 bottom-full left-3 z-10 mb-1 overflow-hidden rounded-xl border border-border/60 bg-popover shadow-lg"

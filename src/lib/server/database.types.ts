@@ -579,9 +579,52 @@ export interface Database {
           }
         ]
       }
+      canvas_assistant_threads: {
+        Row: {
+          id: string
+          canvas_id: string
+          user_id: string
+          title: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          canvas_id: string
+          user_id: string
+          title?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          canvas_id?: string
+          user_id?: string
+          title?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'canvas_assistant_threads_canvas_id_fkey'
+            columns: ['canvas_id']
+            isOneToOne: false
+            referencedRelation: 'canvases'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'canvas_assistant_threads_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       canvas_assistant_messages: {
         Row: {
           id: string
+          thread_id: string
           canvas_id: string
           user_id: string
           role: string
@@ -591,6 +634,7 @@ export interface Database {
         }
         Insert: {
           id: string
+          thread_id: string
           canvas_id: string
           user_id: string
           role: string
@@ -600,6 +644,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          thread_id?: string
           canvas_id?: string
           user_id?: string
           role?: string
@@ -608,6 +653,13 @@ export interface Database {
           created_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'canvas_assistant_messages_thread_id_fkey'
+            columns: ['thread_id']
+            isOneToOne: false
+            referencedRelation: 'canvas_assistant_threads'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'canvas_assistant_messages_canvas_id_fkey'
             columns: ['canvas_id']

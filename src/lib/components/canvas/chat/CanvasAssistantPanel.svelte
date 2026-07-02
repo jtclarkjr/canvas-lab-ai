@@ -7,21 +7,22 @@
   const store = useCanvasChatStore()
 </script>
 
-{#if store.assistantInitialMessages !== null}
+{#if store.assistantActiveThreadId && store.assistantInitialMessages !== null}
   <!-- Keyed so switching canvases rebuilds the Chat instance with the new
        thread's history. -->
-  {#key canvasId}
+  {#key `${canvasId}:${store.assistantActiveThreadId}`}
     <CanvasAssistantThread
       {canvasId}
+      threadId={store.assistantActiveThreadId}
       initialMessages={store.assistantInitialMessages}
     />
   {/key}
-{:else if store.assistantLoadError}
+{:else if store.assistantLoadError || store.assistantThreadsLoadError}
   <div
     class="flex h-full items-center justify-center px-6 text-center text-sm text-destructive"
     role="alert"
   >
-    {store.assistantLoadError}
+    {store.assistantLoadError ?? store.assistantThreadsLoadError}
   </div>
 {:else}
   <div

@@ -16,8 +16,9 @@
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
   import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
 
-  let { canvasId, initialMessages } = $props<{
+  let { canvasId, threadId, initialMessages } = $props<{
     canvasId: string
+    threadId: string
     initialMessages: UIMessage[]
   }>()
 
@@ -34,11 +35,18 @@
       api: '/api/ai/canvas-assistant',
       prepareSendMessagesRequest: async ({ messages }) => ({
         headers: await getApiHeaders({ 'content-type': 'application/json' }),
-        body: { canvasId, modelId: defaultModelId, webSearch, messages }
+        body: {
+          canvasId,
+          threadId,
+          modelId: defaultModelId,
+          webSearch,
+          messages
+        }
       })
     }),
     onFinish: () => {
       store.snapshotAssistantMessages(
+        threadId,
         $state.snapshot(chat.messages) as UIMessage[]
       )
     }
@@ -49,6 +57,27 @@
   )
 
   const visible = $derived(store.open && store.activeTab === 'assistant')
+  const fullscreen = $derived(store.displayMode === 'fullscreen')
+  const messageListClass = $derived(fullscreen ? 'px-4 py-6' : 'px-4 py-3')
+  const messageItemClass = $derived(
+    fullscreen ? 'w-full max-w-3xl self-center' : ''
+  )
+  const messageBubbleClass = $derived(
+    fullscreen ? 'max-w-[78%]' : 'max-w-[85%]'
+  )
+
+  $effect(() => {
+    if (isStreaming) {
+      store.setAssistantStreamingThread(threadId)
+    } else if (store.assistantStreamingThreadId === threadId) {
+      store.setAssistantStreamingThread(null)
+    }
+  })
+
+  function sendMessage(text: string) {
+    store.noteAssistantUserMessage(threadId, text)
+    void chat.sendMessage({ text })
+  }
 
   function messageTextLength(message: UIMessage | undefined) {
     return asParts(message?.parts ?? []).reduce(
@@ -73,7 +102,8 @@
     active={visible}
     followMode="when-at-end"
     {followKey}
-    className="px-4 py-3"
+    className={messageListClass}
+    itemClassName={messageItemClass}
   >
     {#snippet item(message)}
       <div
@@ -83,7 +113,7 @@
           {message.role === 'user' ? 'You' : 'Assistant'}
         </span>
         <div
-          class={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+          class={`${messageBubbleClass} rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
             message.role === 'user'
               ? 'bg-primary text-primary-foreground'
               : 'border border-border/60 bg-background/70 text-foreground'
@@ -174,13 +204,30 @@
     </div>
   {/if}
 
-  <CanvasChatComposer
-    {isStreaming}
-    placeholder="Ask the assistant…"
-    {webSearch}
-    onWebSearchToggle={() => (webSearch = !webSearch)}
-    onSend={(text) => void chat.sendMessage({ text })}
-  />
+  {#if fullscreen}
+    <div class="border-t border-border/50 px-4 py-4">
+      <div class="mx-auto w-full max-w-3xl">
+        <CanvasChatComposer
+          {isStreaming}
+          disabled={!threadId}
+          placeholder="Ask the assistant…"
+          className="border-t-0 px-0 py-0"
+          {webSearch}
+          onWebSearchToggle={() => (webSearch = !webSearch)}
+          onSend={sendMessage}
+        />
+      </div>
+    </div>
+  {:else}
+    <CanvasChatComposer
+      {isStreaming}
+      disabled={!threadId}
+      placeholder="Ask the assistant…"
+      {webSearch}
+      onWebSearchToggle={() => (webSearch = !webSearch)}
+      onSend={sendMessage}
+    />
+  {/if}
 </div>
 
 <style>

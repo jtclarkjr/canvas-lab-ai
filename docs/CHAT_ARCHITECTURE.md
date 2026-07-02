@@ -1,13 +1,13 @@
 # Canvas Chat Architecture
 
 This document explains how chat works in the canvas workspace. It covers the
-shared member chatroom and the private canvas assistant thread.
+shared member chatroom and private canvas assistant histories.
 
 ## Purpose
 
 Canvas chat gives members a realtime conversation surface without leaving the
-workspace. The same floating window also hosts a private AI assistant thread for
-the active canvas.
+workspace. The same floating window also hosts private AI assistant histories
+for the active canvas.
 
 The design goal is to keep UI state, optimistic sends, realtime delivery, and
 assistant history in one focused store while keeping server routes authoritative
@@ -19,7 +19,7 @@ for access and persistence.
 | --- | --- | --- | --- |
 | Member chatroom | Shared text chat for canvas members | `canvas_chat_messages` | Supabase INSERT events |
 | Call chat | Ephemeral text chat for the active fullscreen call | None | LiveKit text streams |
-| Canvas assistant | Private per-user AI thread for the canvas | `canvas_assistant_messages` | AI response stream only |
+| Canvas assistant | Private per-user AI histories for the canvas | `canvas_assistant_threads`, `canvas_assistant_messages` | AI response stream only |
 
 Document-scene AI chat is separate. It belongs to scenes, persists in
 `canvas_scene_messages`, and is covered by `SCENES_ARCHITECTURE.md`.
@@ -42,6 +42,7 @@ flowchart TD
 
   Assistant --> AiRoute["/api/ai/canvas-assistant"]
   AiRoute --> AiRuntime[AI runtime]
+  AiRoute --> AssistantThreads[canvas_assistant_threads]
   AiRoute --> AssistantRows[canvas_assistant_messages]
 ```
 
@@ -55,13 +56,14 @@ ephemeral **Call** tab.
 | Section | Responsibility |
 | --- | --- |
 | Workspace shell | Provides the store and hides chat from public viewers. |
-| Chat store | Owns open/minimized state, active tab, caches, optimistic entries, unread count, mention member list, assistant bootstrap, and realtime subscription. |
+| Chat store | Owns open/minimized/maximized state, active tab, member-chat cache, optimistic entries, unread count, mention member list, and realtime subscription. |
+| Assistant store | Owns private assistant histories, active assistant thread, per-thread message cache, local draft histories, and streaming locks. |
 | Chat components | Render the launcher, window, member chat panel, assistant panel, message lists, composers, and @mention picker. |
 | Chat schemas | Validate member message rows, API responses, assistant rows, assistant requests, and member list responses. |
 | Chat API wrappers | Call chat endpoints and parse responses into typed client data. |
 | Member chat route | Lists latest member messages and inserts new messages with author metadata. |
 | Members route | Returns all canvas members for @mention autocomplete. Requires reader role. |
-| Assistant history route | Lists the caller's private assistant messages for one canvas. |
+| Assistant thread routes | List, rename, delete, and load the caller's private assistant histories for one canvas. |
 | Assistant AI route | Streams model responses and persists completed assistant turns. |
 
 ## Key Modules
@@ -69,16 +71,19 @@ ephemeral **Call** tab.
 | Module | Responsibility |
 | --- | --- |
 | `src/lib/stores/chat/canvas-chat.svelte.ts` | Store and context provider for all canvas chat surfaces. |
+| `src/lib/stores/chat/canvas-assistant.svelte.ts` | Assistant history state, per-thread cache, and thread actions. |
 | `src/lib/components/canvas/chat/CanvasChat.svelte` | Top-level launcher and window composition. |
 | `src/lib/components/canvas/chat/CanvasChatRoomPanel.svelte` | Shared member chat room with @mention highlight. |
 | `src/lib/components/canvas/chat/CanvasChatComposer.svelte` | Message composer with @mention autocomplete picker. |
-| `src/lib/components/canvas/chat/CanvasAssistantThread.svelte` | Private assistant thread. |
+| `src/lib/components/canvas/chat/CanvasAssistantThread.svelte` | Active private assistant thread. |
+| `src/lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte` | Assistant history list with new, select, rename, and delete actions. |
 | `src/lib/chat/mentions.ts` | `mentionPattern` and `segmentMentions` helpers for @mention regex and highlight splitting. |
 | `src/lib/chat/schema.ts` | Zod schemas and row-to-client mapping, including `ChatMember`. |
 | `src/lib/chat/api.ts` | HTTP client helpers. |
 | `src/routes/api/canvases/[canvasId]/chat/+server.ts` | Member chat GET/POST endpoint. |
 | `src/routes/api/canvases/[canvasId]/chat/members/+server.ts` | Canvas member list for @mention. Requires reader role. |
-| `src/routes/api/canvases/[canvasId]/assistant-messages/+server.ts` | Private assistant history endpoint. |
+| `src/routes/api/canvases/[canvasId]/assistant-threads/*` | Private assistant history endpoints. |
+| `src/routes/api/canvases/[canvasId]/assistant-messages/+server.ts` | Compatibility endpoint for the latest private assistant history. |
 | `src/routes/api/ai/canvas-assistant/+server.ts` | Assistant streaming endpoint. |
 | `src/lib/server/canvas-assistant-chat.ts` | Idempotent assistant turn persistence. |
 
@@ -112,8 +117,17 @@ type ChatMessage = {
 Assistant rows:
 
 ```text
+canvas_assistant_threads
+  id uuid primary key
+  canvas_id uuid
+  user_id uuid
+  title text, 1..80 characters
+  created_at timestamptz
+  updated_at timestamptz
+
 canvas_assistant_messages
   id text primary key
+  thread_id uuid
   canvas_id uuid
   user_id uuid
   role user | assistant | system
@@ -122,8 +136,10 @@ canvas_assistant_messages
   created_at timestamptz
 ```
 
-Assistant ids are AI SDK `UIMessage.id` values. Completed turns are upserted by
-id so retries and finish handling remain idempotent.
+Assistant thread ids are client-generated UUIDs for local drafts, then persisted
+on the first completed turn. Assistant message ids are AI SDK `UIMessage.id`
+values. Completed turns are upserted by id so retries and finish handling remain
+idempotent.
 
 ## Member Chat Load Flow
 
@@ -213,20 +229,23 @@ sequenceDiagram
   participant Panel as Assistant panel
   participant Route as /api/ai/canvas-assistant
   participant Ai as AI runtime
+  participant Threads as canvas_assistant_threads
   participant Db as canvas_assistant_messages
 
-  Panel->>Route: POST canvasId, modelId, webSearch, messages
+  Panel->>Route: POST canvasId, threadId, modelId, webSearch, messages
   Route->>Route: Validate model and membership
   Route->>Route: Load saved scene document titles
   Route->>Ai: streamCanvasAssistant
   Ai-->>Panel: UI message stream
+  Route->>Threads: Upsert active thread on finish
   Route->>Db: Persist user + assistant messages on finish
 ```
 
 Saved scene documents from the canvas are offered as assistant context: titles
 are included up front, and document content loads on demand. Assistant rows are
 not realtime-published; active output arrives through the stream and saved
-history reloads through HTTP.
+histories reload through HTTP. Thread switching, rename, delete, and new-chat
+actions are disabled while the active assistant response is streaming.
 
 ## @Mention Feature
 

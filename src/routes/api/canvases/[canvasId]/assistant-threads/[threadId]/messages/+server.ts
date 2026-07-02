@@ -3,15 +3,13 @@ import { listAssistantMessagesResponseSchema } from '$lib/chat/schema'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import {
   handleApiError,
+  notFound,
   requireRouteParam,
   withAuth
 } from '$lib/server/api-error'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
 
-// Assistant history is read-only over HTTP: messages are persisted
-// server-side by the canvas-assistant AI route when a generation finishes.
-// Threads are private — only the caller's own messages are returned.
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
@@ -22,30 +20,36 @@ export const GET: RequestHandler = async (event) =>
         'Canvas id',
         'canvasId'
       )
+      const threadId = requireRouteParam(
+        event.params.threadId,
+        'Thread id',
+        'threadId'
+      )
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 
-      const { data: latestThread, error: latestThreadError } = await supabase
+      const { data: thread, error: threadError } = await supabase
         .from('canvas_assistant_threads')
         .select('id')
+        .eq('id', threadId)
         .eq('canvas_id', canvasId)
         .eq('user_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(1)
         .maybeSingle()
 
-      if (latestThreadError) {
-        throw latestThreadError
+      if (threadError) {
+        throw threadError
       }
-
-      if (!latestThread) {
-        return json(listAssistantMessagesResponseSchema.parse({ items: [] }))
+      if (!thread) {
+        throw notFound('Assistant history not found.', {
+          code: 'assistant_thread_not_found',
+          details: { canvasId, threadId }
+        })
       }
 
       const { data, error } = await supabase
         .from('canvas_assistant_messages')
         .select('id, role, parts, metadata, created_at')
-        .eq('thread_id', latestThread.id)
+        .eq('thread_id', threadId)
         .eq('canvas_id', canvasId)
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })

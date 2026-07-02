@@ -1,9 +1,7 @@
 import { getContext, setContext } from 'svelte'
-import type { UIMessage } from 'ai'
 import { ApiClientError } from '$lib/api-client'
 import { supabase } from '$lib/auth/session-store'
 import {
-  listAssistantMessages,
   listChatMembers,
   listChatMessages,
   sendChatMessage
@@ -14,10 +12,12 @@ import {
   chatMessageRowToMessage,
   type ChatMessage
 } from '$lib/chat/schema'
+import { createCanvasAssistantStore } from '$lib/stores/chat/canvas-assistant.svelte'
 
 const CANVAS_CHAT_CONTEXT = Symbol('canvas-chat-store')
 
 export type CanvasChatTab = 'chat' | 'assistant'
+export type CanvasChatDisplayMode = 'compact' | 'fullscreen'
 
 export type ChatEntryStatus = 'sent' | 'pending' | 'failed'
 
@@ -30,7 +30,6 @@ export type ChatEntry = {
 // Module-level caches keyed by canvas id: the skeleton shows only on the
 // first-ever load of a canvas; reopening renders instantly from cache.
 const chatMessagesCache = new Map<string, ChatMessage[]>()
-const assistantMessagesCache = new Map<string, UIMessage[]>()
 const chatMembersCache = new Map<string, MessageAuthor[]>()
 
 type CanvasChatStoreInput = {
@@ -49,6 +48,8 @@ export function createCanvasChatStore({
   let open = $state(false)
   let hasOpened = $state(false)
   let activeTab = $state<CanvasChatTab>('chat')
+  let displayMode = $state<CanvasChatDisplayMode>('compact')
+  const assistant = createCanvasAssistantStore({ getCanvasId })
 
   let entries = $state<ChatEntry[]>([])
   let isLoadingChat = $state(false)
@@ -56,11 +57,7 @@ export function createCanvasChatStore({
   let unreadCount = $state(0)
   let mentionMembers = $state<MessageAuthor[]>([])
 
-  let assistantInitialMessages = $state<UIMessage[] | null>(null)
-  let assistantLoadError = $state<string | null>(null)
-
   let loadedChatForCanvasId: string | null = null
-  let loadedAssistantForCanvasId: string | null = null
   let loadedMembersForCanvasId: string | null = null
   let chatLoadPromise: Promise<void> | null = null
 
@@ -126,48 +123,6 @@ export function createCanvasChatStore({
     })()
 
     return chatLoadPromise
-  }
-
-  async function ensureAssistantLoaded() {
-    const canvasId = getCanvasId()
-    if (!canvasId || loadedAssistantForCanvasId === canvasId) {
-      return
-    }
-
-    const cached = assistantMessagesCache.get(canvasId)
-    if (cached && assistantInitialMessages === null) {
-      assistantInitialMessages = cached
-    }
-
-    try {
-      const response = await listAssistantMessages(canvasId)
-      if (canvasId !== getCanvasId()) {
-        return
-      }
-
-      const messages: UIMessage[] = response.items.map((item) => ({
-        id: item.id,
-        role: item.role,
-        parts: item.parts
-      }))
-
-      assistantMessagesCache.set(canvasId, messages)
-      // Don't clobber a thread the panel already mounted from cache — the
-      // Chat instance owns it from there.
-      if (assistantInitialMessages === null) {
-        assistantInitialMessages = messages
-      }
-      assistantLoadError = null
-      loadedAssistantForCanvasId = canvasId
-    } catch (error) {
-      if (canvasId !== getCanvasId() || assistantInitialMessages !== null) {
-        return
-      }
-      assistantLoadError =
-        error instanceof ApiClientError
-          ? error.message
-          : 'Failed to load assistant messages.'
-    }
   }
 
   async function ensureMembersLoaded() {
@@ -281,26 +236,34 @@ export function createCanvasChatStore({
       unreadCount = 0
     }
     void ensureChatLoaded()
-    void ensureAssistantLoaded()
+    void assistant.ensureLoaded()
     void ensureMembersLoaded()
   }
 
   // Called by the window component after the minimize animation finishes.
   function minimize() {
     open = false
+    displayMode = 'compact'
+  }
+
+  function maximize() {
+    open = true
+    hasOpened = true
+    activeTab = 'assistant'
+    displayMode = 'fullscreen'
+    void ensureChatLoaded()
+    void assistant.ensureLoaded()
+    void ensureMembersLoaded()
+  }
+
+  function restoreCompact() {
+    displayMode = 'compact'
   }
 
   function setTab(tab: CanvasChatTab) {
     activeTab = tab
     if (tab === 'chat' && open) {
       unreadCount = 0
-    }
-  }
-
-  function snapshotAssistantMessages(messages: UIMessage[]) {
-    const canvasId = getCanvasId()
-    if (canvasId) {
-      assistantMessagesCache.set(canvasId, messages)
     }
   }
 
@@ -322,15 +285,12 @@ export function createCanvasChatStore({
     isLoadingChat = false
     loadedChatForCanvasId = null
     chatLoadPromise = null
-    assistantInitialMessages = assistantMessagesCache.get(canvasId) ?? null
-    assistantLoadError = null
-    loadedAssistantForCanvasId = null
     mentionMembers = chatMembersCache.get(canvasId) ?? []
     loadedMembersForCanvasId = null
 
     if (hasOpened) {
       void ensureChatLoaded()
-      void ensureAssistantLoaded()
+      void assistant.ensureLoaded()
       void ensureMembersLoaded()
     }
   })
@@ -407,6 +367,9 @@ export function createCanvasChatStore({
     get activeTab() {
       return activeTab
     },
+    get displayMode() {
+      return displayMode
+    },
     get entries() {
       return entries
     },
@@ -419,17 +382,43 @@ export function createCanvasChatStore({
     get unreadCount() {
       return unreadCount
     },
+    get assistantThreads() {
+      return assistant.threads
+    },
+    get assistantActiveThreadId() {
+      return assistant.activeThreadId
+    },
+    get assistantActiveThread() {
+      return assistant.activeThread
+    },
     get assistantInitialMessages() {
-      return assistantInitialMessages
+      return assistant.initialMessages
     },
     get assistantLoadError() {
-      return assistantLoadError
+      return assistant.loadError
+    },
+    get assistantThreadsLoadError() {
+      return assistant.threadsLoadError
+    },
+    get isLoadingAssistantThreads() {
+      return assistant.isLoadingThreads
+    },
+    get isLoadingAssistantMessages() {
+      return assistant.isLoadingMessages
+    },
+    get assistantStreamingThreadId() {
+      return assistant.streamingThreadId
+    },
+    get isAssistantStreaming() {
+      return assistant.isStreaming
     },
     get mentionMembers() {
       return mentionMembers
     },
     openWindow,
     minimize,
+    maximize,
+    restoreCompact,
     setTab,
     send,
     retry,
@@ -439,11 +428,19 @@ export function createCanvasChatStore({
     // fullscreen chat panel): load without flipping `open`, and clear the
     // unread badge while the messages are actually visible there.
     ensureLoaded: () => ensureChatLoaded(),
+    ensureAssistantLoaded: () => assistant.ensureLoaded(),
     ensureMembersLoaded: () => ensureMembersLoaded(),
     markChatRead: () => {
       unreadCount = 0
     },
-    snapshotAssistantMessages
+    selectAssistantThread: assistant.selectThread,
+    newAssistantThread: assistant.newThread,
+    noteAssistantUserMessage: assistant.noteUserMessage,
+    snapshotAssistantMessages: assistant.snapshotMessages,
+    renameAssistantThread: assistant.renameThread,
+    deleteAssistantThread: assistant.deleteThread,
+    setAssistantStreamingThread: assistant.setStreamingThread,
+    refreshAssistantThreads: assistant.refreshThreads
   }
 }
 

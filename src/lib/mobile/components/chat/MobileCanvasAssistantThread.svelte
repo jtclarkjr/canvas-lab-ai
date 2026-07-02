@@ -16,8 +16,9 @@
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
   import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
 
-  let { canvasId, initialMessages } = $props<{
+  let { canvasId, threadId, initialMessages } = $props<{
     canvasId: string
+    threadId: string
     initialMessages: UIMessage[]
   }>()
 
@@ -31,11 +32,18 @@
       api: '/api/ai/canvas-assistant',
       prepareSendMessagesRequest: async ({ messages }) => ({
         headers: await getApiHeaders({ 'content-type': 'application/json' }),
-        body: { canvasId, modelId: defaultModelId, webSearch, messages }
+        body: {
+          canvasId,
+          threadId,
+          modelId: defaultModelId,
+          webSearch,
+          messages
+        }
       })
     }),
     onFinish: () => {
       store.snapshotAssistantMessages(
+        threadId,
         $state.snapshot(chat.messages) as UIMessage[]
       )
     }
@@ -45,6 +53,19 @@
     chat.status === 'submitted' || chat.status === 'streaming'
   )
   const visible = $derived(store.open && store.activeTab === 'assistant')
+
+  $effect(() => {
+    if (isStreaming) {
+      store.setAssistantStreamingThread(threadId)
+    } else if (store.assistantStreamingThreadId === threadId) {
+      store.setAssistantStreamingThread(null)
+    }
+  })
+
+  function sendMessage(text: string) {
+    store.noteAssistantUserMessage(threadId, text)
+    void chat.sendMessage({ text })
+  }
 
   function messageTextLength(message: UIMessage | undefined) {
     return asParts(message?.parts ?? []).reduce(
@@ -172,10 +193,11 @@
 
   <MobileCanvasChatComposer
     {isStreaming}
+    disabled={!threadId}
     placeholder="Ask the assistant..."
     {webSearch}
     onWebSearchToggle={() => (webSearch = !webSearch)}
-    onSend={(text) => void chat.sendMessage({ text })}
+    onSend={sendMessage}
   />
 </div>
 

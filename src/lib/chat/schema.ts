@@ -63,6 +63,28 @@ export function chatMessageRowToMessage(
 
 // canvas assistant (per-user AI thread)
 
+export const assistantThreadTitleSchema = z
+  .string()
+  .trim()
+  .min(1, 'Title cannot be empty.')
+  .max(80, 'Keep titles under 80 characters.')
+
+export const assistantThreadSchema = z.object({
+  id: z.uuid(),
+  canvasId: z.string(),
+  title: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+})
+
+export const assistantThreadRowSchema = z.object({
+  id: z.string(),
+  canvas_id: z.string(),
+  title: z.string(),
+  created_at: z.string(),
+  updated_at: z.string()
+})
+
 export const assistantMessageSchema = z.object({
   id: z.string(),
   role: z.enum(['user', 'assistant', 'system']),
@@ -75,12 +97,37 @@ export const listAssistantMessagesResponseSchema = z.object({
   items: z.array(assistantMessageSchema)
 })
 
+export const listAssistantThreadsResponseSchema = z.object({
+  items: z.array(assistantThreadSchema)
+})
+
+export const updateAssistantThreadInputSchema = z.object({
+  title: assistantThreadTitleSchema
+})
+
+export const assistantThreadResponseSchema = z.object({
+  item: assistantThreadSchema
+})
+
 export const canvasAssistantRequestSchema = z.object({
   canvasId: z.string().min(1),
+  threadId: z.uuid().optional(),
   modelId: z.string().min(1),
   webSearch: z.boolean().default(true),
   messages: z.array(uiMessageSchema).min(1)
 })
+
+export function assistantThreadRowToThread(
+  row: AssistantThreadRow
+): AssistantThread {
+  return {
+    id: row.id,
+    canvasId: row.canvas_id,
+    title: row.title,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  }
+}
 
 export const listChatMembersResponseSchema = z.object({
   items: z.array(messageAuthorSchema)
@@ -100,6 +147,17 @@ export type ListChatMessagesResponse = z.infer<
 export type AssistantMessage = z.infer<typeof assistantMessageSchema>
 export type ListAssistantMessagesResponse = z.infer<
   typeof listAssistantMessagesResponseSchema
+>
+export type AssistantThread = z.infer<typeof assistantThreadSchema>
+export type AssistantThreadRow = z.infer<typeof assistantThreadRowSchema>
+export type ListAssistantThreadsResponse = z.infer<
+  typeof listAssistantThreadsResponseSchema
+>
+export type UpdateAssistantThreadInput = z.infer<
+  typeof updateAssistantThreadInputSchema
+>
+export type AssistantThreadResponse = z.infer<
+  typeof assistantThreadResponseSchema
 >
 export type CanvasAssistantRequest = z.infer<
   typeof canvasAssistantRequestSchema

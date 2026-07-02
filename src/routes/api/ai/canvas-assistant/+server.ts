@@ -119,6 +119,7 @@ export const POST: RequestHandler = async (event) =>
               supabase,
               canvasId: input.canvasId,
               userId: user.id,
+              threadId: input.threadId,
               modelId: input.modelId,
               messages: updatedMessages,
               responseMessage
