@@ -62,6 +62,7 @@
   const messageItemClass = $derived(
     fullscreen ? 'w-full max-w-3xl self-center' : ''
   )
+  const footerItemClass = $derived(fullscreen ? 'mx-auto w-full max-w-3xl' : '')
   const messageBubbleClass = $derived(
     fullscreen ? 'max-w-[78%]' : 'max-w-[85%]'
   )
@@ -164,15 +165,17 @@
 
     {#snippet after()}
       {#if chat.status === 'submitted'}
-        <div
-          class="mt-3 flex items-center gap-2 px-1 text-xs text-muted-foreground"
-          role="status"
-        >
-          <LoaderCircle
-            class="size-3.5 animate-spin text-primary"
-            aria-hidden="true"
-          />
-          Thinking…
+        <div class={footerItemClass}>
+          <div
+            class="mt-3 flex items-center gap-2 px-1 text-xs text-muted-foreground"
+            role="status"
+          >
+            <LoaderCircle
+              class="size-3.5 animate-spin text-primary"
+              aria-hidden="true"
+            />
+            Thinking…
+          </div>
         </div>
       {/if}
     {/snippet}
