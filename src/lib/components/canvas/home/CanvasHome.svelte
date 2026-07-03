@@ -451,36 +451,18 @@
 <section
   class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"
 >
-  <div
-    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
-  >
-    <div class="grid gap-3">
-      <p class="m-0 text-sm font-bold uppercase tracking-[0.2em] text-primary">
-        Canvas
-      </p>
-      <h1
-        class="m-0 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl"
-      >
-        Recent canvases
-      </h1>
-      <p class="m-0 max-w-3xl text-lg leading-8 text-muted-foreground">
-        Create a new canvas or reopen a previous one to keep drawing.
-      </p>
-    </div>
-
-    {#if activeUser}
-      <button
-        type="button"
-        class="inline-flex h-10 w-fit shrink-0 items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 text-sm font-semibold text-foreground shadow-sm transition hover:border-primary/50 hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring sm:mt-1"
-        onclick={() => {
-          isSearchOpen = true
-        }}
-        aria-label="Search canvases"
-      >
-        <Search class="size-4 text-muted-foreground" aria-hidden="true" />
-        <span>Search</span>
-      </button>
-    {/if}
+  <div class="grid gap-3">
+    <p class="m-0 text-sm font-bold uppercase tracking-[0.2em] text-primary">
+      Canvas
+    </p>
+    <h1
+      class="m-0 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl"
+    >
+      Recent canvases
+    </h1>
+    <p class="m-0 max-w-3xl text-lg leading-8 text-muted-foreground">
+      Create a new canvas or reopen a previous one to keep drawing.
+    </p>
   </div>
 
   {#if error}
@@ -492,11 +474,12 @@
   {/if}
 
   {#if activeUser}
-    <div
-      class="flex w-full flex-wrap items-center justify-end gap-1.5"
-      aria-label="Sort canvases"
-    >
-      <div class="inline-flex max-w-full flex-wrap items-center gap-0.5">
+    <div class="flex w-full flex-wrap items-center justify-end gap-1.5">
+      <div
+        class="inline-flex max-w-full flex-wrap items-center gap-0.5"
+        role="group"
+        aria-label="Sort canvases"
+      >
         {#each CANVAS_SORT_OPTIONS as option}
           <button
             type="button"
@@ -529,6 +512,17 @@
           </button>
         {/each}
       </div>
+      <button
+        type="button"
+        class="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-transparent text-muted-foreground transition hover:bg-muted/40 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        onclick={() => {
+          isSearchOpen = true
+        }}
+        aria-label="Search canvases"
+        title="Search canvases"
+      >
+        <Search class="size-3.5" aria-hidden="true" />
+      </button>
     </div>
   {/if}
 
