@@ -9,6 +9,7 @@ import {
 import type { CanvasRole, MemberRole } from '$lib/canvas/roles'
 import type { Database } from '$lib/server/database.types'
 import type { CanvasListData } from '$lib/server/types'
+import { withCanvasIconUrls } from '$lib/server/canvas-icons'
 
 type CanvasMembership = Pick<
   Database['public']['Tables']['canvas_members']['Row'],
@@ -25,6 +26,8 @@ export const toCanvas = (row: CanvasRow, role?: CanvasRole): Canvas => ({
   createdBy: row.created_by,
   createdAt: row.created_at,
   visibility: row.visibility,
+  iconPath: row.icon_path,
+  iconUrl: null,
   ...(role ? { role } : null)
 })
 
@@ -83,10 +86,14 @@ export async function listCanvasesForUser(
     throw shared.error
   }
 
-  return buildCanvasListResponse({
+  const response = buildCanvasListResponse({
     ownedRows: owned.data ?? [],
     memberships: memberships.data ?? [],
     sharedRows: shared.data ?? []
+  })
+
+  return listCanvasesResponseSchema.parse({
+    items: await withCanvasIconUrls(supabase, response.items)
   })
 }
 
@@ -99,6 +106,7 @@ if (import.meta.vitest) {
     created_by: 'user-1',
     created_at: '2026-01-01T00:00:00.000Z',
     visibility: 'private',
+    icon_path: null,
     ...overrides
   })
 
@@ -123,6 +131,17 @@ if (import.meta.vitest) {
       ])
       expect(response.items[0].role).toBe('editor')
       expect(response.items[1].role).toBe('owner')
+    })
+
+    it('maps canvas icon paths onto list items', () => {
+      const response = buildCanvasListResponse({
+        ownedRows: [row({ icon_path: 'canvases/canvas-1/icon-123.png' })],
+        memberships: [],
+        sharedRows: []
+      })
+
+      expect(response.items[0].iconPath).toBe('canvases/canvas-1/icon-123.png')
+      expect(response.items[0].iconUrl).toBeNull()
     })
   })
 }

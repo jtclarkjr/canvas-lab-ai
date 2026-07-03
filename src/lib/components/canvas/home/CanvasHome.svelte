@@ -1,21 +1,16 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
-  import {
-    EllipsisVertical,
-    FileText,
-    LoaderCircle,
-    Plus,
-    Search
-  } from 'lucide-svelte'
+  import { LoaderCircle, Plus, Search } from 'lucide-svelte'
   import { goto, invalidate } from '$app/navigation'
   import { fade, scale } from 'svelte/transition'
-  import { flip } from 'svelte/animate'
   import { createCanvas, deleteCanvas, listCanvases } from '$lib/canvas/api'
   import { CANVASES_DEPENDENCY } from '$lib/canvas/consts'
   import { isAnonymousUser } from '$lib/auth/anonymous'
+  import CanvasDeleteDialog from '$lib/components/canvas/home/CanvasDeleteDialog.svelte'
+  import CanvasHomeOwnedTile from '$lib/components/canvas/home/CanvasHomeOwnedTile.svelte'
+  import CanvasHomeSharedTile from '$lib/components/canvas/home/CanvasHomeSharedTile.svelte'
+  import CanvasIconUploadDialog from '$lib/components/canvas/home/CanvasIconUploadDialog.svelte'
   import CanvasSearchDialog from '$lib/components/canvas/CanvasSearchDialog.svelte'
-  import Modal from '$lib/components/shared/Modal.svelte'
-  import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
   import type { Canvas } from '$lib/canvas/schema'
   import { session } from '$lib/stores/shared/session.svelte'
   import { updateCanvas } from '$lib/workspace/api'
@@ -54,6 +49,8 @@
   let isDeleteDialogOpen = $state(false)
   let deleteTarget = $state<Canvas | null>(null)
   let isDeletingId = $state<string | null>(null)
+  let isIconDialogOpen = $state(false)
+  let iconTarget = $state<Canvas | null>(null)
   let openMenuCanvasId = $state<string | null>(null)
   let editingCanvasId = $state<string | null>(null)
   let editingTitle = $state('')
@@ -65,10 +62,19 @@
   let hasLoadedFallback = $state(false)
   const error = $derived(localError ?? initialError)
 
-  function formatCanvasDate(dateString: string | null | undefined): string {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  function openIconUploadDialog(canvas: Canvas) {
+    openMenuCanvasId = null
+    cancelRenameCanvas()
+    iconTarget = canvas
+    isIconDialogOpen = true
+  }
+
+  function handleIconChanged(canvas: Canvas) {
+    canvases = canvases.map((entry) =>
+      entry.id === canvas.id ? canvas : entry
+    )
+    iconTarget = null
+    void invalidate(CANVASES_DEPENDENCY)
   }
 
   async function loadCanvases() {
@@ -316,6 +322,12 @@
   })
 
   $effect(() => {
+    if (!isIconDialogOpen) {
+      iconTarget = null
+    }
+  })
+
+  $effect(() => {
     canvases = initialCanvases
   })
 
@@ -344,6 +356,7 @@
         (!event.metaKey && !event.ctrlKey) ||
         !activeUser ||
         editingCanvasId ||
+        isIconDialogOpen ||
         isDeleteDialogOpen
       ) {
         return
@@ -464,142 +477,23 @@
       {/each}
     {:else}
       {#each ownedCanvases as canvas (canvas.id)}
-        {@const isEditingTitle = editingCanvasId === canvas.id}
-        <div
-          out:scale={{ duration: 200, start: 0.92, opacity: 0 }}
-          animate:flip={{ duration: 250 }}
-          aria-busy={openingCanvasId === canvas.id ||
-            savingTitleId === canvas.id}
-          class={`group relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:border-primary/50 hover:shadow-md ${openingCanvasId === canvas.id ? 'border-primary/60 shadow-lg ring-2 ring-primary/25' : ''} ${openingCanvasId && openingCanvasId !== canvas.id ? 'opacity-60' : ''}`}
-        >
-          {#if !isEditingTitle}
-            <div
-              class={`absolute right-2 top-2 z-10 hidden transition md:block ${openMenuCanvasId === canvas.id ? 'opacity-100' : 'pointer-events-none opacity-0 group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100'}`}
-              data-canvas-tile-menu
-            >
-              <button
-                type="button"
-                class="flex size-8 items-center justify-center rounded-lg bg-card/95 text-muted-foreground shadow-md transition hover:bg-primary/10 hover:text-primary disabled:pointer-events-none disabled:opacity-50"
-                onclick={(event) => toggleCanvasMenu(event, canvas)}
-                disabled={openingCanvasId !== null || savingTitleId !== null}
-                aria-label={`Canvas actions for "${canvas.title}"`}
-                aria-haspopup="menu"
-                aria-expanded={openMenuCanvasId === canvas.id}
-                title="Canvas actions"
-              >
-                <EllipsisVertical class="size-4" aria-hidden="true" />
-              </button>
-
-              {#if openMenuCanvasId === canvas.id}
-                <div
-                  class="absolute right-0 top-full mt-1 min-w-32 rounded-lg border border-border/70 bg-popover p-1 text-sm text-popover-foreground shadow-xl"
-                  role="menu"
-                >
-                  <button
-                    type="button"
-                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-muted"
-                    role="menuitem"
-                    onclick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      void startRenameCanvas(canvas)
-                    }}
-                  >
-                    Rename
-                  </button>
-                  <button
-                    type="button"
-                    class="flex w-full items-center rounded-md px-3 py-2 text-left text-sm font-medium text-destructive transition hover:bg-destructive/10"
-                    role="menuitem"
-                    onclick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      handleDeleteRequest(canvas)
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              {/if}
-            </div>
-          {/if}
-
-          {#if isEditingTitle}
-            <div class="flex h-full flex-col">
-              <div
-                class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
-              >
-                <div class="rounded-lg bg-background/80 p-4 shadow-inner">
-                  <FileText class="size-12 text-muted-foreground/50" />
-                </div>
-              </div>
-
-              <div class="flex h-1/4 flex-col justify-center gap-1 px-3">
-                <div class="flex items-center gap-2">
-                  <input
-                    bind:this={titleInputEl}
-                    bind:value={editingTitle}
-                    class="min-w-0 flex-1 rounded-md border border-primary/40 bg-background/95 px-2 py-1 text-sm font-medium text-card-foreground outline-none focus:ring-2 focus:ring-primary/20"
-                    maxlength="100"
-                    readonly={savingTitleId === canvas.id}
-                    aria-label={`Rename "${canvas.title}"`}
-                    onblur={() => void commitRenameCanvas(canvas)}
-                    onkeydown={(event) => handleRenameKeydown(event, canvas)}
-                  />
-                  {#if savingTitleId === canvas.id}
-                    <LoaderCircle
-                      class="size-4 shrink-0 animate-spin text-primary"
-                      aria-hidden="true"
-                    />
-                  {/if}
-                </div>
-                <p class="m-0 text-xs text-muted-foreground">
-                  {formatCanvasDate(canvas.createdAt)}
-                </p>
-              </div>
-            </div>
-          {:else}
-            <a
-              href={`/canvas/${canvas.id}`}
-              onclick={(event) => void handleCanvasNavigation(event, canvas)}
-              class="flex h-full flex-col"
-            >
-              <div
-                class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
-              >
-                <div class="rounded-lg bg-background/80 p-4 shadow-inner">
-                  <FileText class="size-12 text-muted-foreground/50" />
-                </div>
-              </div>
-
-              <div class="flex h-1/4 flex-col justify-center gap-1 px-4">
-                <h2
-                  class="m-0 truncate text-sm font-medium text-card-foreground group-hover:text-primary"
-                >
-                  {canvas.title}
-                </h2>
-                <p class="m-0 text-xs text-muted-foreground">
-                  {formatCanvasDate(canvas.createdAt)}
-                </p>
-              </div>
-            </a>
-          {/if}
-
-          {#if openingCanvasId === canvas.id}
-            <div
-              in:fade={{ duration: 120 }}
-              class="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-[2px]"
-            >
-              <div
-                in:scale={{ duration: 140, start: 0.95 }}
-                class="inline-flex items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 text-xs font-semibold text-foreground shadow-lg"
-              >
-                <LoaderCircle class="size-4 animate-spin text-primary" />
-                Opening
-              </div>
-            </div>
-          {/if}
-        </div>
+        <CanvasHomeOwnedTile
+          {canvas}
+          isEditingTitle={editingCanvasId === canvas.id}
+          bind:editingTitle
+          bind:titleInputEl
+          savingTitle={savingTitleId === canvas.id}
+          isOpening={openingCanvasId === canvas.id}
+          isDimmed={Boolean(openingCanvasId && openingCanvasId !== canvas.id)}
+          menuOpen={openMenuCanvasId === canvas.id}
+          onNavigate={handleCanvasNavigation}
+          onToggleMenu={toggleCanvasMenu}
+          onUploadIcon={openIconUploadDialog}
+          onStartRename={startRenameCanvas}
+          onDelete={handleDeleteRequest}
+          onCommitRename={commitRenameCanvas}
+          onRenameKeydown={handleRenameKeydown}
+        />
       {/each}
     {/if}
   </div>
@@ -613,52 +507,12 @@
         class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
       >
         {#each sharedCanvases as canvas (canvas.id)}
-          <a
-            href={`/canvas/${canvas.id}`}
-            onclick={(event) => void handleCanvasNavigation(event, canvas)}
-            out:scale={{ duration: 200, start: 0.92, opacity: 0 }}
-            animate:flip={{ duration: 250 }}
-            aria-busy={openingCanvasId === canvas.id}
-            class={`group relative aspect-[3/4] overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:border-primary/50 hover:shadow-md ${openingCanvasId === canvas.id ? 'border-primary/60 shadow-lg ring-2 ring-primary/25' : ''} ${openingCanvasId && openingCanvasId !== canvas.id ? 'opacity-60' : ''}`}
-          >
-            <div class="absolute right-2 top-2 z-10">
-              <RoleBadge role={canvas.role ?? 'reader'} />
-            </div>
-
-            <div
-              class="flex h-3/4 items-center justify-center border-b border-border bg-gradient-to-br from-muted to-card p-4"
-            >
-              <div class="rounded-lg bg-background/80 p-4 shadow-inner">
-                <FileText class="size-12 text-muted-foreground/50" />
-              </div>
-            </div>
-
-            <div class="flex h-1/4 flex-col justify-center gap-1 px-4">
-              <h2
-                class="m-0 truncate text-sm font-medium text-card-foreground group-hover:text-primary"
-              >
-                {canvas.title}
-              </h2>
-              <p class="m-0 text-xs text-muted-foreground">
-                {formatCanvasDate(canvas.createdAt)}
-              </p>
-            </div>
-
-            {#if openingCanvasId === canvas.id}
-              <div
-                in:fade={{ duration: 120 }}
-                class="absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-[2px]"
-              >
-                <div
-                  in:scale={{ duration: 140, start: 0.95 }}
-                  class="inline-flex items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 text-xs font-semibold text-foreground shadow-lg"
-                >
-                  <LoaderCircle class="size-4 animate-spin text-primary" />
-                  Opening
-                </div>
-              </div>
-            {/if}
-          </a>
+          <CanvasHomeSharedTile
+            {canvas}
+            isOpening={openingCanvasId === canvas.id}
+            isDimmed={Boolean(openingCanvasId && openingCanvasId !== canvas.id)}
+            onNavigate={handleCanvasNavigation}
+          />
         {/each}
       </div>
     </div>
@@ -700,43 +554,15 @@
   />
 {/if}
 
-<Modal
-  bind:open={isDeleteDialogOpen}
-  title="Delete canvas"
-  eyebrow="Confirm action"
-  widthClass="max-w-md"
->
-  <div class="grid gap-6">
-    <p class="m-0 text-sm leading-6 text-muted-foreground">
-      Delete
-      <span class="font-semibold text-foreground"
-        >{deleteTarget?.title ?? 'this canvas'}</span
-      >? This action cannot be undone.
-    </p>
+<CanvasIconUploadDialog
+  bind:open={isIconDialogOpen}
+  canvas={iconTarget}
+  onChanged={handleIconChanged}
+/>
 
-    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-      <button
-        type="button"
-        class="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-secondary"
-        onclick={() => {
-          isDeleteDialogOpen = false
-        }}
-        disabled={isDeletingId !== null}
-      >
-        Cancel
-      </button>
-      <button
-        type="button"
-        class="inline-flex items-center justify-center rounded-full bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
-        onclick={() => void handleDeleteConfirm()}
-        disabled={!deleteTarget || isDeletingId !== null}
-      >
-        {#if isDeletingId === deleteTarget?.id}
-          Deleting...
-        {:else}
-          Delete canvas
-        {/if}
-      </button>
-    </div>
-  </div>
-</Modal>
+<CanvasDeleteDialog
+  bind:open={isDeleteDialogOpen}
+  canvas={deleteTarget}
+  deleting={isDeletingId !== null}
+  onConfirm={handleDeleteConfirm}
+/>

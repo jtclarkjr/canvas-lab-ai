@@ -8,7 +8,6 @@ import {
   updateCanvasInputSchema,
   updateCanvasResponseSchema
 } from '$lib/workspace/schema'
-import type { CanvasRow } from '$lib/canvas/schema'
 import { requireCanvasRole } from '$lib/server/canvas-access'
 import {
   badRequest,
@@ -18,16 +17,13 @@ import {
   parseJsonBody,
   withAuth
 } from '$lib/server/api-error'
+import {
+  removeCanvasIconObject,
+  withCanvasIconUrl
+} from '$lib/server/canvas-icons'
+import { toCanvas } from '$lib/server/canvas-list'
 import { withRateLimit } from '$lib/server/rate-limit'
 import { getSupabase } from '$lib/server/supabase'
-
-const toCanvas = (row: CanvasRow) => ({
-  id: row.id,
-  title: row.title,
-  createdBy: row.created_by,
-  createdAt: row.created_at,
-  visibility: row.visibility
-})
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -44,7 +40,10 @@ export const GET: RequestHandler = async (event) =>
 
       return json(
         getCanvasResponseSchema.parse({
-          item: { ...toCanvas(canvas), role }
+          item: await withCanvasIconUrl(
+            supabase,
+            toCanvas(canvasRowSchema.parse(canvas), role)
+          )
         })
       )
     } catch (error) {
@@ -95,7 +94,10 @@ export const PATCH: RequestHandler = async (event) =>
 
       return json(
         updateCanvasResponseSchema.parse({
-          item: toCanvas(canvasRowSchema.parse(data))
+          item: await withCanvasIconUrl(
+            supabase,
+            toCanvas(canvasRowSchema.parse(data))
+          )
         })
       )
     } catch (error) {
@@ -131,9 +133,15 @@ export const DELETE: RequestHandler = async (event) =>
         })
       }
 
+      const deletedCanvas = canvasRowSchema.parse(data)
+
+      await removeCanvasIconObject(supabase, deletedCanvas.icon_path).catch(
+        () => undefined
+      )
+
       return json(
         deleteCanvasResponseSchema.parse({
-          item: toCanvas(canvasRowSchema.parse(data))
+          item: toCanvas(deletedCanvas)
         })
       )
     } catch (error) {

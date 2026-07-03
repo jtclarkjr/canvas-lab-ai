@@ -34,7 +34,7 @@ describe('canvas schema', () => {
     expect(input.data).toBeNull()
   })
 
-  it('defaults canvas visibility to private when the column is absent', () => {
+  it('defaults canvas visibility and icon fields when columns are absent', () => {
     const row = canvasRowSchema.parse({
       id: 'canvas-1',
       title: 'Sketch',
@@ -42,6 +42,7 @@ describe('canvas schema', () => {
       created_at: '2026-06-12T00:00:00Z'
     })
     expect(row.visibility).toBe('private')
+    expect(row.icon_path).toBeNull()
 
     const canvas = canvasSchema.parse({
       id: 'canvas-1',
@@ -50,6 +51,30 @@ describe('canvas schema', () => {
       createdAt: '2026-06-12T00:00:00Z'
     })
     expect(canvas.visibility).toBe('private')
+    expect(canvas.iconPath).toBeNull()
+    expect(canvas.iconUrl).toBeNull()
+  })
+
+  it('accepts nullable canvas icon fields', () => {
+    const row = canvasRowSchema.parse({
+      id: 'canvas-1',
+      title: 'Sketch',
+      created_by: 'user-1',
+      created_at: '2026-06-12T00:00:00Z',
+      icon_path: 'canvases/canvas-1/icon-123.png'
+    })
+    expect(row.icon_path).toBe('canvases/canvas-1/icon-123.png')
+
+    const canvas = canvasSchema.parse({
+      id: 'canvas-1',
+      title: 'Sketch',
+      createdBy: 'user-1',
+      createdAt: '2026-06-12T00:00:00Z',
+      iconPath: 'canvases/canvas-1/icon-123.png',
+      iconUrl: 'https://example.com/icon.png'
+    })
+    expect(canvas.iconPath).toBe('canvases/canvas-1/icon-123.png')
+    expect(canvas.iconUrl).toBe('https://example.com/icon.png')
   })
 
   it('accepts visibility updates and rejects unknown values', () => {

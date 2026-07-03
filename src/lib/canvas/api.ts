@@ -1,4 +1,9 @@
-import { ApiClientError, apiRequest } from '$lib/api-client'
+import {
+  ApiClientError,
+  apiRequest,
+  getApiHeaders,
+  parseResponse
+} from '$lib/api-client'
 import {
   accessRequestResponseSchema,
   createCanvasInputSchema,
@@ -7,6 +12,7 @@ import {
   getCanvasResponseSchema,
   listCanvasesResponseSchema,
   myAccessRequestResponseSchema,
+  uploadCanvasIconResponseSchema,
   type AccessRequestResponse,
   type CreateCanvasInput,
   type CreateCanvasResponse,
@@ -14,7 +20,8 @@ import {
   type GetCanvasResponse,
   type ListCanvasesResponse,
   type MemberRole,
-  type MyAccessRequestResponse
+  type MyAccessRequestResponse,
+  type UploadCanvasIconResponse
 } from '$lib/canvas/schema'
 export { ApiClientError }
 
@@ -50,6 +57,41 @@ export async function deleteCanvas(id: string): Promise<DeleteCanvasResponse> {
     parse: (payload) => deleteCanvasResponseSchema.parse(payload),
     fallbackMessage: 'Failed to delete canvas.'
   })
+}
+
+export async function uploadCanvasIcon(
+  canvasId: string,
+  file: File
+): Promise<UploadCanvasIconResponse> {
+  const body = new FormData()
+  body.set('file', file)
+
+  const response = await fetch(`/api/canvases/${canvasId}/icon`, {
+    method: 'POST',
+    headers: await getApiHeaders({ accept: 'application/json' }),
+    body
+  })
+
+  return parseResponse(
+    response,
+    (payload) => uploadCanvasIconResponseSchema.parse(payload),
+    'Failed to upload canvas icon.'
+  )
+}
+
+export async function removeCanvasIcon(
+  canvasId: string
+): Promise<UploadCanvasIconResponse> {
+  const response = await fetch(`/api/canvases/${canvasId}/icon`, {
+    method: 'DELETE',
+    headers: await getApiHeaders({ accept: 'application/json' })
+  })
+
+  return parseResponse(
+    response,
+    (payload) => uploadCanvasIconResponseSchema.parse(payload),
+    'Failed to remove canvas icon.'
+  )
 }
 
 export async function getCanvas(canvasId: string): Promise<GetCanvasResponse> {

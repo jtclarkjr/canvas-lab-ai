@@ -17,7 +17,8 @@ export const canvasRowSchema = z.object({
   title: z.string(),
   created_by: z.string(),
   created_at: z.string(),
-  visibility: canvasVisibilitySchema.default('private')
+  visibility: canvasVisibilitySchema.default('private'),
+  icon_path: z.string().nullable().default(null)
 })
 
 export const createCanvasInputSchema = z.object({
@@ -34,6 +35,8 @@ export const canvasSchema = z.object({
   createdBy: z.string(),
   createdAt: z.string(),
   visibility: canvasVisibilitySchema.default('private'),
+  iconPath: z.string().nullable().default(null),
+  iconUrl: z.string().nullable().default(null),
   role: roleSchema.optional()
 })
 
@@ -50,6 +53,10 @@ export const createCanvasResponseSchema = z.object({
 })
 
 export const deleteCanvasResponseSchema = z.object({
+  item: canvasSchema
+})
+
+export const uploadCanvasIconResponseSchema = z.object({
   item: canvasSchema
 })
 
@@ -91,6 +98,9 @@ export type Canvas = z.infer<typeof canvasSchema>
 export type ListCanvasesResponse = z.infer<typeof listCanvasesResponseSchema>
 export type CreateCanvasResponse = z.infer<typeof createCanvasResponseSchema>
 export type DeleteCanvasResponse = z.infer<typeof deleteCanvasResponseSchema>
+export type UploadCanvasIconResponse = z.infer<
+  typeof uploadCanvasIconResponseSchema
+>
 export type GetCanvasResponse = z.infer<typeof getCanvasResponseSchema>
 export type UserSearchResult = z.infer<typeof userSearchResultSchema>
 export type AccessRequest = z.infer<typeof accessRequestSchema>

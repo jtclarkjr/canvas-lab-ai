@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CanvasHome from '$lib/components/canvas/CanvasHome.svelte'
+  import CanvasHome from '$lib/components/canvas/home/CanvasHome.svelte'
   import type { PageData } from './$types'
 
   let { data } = $props<{ data: PageData }>()

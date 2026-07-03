@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { X } from 'lucide-svelte'
 
   let {
     open = $bindable(false),
@@ -122,27 +123,32 @@
       aria-modal="true"
       aria-labelledby={titleId}
     >
-      <div class="mb-5 flex items-start justify-between gap-4">
-        <div class="grid gap-1">
+      <div class="mb-5 flex min-w-0 items-start justify-between gap-4">
+        <div class="grid min-w-0 flex-1 gap-1">
           {#if eyebrow}
             <p
-              class="text-xs font-black uppercase tracking-[0.24em] text-primary"
+              class="truncate text-xs font-black uppercase tracking-[0.24em] text-primary"
+              title={eyebrow}
             >
               {eyebrow}
             </p>
           {/if}
-          <h2 id={titleId} class="text-2xl font-bold text-foreground">
+          <h2
+            id={titleId}
+            class="truncate text-2xl font-bold text-foreground"
+            {title}
+          >
             {title}
           </h2>
         </div>
         {#if showClose}
           <button
             type="button"
-            class="flex size-10 items-center justify-center rounded-full bg-secondary text-lg text-secondary-foreground transition hover:scale-105"
+            class="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition hover:scale-105"
             onclick={() => (open = false)}
             aria-label="Close dialog"
           >
-            ×
+            <X class="size-4" aria-hidden="true" />
           </button>
         {/if}
       </div>

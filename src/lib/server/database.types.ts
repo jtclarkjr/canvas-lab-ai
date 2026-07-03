@@ -16,6 +16,7 @@ export interface Database {
           created_by: string
           created_at: string
           visibility: Database['public']['Enums']['canvas_visibility']
+          icon_path: string | null
         }
         Insert: {
           id?: string
@@ -23,6 +24,7 @@ export interface Database {
           created_by: string
           created_at?: string
           visibility?: Database['public']['Enums']['canvas_visibility']
+          icon_path?: string | null
         }
         Update: {
           id?: string
@@ -30,6 +32,7 @@ export interface Database {
           created_by?: string
           created_at?: string
           visibility?: Database['public']['Enums']['canvas_visibility']
+          icon_path?: string | null
         }
         Relationships: []
       }
