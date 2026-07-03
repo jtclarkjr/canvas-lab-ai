@@ -36,7 +36,7 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>Canvas App</title>
+  <title>Canvas Lab</title>
 </svelte:head>
 
 <ToastViewport />
@@ -53,7 +53,7 @@
         class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6"
       >
         <a href="/" class="text-sm font-bold tracking-[0.02em] text-foreground"
-          >Canvas App</a
+          >Canvas Lab</a
         >
         <AuthControls />
       </div>

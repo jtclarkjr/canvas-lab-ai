@@ -1,4 +1,4 @@
-# Canvas App V4
+# Canvas Lab AI
 
 A real-time collaborative canvas application built with SvelteKit and Supabase.
 

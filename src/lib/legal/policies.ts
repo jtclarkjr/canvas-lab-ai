@@ -16,24 +16,24 @@ export type LegalPolicy = {
 export const legalPolicies = {
   termsOfService: {
     slug: 'terms-of-service',
-    title: 'Canvas App Terms of Service',
+    title: 'Canvas Lab Terms of Service',
     description:
-      'Terms of Service for Canvas App, covering accounts, collaboration, user content, AI features, and service operation.',
+      'Terms of Service for Canvas Lab, covering accounts, collaboration, user content, AI features, and service operation.',
     lastUpdated: 'June 29, 2026',
     sections: [
       {
         id: 'acceptance-and-scope',
         title: '1. Acceptance and Scope',
         paragraphs: [
-          'These Terms of Service govern your access to and use of Canvas App, a real-time collaborative canvas service for creating, editing, sharing, discussing, and organizing canvas-based workspaces, documents, workflows, conference sessions, and related AI-assisted content.',
-          'By accessing or using Canvas App, you agree to these Terms. If you do not agree, do not use the Service. If you use Canvas App on behalf of an organization, you represent that you have authority to bind that organization to these Terms.'
+          'These Terms of Service govern your access to and use of Canvas Lab, a real-time collaborative canvas service for creating, editing, sharing, discussing, and organizing canvas-based workspaces, documents, workflows, conference sessions, and related AI-assisted content.',
+          'By accessing or using Canvas Lab, you agree to these Terms. If you do not agree, do not use the Service. If you use Canvas Lab on behalf of an organization, you represent that you have authority to bind that organization to these Terms.'
         ]
       },
       {
         id: 'accounts-and-authentication',
         title: '2. Accounts and Authentication',
         paragraphs: [
-          'Canvas App uses Supabase Auth and optional third-party sign-in providers for account and session management. You are responsible for keeping your credentials secure and for all activity that occurs under your account.',
+          'Canvas Lab uses Supabase Auth and optional third-party sign-in providers for account and session management. You are responsible for keeping your credentials secure and for all activity that occurs under your account.',
           "You must provide accurate account information and promptly update it when needed. You may not share accounts, impersonate another person, or use another user's credentials without permission."
         ]
       },
@@ -41,7 +41,7 @@ export const legalPolicies = {
         id: 'service-description',
         title: '3. Service Description',
         paragraphs: [
-          'Canvas App provides collaborative drawing, text editing, document scenes, workflow scenes, chat, presence, sharing, access requests, and conference-related features. Some features may be experimental, may depend on third-party providers, or may change as the Service evolves.',
+          'Canvas Lab provides collaborative drawing, text editing, document scenes, workflow scenes, chat, presence, sharing, access requests, and conference-related features. Some features may be experimental, may depend on third-party providers, or may change as the Service evolves.',
           'We may add, modify, limit, suspend, or discontinue features for security, reliability, maintenance, legal, or operational reasons.'
         ]
       },
@@ -49,7 +49,7 @@ export const legalPolicies = {
         id: 'user-content-and-canvas-data',
         title: '4. User Content and Canvas Data',
         paragraphs: [
-          'You retain ownership of content you create or upload, including canvases, drawings, text, documents, workflow definitions, chat messages, prompts, files, feedback, and other materials. You grant Canvas App a limited license to host, store, transmit, process, display, reproduce, and modify your content only as needed to operate, secure, improve, and provide the Service.',
+          'You retain ownership of content you create or upload, including canvases, drawings, text, documents, workflow definitions, chat messages, prompts, files, feedback, and other materials. You grant Canvas Lab a limited license to host, store, transmit, process, display, reproduce, and modify your content only as needed to operate, secure, improve, and provide the Service.',
           'You are responsible for your content and for ensuring that you have the rights needed to submit it. Do not submit confidential, regulated, or sensitive information unless you are authorized to do so and the Service configuration is appropriate for that use.'
         ]
       },
@@ -57,7 +57,7 @@ export const legalPolicies = {
         id: 'ai-features-and-generated-output',
         title: '5. AI Features and Generated Output',
         paragraphs: [
-          'Canvas App may include AI-assisted features for canvas assistance, document drafting, workflow assistance, captions, transcription, translation, or related tasks. AI features may send prompts, selected content, documents, audio, or metadata to configured AI providers such as OpenAI or Anthropic to generate responses or perform processing.',
+          'Canvas Lab may include AI-assisted features for canvas assistance, document drafting, workflow assistance, captions, transcription, translation, or related tasks. AI features may send prompts, selected content, documents, audio, or metadata to configured AI providers such as OpenAI or Anthropic to generate responses or perform processing.',
           'AI output may be inaccurate, incomplete, offensive, or outdated. You are responsible for reviewing and validating AI output before relying on it, sharing it, or using it to make decisions. AI output is not professional, legal, medical, financial, or safety advice.'
         ]
       },
@@ -65,7 +65,7 @@ export const legalPolicies = {
         id: 'collaboration-sharing-and-permissions',
         title: '6. Collaboration, Sharing, and Permissions',
         paragraphs: [
-          'Canvas App supports multi-user collaboration, live cursors, realtime updates, chat, role-based access, access requests, and shared canvas workspaces. You are responsible for choosing appropriate sharing settings and for managing who can view, edit, or interact with your canvases.',
+          'Canvas Lab supports multi-user collaboration, live cursors, realtime updates, chat, role-based access, access requests, and shared canvas workspaces. You are responsible for choosing appropriate sharing settings and for managing who can view, edit, or interact with your canvases.',
           'If you invite others or share a canvas, their actions may affect shared content. Do not grant access to people who should not receive the information in that workspace.'
         ]
       },
@@ -74,7 +74,7 @@ export const legalPolicies = {
         title: '7. Usage Limits, Availability, and Changes',
         paragraphs: [
           'We may apply usage limits, rate limits, storage limits, feature limits, or other controls to protect service reliability, manage third-party provider costs, and prevent abuse. We do not guarantee that the Service will be uninterrupted, error-free, or available at all times.',
-          'We may update these Terms by revising the Last Updated date. Continued use of Canvas App after an update means you accept the updated Terms.'
+          'We may update these Terms by revising the Last Updated date. Continued use of Canvas Lab after an update means you accept the updated Terms.'
         ]
       },
       {
@@ -92,7 +92,7 @@ export const legalPolicies = {
         id: 'suspension-and-termination',
         title: '9. Suspension and Termination',
         paragraphs: [
-          'We may suspend, restrict, or terminate access to Canvas App if we reasonably believe you violated these Terms, created risk for the Service or other users, caused legal exposure, or used the Service abusively. You may stop using the Service at any time.',
+          'We may suspend, restrict, or terminate access to Canvas Lab if we reasonably believe you violated these Terms, created risk for the Service or other users, caused legal exposure, or used the Service abusively. You may stop using the Service at any time.',
           'After termination, some content may remain in backups, logs, shared workspaces, audit records, or retained records where permitted or required by law and operational needs.'
         ]
       },
@@ -100,8 +100,8 @@ export const legalPolicies = {
         id: 'disclaimers-and-liability',
         title: '10. Disclaimers and Liability',
         paragraphs: [
-          'Canvas App is provided "as is" and "as available" without warranties of any kind to the fullest extent allowed by law. We disclaim warranties of merchantability, fitness for a particular purpose, non-infringement, availability, accuracy, and reliability.',
-          'To the fullest extent allowed by law, Canvas App and its operators will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, data, goodwill, or business opportunities.'
+          'Canvas Lab is provided "as is" and "as available" without warranties of any kind to the fullest extent allowed by law. We disclaim warranties of merchantability, fitness for a particular purpose, non-infringement, availability, accuracy, and reliability.',
+          'To the fullest extent allowed by law, Canvas Lab and its operators will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, data, goodwill, or business opportunities.'
         ]
       },
       {
@@ -116,24 +116,24 @@ export const legalPolicies = {
   },
   usagePolicy: {
     slug: 'usage-policy',
-    title: 'Canvas App Usage Policy',
+    title: 'Canvas Lab Usage Policy',
     description:
-      'Usage Policy for Canvas App, covering permitted use, prohibited content, AI restrictions, collaboration rules, and enforcement.',
+      'Usage Policy for Canvas Lab, covering permitted use, prohibited content, AI restrictions, collaboration rules, and enforcement.',
     lastUpdated: 'June 29, 2026',
     sections: [
       {
         id: 'scope',
         title: '1. Scope',
         paragraphs: [
-          'This Usage Policy applies to all use of Canvas App, including canvases, drawings, text, documents, workflows, chat messages, uploaded content, prompts, AI-generated output, conference features, captions, translations, access requests, and API interactions.',
-          'This policy is part of the Canvas App Terms of Service. If your use violates this policy, we may remove content, restrict features, suspend access, or take other action needed to protect users, the Service, or third-party providers.'
+          'This Usage Policy applies to all use of Canvas Lab, including canvases, drawings, text, documents, workflows, chat messages, uploaded content, prompts, AI-generated output, conference features, captions, translations, access requests, and API interactions.',
+          'This policy is part of the Canvas Lab Terms of Service. If your use violates this policy, we may remove content, restrict features, suspend access, or take other action needed to protect users, the Service, or third-party providers.'
         ]
       },
       {
         id: 'allowed-use',
         title: '2. Allowed Use',
         paragraphs: [
-          'You may use Canvas App for lawful collaboration, planning, drawing, drafting, note-taking, diagramming, workflow design, document editing, realtime communication, and AI-assisted productivity. You are responsible for your content and for how you share it.',
+          'You may use Canvas Lab for lawful collaboration, planning, drawing, drafting, note-taking, diagramming, workflow design, document editing, realtime communication, and AI-assisted productivity. You are responsible for your content and for how you share it.',
           'Use must comply with applicable law, the Terms of Service, this policy, provider policies for integrated services, and any access rules set by canvas owners or workspace collaborators.'
         ]
       },
@@ -152,7 +152,7 @@ export const legalPolicies = {
         id: 'ai-feature-restrictions',
         title: '4. AI Feature Restrictions',
         paragraphs: [
-          'Do not use Canvas App AI features to generate, transform, conceal, or distribute prohibited content. Do not rely on AI output as a substitute for professional judgment in legal, medical, financial, safety-critical, employment, housing, credit, education, or similar high-impact decisions.',
+          'Do not use Canvas Lab AI features to generate, transform, conceal, or distribute prohibited content. Do not rely on AI output as a substitute for professional judgment in legal, medical, financial, safety-critical, employment, housing, credit, education, or similar high-impact decisions.',
           'Do not submit content to AI features unless you have the right to process that content through the configured providers. You are responsible for reviewing AI output before using, publishing, or sharing it.'
         ],
         bullets: [
@@ -183,7 +183,7 @@ export const legalPolicies = {
         id: 'usage-limits-and-enforcement',
         title: '7. Usage Limits and Enforcement',
         paragraphs: [
-          'Canvas App may enforce usage limits, rate limits, moderation controls, logging, provider restrictions, or access restrictions to protect reliability and safety. Limits may vary by environment, account, feature, or operational need.',
+          'Canvas Lab may enforce usage limits, rate limits, moderation controls, logging, provider restrictions, or access restrictions to protect reliability and safety. Limits may vary by environment, account, feature, or operational need.',
           'We may investigate suspected violations using account, usage, content, request, and security data available to the Service. Enforcement may include warnings, content removal, feature limits, temporary suspension, account termination, or reporting where legally required.'
         ]
       },
@@ -191,23 +191,23 @@ export const legalPolicies = {
         id: 'reporting-issues',
         title: '8. Reporting Issues',
         paragraphs: [
-          'If you encounter harmful content, security issues, abuse, or policy violations, use the contact or support channel provided by the service operator or through Canvas App when available. Include enough detail to identify the relevant account, canvas, message, workflow, or request.'
+          'If you encounter harmful content, security issues, abuse, or policy violations, use the contact or support channel provided by the service operator or through Canvas Lab when available. Include enough detail to identify the relevant account, canvas, message, workflow, or request.'
         ]
       }
     ]
   },
   privacyPolicy: {
     slug: 'privacy-policy',
-    title: 'Canvas App Privacy Policy',
+    title: 'Canvas Lab Privacy Policy',
     description:
-      'Privacy Policy explaining what data Canvas App collects, how it is used, how AI and realtime features process data, and what choices users have.',
+      'Privacy Policy explaining what data Canvas Lab collects, how it is used, how AI and realtime features process data, and what choices users have.',
     lastUpdated: 'June 29, 2026',
     sections: [
       {
         id: 'who-we-are',
         title: '1. Who We Are',
         paragraphs: [
-          'This Privacy Policy explains how Canvas App collects, uses, shares, and retains personal data when you access or use the Service. Canvas App is a real-time collaborative canvas application built with SvelteKit, Supabase, and optional AI and conference integrations.',
+          'This Privacy Policy explains how Canvas Lab collects, uses, shares, and retains personal data when you access or use the Service. Canvas Lab is a real-time collaborative canvas application built with SvelteKit, Supabase, and optional AI and conference integrations.',
           'For purposes of this policy, "personal data" means information that identifies, relates to, describes, or can reasonably be associated with an individual.'
         ]
       },
@@ -226,7 +226,7 @@ export const legalPolicies = {
         id: 'how-we-use-data',
         title: '3. How We Use Data',
         bullets: [
-          'Provide, operate, maintain, secure, and improve Canvas App.',
+          'Provide, operate, maintain, secure, and improve Canvas Lab.',
           'Authenticate users, manage sessions, enforce roles, and support sharing and access requests.',
           'Synchronize canvases, chat, presence, collaboration state, scenes, documents, workflows, and conference-related features.',
           'Provide AI-assisted features, generate responses, process prompts and context, transcribe or translate content, and enforce usage limits.',
@@ -238,7 +238,7 @@ export const legalPolicies = {
         id: 'ai-realtime-and-conference-processing',
         title: '4. AI, Realtime, and Conference Processing',
         paragraphs: [
-          'Canvas App may process canvas content, chat messages, documents, workflow definitions, prompts, selected context, audio, captions, or translations through configured third-party providers. These providers may include Supabase for authentication, database, storage, and realtime features, and AI providers such as OpenAI or Anthropic for model-based features.',
+          'Canvas Lab may process canvas content, chat messages, documents, workflow definitions, prompts, selected context, audio, captions, or translations through configured third-party providers. These providers may include Supabase for authentication, database, storage, and realtime features, and AI providers such as OpenAI or Anthropic for model-based features.',
           'When conference captions or translation features are enabled, audio or transcript data may be processed by the configured provider to provide the requested feature. Do not enable or use these features for conversations unless you have the rights and notices required by applicable law.'
         ]
       },
@@ -257,7 +257,7 @@ export const legalPolicies = {
         id: 'cookies-tokens-and-local-storage',
         title: '6. Cookies, Tokens, and Local Storage',
         paragraphs: [
-          'Canvas App may use cookies, authentication tokens, and local browser storage to manage sessions, remember preferences, secure requests, maintain realtime connections, and support product functionality. You can clear browser data through your browser settings, but doing so may sign you out or reset preferences.'
+          'Canvas Lab may use cookies, authentication tokens, and local browser storage to manage sessions, remember preferences, secure requests, maintain realtime connections, and support product functionality. You can clear browser data through your browser settings, but doing so may sign you out or reset preferences.'
         ]
       },
       {
@@ -290,14 +290,14 @@ export const legalPolicies = {
         id: 'children',
         title: '10. Children',
         paragraphs: [
-          'Canvas App is not intended for children under 13 or the higher minimum age required by applicable law. Do not use the Service if you are below the required age. If we learn that a child has provided personal data without appropriate consent, we will take steps to delete it where required.'
+          'Canvas Lab is not intended for children under 13 or the higher minimum age required by applicable law. Do not use the Service if you are below the required age. If we learn that a child has provided personal data without appropriate consent, we will take steps to delete it where required.'
         ]
       },
       {
         id: 'changes-to-this-policy',
         title: '11. Changes to This Policy',
         paragraphs: [
-          'We may update this Privacy Policy from time to time. When we make changes, we will update the Last Updated date. Continued use of Canvas App after changes means the updated policy applies to your use of the Service.'
+          'We may update this Privacy Policy from time to time. When we make changes, we will update the Last Updated date. Continued use of Canvas Lab after changes means the updated policy applies to your use of the Service.'
         ]
       },
       {
