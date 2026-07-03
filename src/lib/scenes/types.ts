@@ -32,6 +32,7 @@ export type ModelOption = {
   id: string
   label: string
   provider: ModelProvider
+  usageTier: 'limited' | 'unlimited'
 }
 
 export type SceneActivityKind = 'generating' | 'drawing' | 'idle'

@@ -1,12 +1,17 @@
-import { UserRound } from 'lucide-svelte'
+import { ChartNoAxesColumn, UserRound } from 'lucide-svelte'
 
-export type SettingsTabId = 'general'
+export type SettingsTabId = 'general' | 'ai-usage'
 
 export const settingsTabs = [
   {
     id: 'general',
     label: 'General',
     Icon: UserRound
+  },
+  {
+    id: 'ai-usage',
+    label: 'AI Usage',
+    Icon: ChartNoAxesColumn
   }
 ] as const
 

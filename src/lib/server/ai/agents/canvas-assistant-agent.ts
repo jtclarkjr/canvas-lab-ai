@@ -16,7 +16,8 @@ export async function streamCanvasAssistant({
   webSearch,
   messages,
   contextDocuments,
-  loadContextDocument
+  loadContextDocument,
+  onFinish
 }: CanvasAssistantInput) {
   const tools: ToolSet = {}
 
@@ -37,7 +38,8 @@ export async function streamCanvasAssistant({
     model: resolved.model,
     instructions: buildCanvasAssistantPrompt({ contextDocuments }),
     tools,
-    stopWhen: stepCountIs(8)
+    stopWhen: stepCountIs(8),
+    onFinish
   })
 
   return agent.stream({ messages: await convertToModelMessages(messages) })

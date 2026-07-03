@@ -9,6 +9,10 @@ import { isKnownModelId } from '$lib/scenes/models'
 import { AiModelError, streamDocumentChat } from '$lib/server/ai'
 import type { ContextDocumentRef } from '$lib/server/ai/types'
 import { getAiRegistry } from '$lib/server/ai-runtime'
+import {
+  assertPromptAiUsageAllowed,
+  recordPromptAiUsage
+} from '$lib/server/ai-usage'
 import { persistDocumentChat } from '$lib/server/document-chat'
 import { requireCanvasRole } from '$lib/server/canvas-access'
 import {
@@ -68,6 +72,11 @@ export const POST: RequestHandler = async (event) =>
         input.sceneId,
         input.documentId
       )
+      await assertPromptAiUsageAllowed({
+        supabase,
+        userId: user.id,
+        modelId: input.modelId
+      })
 
       // Context documents must be saved documents of this same scene.
       let contextDocuments: ContextDocumentRef[] = []
@@ -201,6 +210,15 @@ export const POST: RequestHandler = async (event) =>
         messages,
         activeDocument,
         contextDocuments,
+        onFinish: ({ totalUsage }) =>
+          recordPromptAiUsage({
+            supabase,
+            request: event.request,
+            userId: user.id,
+            feature: 'document_scene_chat',
+            modelId: input.modelId,
+            usage: totalUsage
+          }),
         loadContextDocument: async (documentId) => {
           const { data } = await supabase
             .from('canvas_scene_documents')

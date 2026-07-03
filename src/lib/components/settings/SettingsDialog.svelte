@@ -4,6 +4,7 @@
   import { fade, scale } from 'svelte/transition'
   import { getSignedInAccountUser } from '$lib/auth/account-user'
   import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
+  import SettingsAiUsagePanel from '$lib/components/settings/SettingsAiUsagePanel.svelte'
   import SettingsGeneralPanel from '$lib/components/settings/SettingsGeneralPanel.svelte'
   import {
     getSettingsPanelId,
@@ -169,6 +170,11 @@
             {email}
             {avatarUrl}
             {initial}
+          />
+        {:else if activeTab === 'ai-usage'}
+          <SettingsAiUsagePanel
+            id={getSettingsPanelId('ai-usage')}
+            labelledby={getSettingsTabId('ai-usage')}
           />
         {/if}
       </div>

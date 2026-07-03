@@ -7,6 +7,8 @@ import {
 import {
   defaultModelId,
   getModelOption,
+  isPromptModelLimited,
+  isPromptModelUnlimited,
   isKnownModelId,
   modelOptions
 } from '$lib/scenes/models'
@@ -39,9 +41,22 @@ describe('model catalog', () => {
   it('uses provider-prefixed ids and a known default', () => {
     for (const option of modelOptions) {
       expect(option.id.startsWith(`${option.provider}/`)).toBe(true)
+      expect(['limited', 'unlimited']).toContain(option.usageTier)
     }
 
     expect(isKnownModelId(defaultModelId)).toBe(true)
     expect(getModelOption(defaultModelId)?.provider).toBe('openai')
+  })
+
+  it('limits every prompt model except nano', () => {
+    for (const option of modelOptions) {
+      if (option.id === 'openai/gpt-5.4-nano') {
+        expect(isPromptModelUnlimited(option.id)).toBe(true)
+        expect(isPromptModelLimited(option.id)).toBe(false)
+      } else {
+        expect(isPromptModelLimited(option.id)).toBe(true)
+        expect(isPromptModelUnlimited(option.id)).toBe(false)
+      }
+    }
   })
 })

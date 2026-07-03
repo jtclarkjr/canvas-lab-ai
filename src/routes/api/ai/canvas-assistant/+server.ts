@@ -4,6 +4,10 @@ import { markdownDocumentContentSchema } from '$lib/scenes/schema'
 import { isKnownModelId } from '$lib/scenes/models'
 import { AiModelError, streamCanvasAssistant } from '$lib/server/ai'
 import { getAiRegistry } from '$lib/server/ai-runtime'
+import {
+  assertPromptAiUsageAllowed,
+  recordPromptAiUsage
+} from '$lib/server/ai-usage'
 import { persistCanvasAssistantChat } from '$lib/server/canvas-assistant-chat'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import {
@@ -43,6 +47,11 @@ export const POST: RequestHandler = async (event) =>
       // Any member can use the Assistant — it's private per user and
       // doesn't modify the canvas.
       await requireCanvasMember(supabase, input.canvasId, user.id, 'reader')
+      await assertPromptAiUsageAllowed({
+        supabase,
+        userId: user.id,
+        modelId: input.modelId
+      })
 
       let resolved
       try {
@@ -81,6 +90,15 @@ export const POST: RequestHandler = async (event) =>
         webSearch: input.webSearch,
         messages,
         contextDocuments,
+        onFinish: ({ totalUsage }) =>
+          recordPromptAiUsage({
+            supabase,
+            request: event.request,
+            userId: user.id,
+            feature: 'canvas_assistant',
+            modelId: input.modelId,
+            usage: totalUsage
+          }),
         loadContextDocument: async (documentId) => {
           const { data } = await supabase
             .from('canvas_scene_documents')

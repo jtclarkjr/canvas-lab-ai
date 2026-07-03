@@ -682,6 +682,47 @@ export interface Database {
           }
         ]
       }
+      prompt_ai_usage_events: {
+        Row: {
+          id: string
+          user_id: string
+          feature: string
+          model_id: string
+          input_tokens: number
+          output_tokens: number
+          total_tokens: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          feature: string
+          model_id: string
+          input_tokens?: number
+          output_tokens?: number
+          total_tokens: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          feature?: string
+          model_id?: string
+          input_tokens?: number
+          output_tokens?: number
+          total_tokens?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'prompt_ai_usage_events_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

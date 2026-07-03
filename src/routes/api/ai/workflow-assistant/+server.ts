@@ -5,6 +5,10 @@ import { markdownDocumentContentSchema } from '$lib/scenes/schema'
 import { isKnownModelId } from '$lib/scenes/models'
 import { AiModelError } from '$lib/server/ai'
 import { getAiRegistry } from '$lib/server/ai-runtime'
+import {
+  assertPromptAiUsageAllowed,
+  recordPromptAiUsage
+} from '$lib/server/ai-usage'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import { listCanvasElementsForCanvas } from '$lib/server/canvas-elements'
 import { listCanvasScenesForCanvas } from '$lib/server/canvas-scenes'
@@ -50,6 +54,11 @@ export const POST: RequestHandler = async (event) =>
 
       await requireCanvasMember(supabase, input.canvasId, user.id, 'reader')
       await requireWorkflow(supabase, input.canvasId, input.workflowId)
+      await assertPromptAiUsageAllowed({
+        supabase,
+        userId: user.id,
+        modelId: input.modelId
+      })
 
       let resolved
       try {
@@ -142,6 +151,14 @@ export const POST: RequestHandler = async (event) =>
             .join('\n\n')}`,
           finalInstruction
         ].join('\n\n---\n\n')
+      })
+      await recordPromptAiUsage({
+        supabase,
+        request: event.request,
+        userId: user.id,
+        feature: 'workflow_ai',
+        modelId: input.modelId,
+        usage: result.usage
       })
 
       const generatedProposal = workflowProposalSchema.parse(

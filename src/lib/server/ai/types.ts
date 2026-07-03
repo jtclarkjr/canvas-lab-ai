@@ -1,4 +1,10 @@
-import type { LanguageModel, Tool, UIMessage } from 'ai'
+import type {
+  LanguageModel,
+  Tool,
+  ToolLoopAgentOnFinishCallback,
+  ToolSet,
+  UIMessage
+} from 'ai'
 
 export type AiProviderKeys = {
   openaiApiKey?: string
@@ -41,6 +47,7 @@ export type DocumentChatInput = {
   activeDocument: ActiveDocument | null
   contextDocuments: ContextDocumentRef[]
   loadContextDocument: LoadContextDocument
+  onFinish?: ToolLoopAgentOnFinishCallback<ToolSet>
 }
 
 export type CanvasAssistantInput = Omit<

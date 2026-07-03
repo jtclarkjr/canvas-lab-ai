@@ -18,7 +18,8 @@ export async function streamDocumentChat({
   messages,
   activeDocument,
   contextDocuments,
-  loadContextDocument
+  loadContextDocument,
+  onFinish
 }: DocumentChatInput) {
   const tools: ToolSet = { write_document: writeDocumentTool }
 
@@ -41,7 +42,8 @@ export async function streamDocumentChat({
       contextDocuments
     }),
     tools,
-    stopWhen: stepCountIs(8)
+    stopWhen: stepCountIs(8),
+    onFinish
   })
 
   return agent.stream({ messages: await convertToModelMessages(messages) })
