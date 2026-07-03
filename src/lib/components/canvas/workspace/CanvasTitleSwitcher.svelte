@@ -31,20 +31,42 @@
   }>()
 
   let titleInputEl = $state<HTMLInputElement | null>(null)
+  let titleEditorEl = $state<HTMLDivElement | null>(null)
   let dropdownEl = $state<HTMLDivElement | null>(null)
   let showCanvasSelector = $state(false)
   let isEditingTitle = $state(false)
+  let isSavingTitle = $state(false)
   let editedTitle = $state('')
 
-  const MAX_TITLE_CHARS = 15
-  const displayTitle = $derived(
-    currentTitle && currentTitle.length > MAX_TITLE_CHARS
-      ? currentTitle.slice(0, MAX_TITLE_CHARS) + '…'
-      : currentTitle
+  const TITLE_EDIT_WIDTH_PX = 208
+  const TITLE_LAYER_CHROME_PX = 26
+  const ESTIMATED_TITLE_CHAR_PX = 7
+  const ESTIMATED_TITLE_LETTER_SPACING_PX = 2
+
+  let titleMeasureWidth = $state(0)
+
+  const displayTitle = $derived(currentTitle.trim())
+  const viewTitle = $derived(
+    displayTitle || (canManageCanvas ? 'Select Canvas' : 'Canvas')
   )
+  const estimatedTitleWidth = $derived.by(() => {
+    const titleLength = viewTitle.length
+    return (
+      titleLength * ESTIMATED_TITLE_CHAR_PX +
+      Math.max(0, titleLength - 1) * ESTIMATED_TITLE_LETTER_SPACING_PX
+    )
+  })
+  const titleWidthPx = $derived.by(() => {
+    return Math.min(
+      TITLE_EDIT_WIDTH_PX,
+      Math.ceil(
+        (titleMeasureWidth || estimatedTitleWidth) + TITLE_LAYER_CHROME_PX
+      )
+    )
+  })
 
   onMount(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (
         dropdownEl &&
         event.target instanceof Node &&
@@ -52,10 +74,24 @@
       ) {
         showCanvasSelector = false
       }
+
+      if (
+        isEditingTitle &&
+        titleEditorEl &&
+        event.target instanceof Node &&
+        !titleEditorEl.contains(event.target)
+      ) {
+        void commitTitleEdit()
+      }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('pointerdown', handlePointerDown, {
+      capture: true
+    })
+    return () =>
+      document.removeEventListener('pointerdown', handlePointerDown, {
+        capture: true
+      })
   })
 
   function beginTitleEdit() {
@@ -71,14 +107,29 @@
     })
   }
 
-  async function saveTitle() {
-    if (!editedTitle.trim()) {
-      isEditingTitle = false
+  function cancelTitleEdit() {
+    editedTitle = currentTitle
+    isEditingTitle = false
+  }
+
+  async function commitTitleEdit() {
+    if (!isEditingTitle || isSavingTitle) {
       return
     }
 
-    await onTitleSave(editedTitle.trim())
-    isEditingTitle = false
+    const nextTitle = editedTitle.trim()
+    if (!nextTitle || nextTitle === currentTitle.trim()) {
+      cancelTitleEdit()
+      return
+    }
+
+    isSavingTitle = true
+    try {
+      await onTitleSave(nextTitle)
+      isEditingTitle = false
+    } finally {
+      isSavingTitle = false
+    }
   }
 </script>
 
@@ -97,35 +148,67 @@
   </div>
 
   <div class="flex items-start gap-2">
-    {#if isEditingTitle}
-      <div class="toolbar-pill toolbar-label gap-1">
+    {#if canManageCanvas}
+      <div
+        bind:this={titleEditorEl}
+        class="canvas-title-shell toolbar-pill"
+        class:canvas-title-shell--editing={isEditingTitle}
+        style={`--canvas-title-display-width:${titleWidthPx}px`}
+      >
+        <span
+          bind:clientWidth={titleMeasureWidth}
+          class="canvas-title-measure"
+          aria-hidden="true"
+        >
+          {viewTitle}
+        </span>
+        <button
+          type="button"
+          class="canvas-title-layer canvas-title-view"
+          tabindex={isEditingTitle ? -1 : 0}
+          aria-hidden={isEditingTitle}
+          aria-label={`Canvas title: ${viewTitle}. Click to edit.`}
+          onclick={beginTitleEdit}
+        >
+          <span class="canvas-title-text">
+            {viewTitle}
+          </span>
+        </button>
         <input
           bind:this={titleInputEl}
-          class="w-[200px] border-0 bg-transparent text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground outline-none"
+          class="canvas-title-layer canvas-title-input"
           bind:value={editedTitle}
+          tabindex={isEditingTitle ? 0 : -1}
+          aria-hidden={!isEditingTitle}
           aria-label="Canvas title"
-          onblur={() => void saveTitle()}
+          readonly={!isEditingTitle || isSavingTitle}
+          onblur={() => void commitTitleEdit()}
           onkeydown={(event) => {
             if (event.key === 'Enter') {
-              void saveTitle()
+              void commitTitleEdit()
             } else if (event.key === 'Escape') {
-              isEditingTitle = false
+              cancelTitleEdit()
             }
           }}
         />
       </div>
-    {:else if canManageCanvas}
-      <button
-        type="button"
-        class="toolbar-pill toolbar-label"
-        onclick={beginTitleEdit}
-        aria-label={`Canvas title: ${displayTitle || 'Select Canvas'}. Click to edit.`}
-      >
-        {displayTitle || 'Select Canvas'}
-      </button>
     {:else}
-      <span class="toolbar-pill toolbar-label">
-        {displayTitle || 'Canvas'}
+      <span
+        class="canvas-title-shell canvas-title-shell--static toolbar-pill"
+        style={`--canvas-title-display-width:${titleWidthPx}px`}
+      >
+        <span
+          bind:clientWidth={titleMeasureWidth}
+          class="canvas-title-measure"
+          aria-hidden="true"
+        >
+          {viewTitle}
+        </span>
+        <span class="canvas-title-layer canvas-title-view">
+          <span class="canvas-title-text">
+            {viewTitle}
+          </span>
+        </span>
       </span>
     {/if}
 
@@ -185,3 +268,98 @@
     {/if}
   </div>
 </div>
+
+<style>
+  /* Local CSS keeps the measured runtime width and edit-state transition together. */
+  .canvas-title-shell {
+    --canvas-title-edit-width: 13rem;
+    display: block;
+    height: 2.25rem;
+    overflow: hidden;
+    position: relative;
+    transition:
+      width 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+    width: var(--canvas-title-display-width);
+  }
+
+  .canvas-title-measure {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    line-height: 1;
+    pointer-events: none;
+    position: absolute;
+    text-transform: uppercase;
+    visibility: hidden;
+    white-space: nowrap;
+  }
+
+  .canvas-title-shell--editing {
+    width: var(--canvas-title-edit-width);
+  }
+
+  .canvas-title-layer {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    display: flex;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    inset: 0;
+    letter-spacing: 0.18em;
+    line-height: 1;
+    min-width: 0;
+    padding: 0 0.75rem;
+    position: absolute;
+    text-align: left;
+    text-transform: uppercase;
+    transition:
+      opacity 140ms ease,
+      transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    width: 100%;
+  }
+
+  .canvas-title-view {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .canvas-title-input {
+    opacity: 0;
+    outline: none;
+    pointer-events: none;
+    transform: translateX(0.75rem);
+  }
+
+  .canvas-title-shell--editing .canvas-title-view {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-0.75rem);
+  }
+
+  .canvas-title-shell--editing .canvas-title-input {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .canvas-title-text,
+  .canvas-title-shell--static .canvas-title-view {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .canvas-title-shell,
+    .canvas-title-layer {
+      transition: none;
+    }
+  }
+</style>
