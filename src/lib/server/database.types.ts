@@ -15,6 +15,7 @@ export interface Database {
           title: string
           created_by: string
           created_at: string
+          updated_at: string
           visibility: Database['public']['Enums']['canvas_visibility']
           icon_path: string | null
         }
@@ -23,6 +24,7 @@ export interface Database {
           title: string
           created_by: string
           created_at?: string
+          updated_at?: string
           visibility?: Database['public']['Enums']['canvas_visibility']
           icon_path?: string | null
         }
@@ -31,6 +33,7 @@ export interface Database {
           title?: string
           created_by?: string
           created_at?: string
+          updated_at?: string
           visibility?: Database['public']['Enums']['canvas_visibility']
           icon_path?: string | null
         }

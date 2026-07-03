@@ -191,7 +191,7 @@
           <div class="flex flex-col gap-1 p-2">
             {#if showNavigation}
               <a
-                href="/"
+                href="/home"
                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-secondary"
                 role="menuitem"
               >

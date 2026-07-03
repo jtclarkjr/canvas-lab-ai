@@ -222,7 +222,7 @@
   {/if}
 
   <a
-    href="/"
+    href="/home"
     class="mt-2 text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
   >
     Back to dashboard

@@ -149,11 +149,11 @@ if (import.meta.vitest) {
 
     it('normalizes unsafe or looping redirects', () => {
       expect(buildOAuthCallbackUrl('/login', 'https://canvas.example')).toBe(
-        'https://canvas.example/login?redirect=%2F'
+        'https://canvas.example/login?redirect=%2Fhome'
       )
       expect(
         buildOAuthCallbackUrl('https://example.com', 'https://canvas.example')
-      ).toBe('https://canvas.example/login?redirect=%2F')
+      ).toBe('https://canvas.example/login?redirect=%2Fhome')
     })
   })
 }

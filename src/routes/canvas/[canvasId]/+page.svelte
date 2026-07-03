@@ -79,7 +79,7 @@
       This canvas does not exist or may have been deleted.
     </p>
     <a
-      href="/"
+      href="/home"
       class="mt-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:opacity-90"
     >
       Back to dashboard

@@ -137,7 +137,7 @@
   <div class="flex flex-col gap-2">
     {#if showNavigation}
       <a
-        href="/"
+        href="/home"
         class="toolbar-pill toolbar-button"
         aria-label="Back to dashboard"
       >

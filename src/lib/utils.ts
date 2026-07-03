@@ -16,18 +16,23 @@ export function sleep(ms: number): Promise<void> {
 
 export function sanitizeRedirectTarget(target: string | null): string {
   if (!target) {
-    return '/'
+    return '/home'
   }
 
   if (!target.startsWith('/') || target.startsWith('//')) {
-    return '/'
+    return '/home'
   }
 
   const searchStart = target.search(/[?#]/)
   const pathname = searchStart === -1 ? target : target.slice(0, searchStart)
+  const suffix = searchStart === -1 ? '' : target.slice(searchStart)
+
+  if (pathname === '/') {
+    return `/home${suffix}`
+  }
 
   if (pathname === '/login') {
-    return '/'
+    return '/home'
   }
 
   return target
@@ -44,14 +49,21 @@ if (import.meta.vitest) {
     })
 
     it('rejects external redirects', () => {
-      expect(sanitizeRedirectTarget('https://example.com')).toBe('/')
-      expect(sanitizeRedirectTarget('//example.com')).toBe('/')
+      expect(sanitizeRedirectTarget('https://example.com')).toBe('/home')
+      expect(sanitizeRedirectTarget('//example.com')).toBe('/home')
+    })
+
+    it('normalizes the root route to home', () => {
+      expect(sanitizeRedirectTarget('/')).toBe('/home')
+      expect(sanitizeRedirectTarget('/?sort=title&dir=desc')).toBe(
+        '/home?sort=title&dir=desc'
+      )
     })
 
     it('avoids sending authenticated users back to login', () => {
-      expect(sanitizeRedirectTarget('/login')).toBe('/')
+      expect(sanitizeRedirectTarget('/login')).toBe('/home')
       expect(sanitizeRedirectTarget('/login?redirect=%2Fcanvas%2F123')).toBe(
-        '/'
+        '/home'
       )
     })
   })

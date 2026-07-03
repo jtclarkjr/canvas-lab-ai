@@ -19,6 +19,8 @@
     isOpening,
     isDimmed,
     menuOpen,
+    dateLabel,
+    dateValue,
     onNavigate,
     onToggleMenu,
     onUploadIcon,
@@ -35,6 +37,8 @@
     isOpening: boolean
     isDimmed: boolean
     menuOpen: boolean
+    dateLabel: string
+    dateValue: string
     onNavigate: (event: MouseEvent, canvas: Canvas) => void | Promise<void>
     onToggleMenu: (event: MouseEvent, canvas: Canvas) => void
     onUploadIcon: (canvas: Canvas) => void
@@ -43,6 +47,15 @@
     onCommitRename: (canvas: Canvas) => void | Promise<void>
     onRenameKeydown: (event: KeyboardEvent, canvas: Canvas) => void
   }>()
+
+  function formatCanvasDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formattedDate = $derived(dateValue ? formatCanvasDate(dateValue) : '')
 </script>
 
 <div
@@ -143,12 +156,9 @@
           {/if}
         </div>
         <p class="m-0 text-xs text-muted-foreground">
-          {canvas.createdAt
-            ? new Date(canvas.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-              })
-            : ''}
+          {#if formattedDate}
+            {dateLabel} {formattedDate}
+          {/if}
         </p>
       </div>
     </div>
@@ -167,12 +177,9 @@
           {canvas.title}
         </h2>
         <p class="m-0 text-xs text-muted-foreground">
-          {canvas.createdAt
-            ? new Date(canvas.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-              })
-            : ''}
+          {#if formattedDate}
+            {dateLabel} {formattedDate}
+          {/if}
         </p>
       </div>
     </a>

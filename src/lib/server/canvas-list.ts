@@ -25,6 +25,7 @@ export const toCanvas = (row: CanvasRow, role?: CanvasRole): Canvas => ({
   title: row.title,
   createdBy: row.created_by,
   createdAt: row.created_at,
+  updatedAt: row.updated_at ?? row.created_at,
   visibility: row.visibility,
   iconPath: row.icon_path,
   iconUrl: null,
@@ -50,7 +51,7 @@ export function buildCanvasListResponse({
       const canvas = canvasRowSchema.parse(row)
       return toCanvas(canvas, roleByCanvasId.get(canvas.id))
     })
-  ].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  ].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 
   return listCanvasesResponseSchema.parse({ items })
 }
@@ -105,32 +106,42 @@ if (import.meta.vitest) {
     title: 'Canvas',
     created_by: 'user-1',
     created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
     visibility: 'private',
     icon_path: null,
     ...overrides
   })
 
   describe('canvas list server helpers', () => {
-    it('marks owned and shared roles and sorts newest first', () => {
+    it('marks owned and shared roles and sorts recently updated first', () => {
       const response = buildCanvasListResponse({
-        ownedRows: [row({ id: 'owned', title: 'Owned' })],
+        ownedRows: [
+          row({
+            id: 'owned',
+            title: 'Owned',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-03T00:00:00.000Z'
+          })
+        ],
         memberships: [{ canvas_id: 'shared', role: 'editor' }],
         sharedRows: [
           row({
             id: 'shared',
             title: 'Shared',
             created_by: 'user-2',
-            created_at: '2026-01-02T00:00:00.000Z'
+            created_at: '2026-01-02T00:00:00.000Z',
+            updated_at: '2026-01-02T00:00:00.000Z'
           })
         ]
       })
 
       expect(response.items.map((canvas) => canvas.id)).toEqual([
-        'shared',
-        'owned'
+        'owned',
+        'shared'
       ])
-      expect(response.items[0].role).toBe('editor')
-      expect(response.items[1].role).toBe('owner')
+      expect(response.items[0].role).toBe('owner')
+      expect(response.items[0].updatedAt).toBe('2026-01-03T00:00:00.000Z')
+      expect(response.items[1].role).toBe('editor')
     })
 
     it('maps canvas icon paths onto list items', () => {
@@ -142,6 +153,25 @@ if (import.meta.vitest) {
 
       expect(response.items[0].iconPath).toBe('canvases/canvas-1/icon-123.png')
       expect(response.items[0].iconUrl).toBeNull()
+    })
+
+    it('falls back to created date when updated_at is missing', () => {
+      const response = buildCanvasListResponse({
+        ownedRows: [
+          {
+            id: 'canvas-1',
+            title: 'Legacy',
+            created_by: 'user-1',
+            created_at: '2026-01-05T00:00:00.000Z',
+            visibility: 'private',
+            icon_path: null
+          }
+        ],
+        memberships: [],
+        sharedRows: []
+      })
+
+      expect(response.items[0].updatedAt).toBe('2026-01-05T00:00:00.000Z')
     })
   })
 }

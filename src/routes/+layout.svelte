@@ -52,7 +52,9 @@
       <div
         class="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6"
       >
-        <a href="/" class="text-sm font-bold tracking-[0.02em] text-foreground"
+        <a
+          href="/home"
+          class="text-sm font-bold tracking-[0.02em] text-foreground"
           >Canvas Lab</a
         >
         <AuthControls />

@@ -1,10 +1,28 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte'
-  import { LoaderCircle, Plus, Search } from 'lucide-svelte'
+  import {
+    ArrowDown,
+    ArrowUp,
+    CalendarDays,
+    Clock3,
+    LoaderCircle,
+    Plus,
+    Search,
+    Type as TypeIcon
+  } from 'lucide-svelte'
   import { goto, invalidate } from '$app/navigation'
+  import { page } from '$app/state'
   import { fade, scale } from 'svelte/transition'
   import { createCanvas, deleteCanvas, listCanvases } from '$lib/canvas/api'
   import { CANVASES_DEPENDENCY } from '$lib/canvas/consts'
+  import {
+    CANVAS_SORT_OPTIONS,
+    getNextCanvasSortState,
+    parseCanvasSort,
+    sortCanvases,
+    type CanvasSortKey,
+    type CanvasSortState
+  } from '$lib/canvas/sort'
   import { isAnonymousUser } from '$lib/auth/anonymous'
   import CanvasDeleteDialog from '$lib/components/canvas/home/CanvasDeleteDialog.svelte'
   import CanvasHomeOwnedTile from '$lib/components/canvas/home/CanvasHomeOwnedTile.svelte'
@@ -31,11 +49,21 @@
 
   let canvases = $state<Canvas[]>(getInitialCanvases())
 
+  const currentSort = $derived(parseCanvasSort(page.url.searchParams))
+  const tileDateLabel = $derived(
+    currentSort.key === 'created' ? 'Created' : 'Updated'
+  )
   const ownedCanvases = $derived(
-    canvases.filter((canvas) => !canvas.role || canvas.role === 'owner')
+    sortCanvases(
+      canvases.filter((canvas) => !canvas.role || canvas.role === 'owner'),
+      currentSort
+    )
   )
   const sharedCanvases = $derived(
-    canvases.filter((canvas) => canvas.role && canvas.role !== 'owner')
+    sortCanvases(
+      canvases.filter((canvas) => canvas.role && canvas.role !== 'owner'),
+      currentSort
+    )
   )
   const sessionUser = $derived(session.data?.user ?? null)
   const activeUser = $derived.by(() => {
@@ -77,7 +105,28 @@
     void invalidate(CANVASES_DEPENDENCY)
   }
 
-  async function loadCanvases() {
+  function getTileDateValue(canvas: Canvas): string {
+    return currentSort.key === 'created' ? canvas.createdAt : canvas.updatedAt
+  }
+
+  function getCanvasSortUrl(sort: CanvasSortState): string {
+    const url = new URL(page.url)
+    url.searchParams.set('sort', sort.key)
+    url.searchParams.set('dir', sort.dir)
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+
+  async function setCanvasSort(key: CanvasSortKey) {
+    await goto(getCanvasSortUrl(getNextCanvasSortState(currentSort, key)), {
+      replaceState: true,
+      keepFocus: true,
+      noScroll: true
+    })
+  }
+
+  async function loadCanvases({
+    showLoading = true
+  }: { showLoading?: boolean } = {}) {
     if (!activeUser) {
       canvases = []
       isLoading = false
@@ -85,7 +134,9 @@
       return
     }
 
-    isLoading = true
+    if (showLoading) {
+      isLoading = true
+    }
     localError = null
 
     try {
@@ -97,7 +148,9 @@
           ? nextError.message
           : 'Failed to load canvases.'
     } finally {
-      isLoading = false
+      if (showLoading) {
+        isLoading = false
+      }
     }
   }
 
@@ -173,7 +226,7 @@
 
   async function handleCreate() {
     if (!activeUser) {
-      window.location.assign('/login?redirect=%2F')
+      window.location.assign('/login?redirect=%2Fhome')
       return
     }
 
@@ -345,6 +398,10 @@
   })
 
   onMount(() => {
+    if (activeUser) {
+      void loadCanvases({ showLoading: canvases.length === 0 })
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && openMenuCanvasId) {
         openMenuCanvasId = null
@@ -434,6 +491,47 @@
     </div>
   {/if}
 
+  {#if activeUser}
+    <div
+      class="flex w-full flex-wrap items-center justify-end gap-1.5"
+      aria-label="Sort canvases"
+    >
+      <div class="inline-flex max-w-full flex-wrap items-center gap-0.5">
+        {#each CANVAS_SORT_OPTIONS as option}
+          <button
+            type="button"
+            class={`inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-ring ${currentSort.key === option.key ? 'border border-border/70 bg-muted/70 text-foreground' : 'border border-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground'}`}
+            aria-pressed={currentSort.key === option.key}
+            title={`Sort by ${option.label}`}
+            onclick={() => void setCanvasSort(option.key)}
+          >
+            {#if option.key === 'updated'}
+              <Clock3 class="size-3.5" aria-hidden="true" />
+            {:else if option.key === 'created'}
+              <CalendarDays class="size-3.5" aria-hidden="true" />
+            {:else}
+              <TypeIcon class="size-3.5" aria-hidden="true" />
+            {/if}
+            <span>{option.label}</span>
+            {#if currentSort.key === option.key}
+              {#if currentSort.dir === 'asc'}
+                <ArrowUp
+                  class="size-3 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              {:else}
+                <ArrowDown
+                  class="size-3 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              {/if}
+            {/if}
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
   <div
     class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
   >
@@ -486,6 +584,8 @@
           isOpening={openingCanvasId === canvas.id}
           isDimmed={Boolean(openingCanvasId && openingCanvasId !== canvas.id)}
           menuOpen={openMenuCanvasId === canvas.id}
+          dateLabel={tileDateLabel}
+          dateValue={getTileDateValue(canvas)}
           onNavigate={handleCanvasNavigation}
           onToggleMenu={toggleCanvasMenu}
           onUploadIcon={openIconUploadDialog}
@@ -511,6 +611,8 @@
             {canvas}
             isOpening={openingCanvasId === canvas.id}
             isDimmed={Boolean(openingCanvasId && openingCanvasId !== canvas.id)}
+            dateLabel={tileDateLabel}
+            dateValue={getTileDateValue(canvas)}
             onNavigate={handleCanvasNavigation}
           />
         {/each}

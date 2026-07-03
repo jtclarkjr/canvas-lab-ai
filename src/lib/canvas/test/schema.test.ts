@@ -43,6 +43,7 @@ describe('canvas schema', () => {
     })
     expect(row.visibility).toBe('private')
     expect(row.icon_path).toBeNull()
+    expect(row.updated_at).toBeUndefined()
 
     const canvas = canvasSchema.parse({
       id: 'canvas-1',
@@ -51,6 +52,7 @@ describe('canvas schema', () => {
       createdAt: '2026-06-12T00:00:00Z'
     })
     expect(canvas.visibility).toBe('private')
+    expect(canvas.updatedAt).toBe('2026-06-12T00:00:00Z')
     expect(canvas.iconPath).toBeNull()
     expect(canvas.iconUrl).toBeNull()
   })
@@ -70,9 +72,11 @@ describe('canvas schema', () => {
       title: 'Sketch',
       createdBy: 'user-1',
       createdAt: '2026-06-12T00:00:00Z',
+      updatedAt: '2026-06-13T00:00:00Z',
       iconPath: 'canvases/canvas-1/icon-123.png',
       iconUrl: 'https://example.com/icon.png'
     })
+    expect(canvas.updatedAt).toBe('2026-06-13T00:00:00Z')
     expect(canvas.iconPath).toBe('canvases/canvas-1/icon-123.png')
     expect(canvas.iconUrl).toBe('https://example.com/icon.png')
   })

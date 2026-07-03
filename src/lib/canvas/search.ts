@@ -54,6 +54,7 @@ if (import.meta.vitest) {
     title,
     createdBy: 'user-1',
     createdAt: `2026-06-${id.padStart(2, '0')}T00:00:00.000Z`,
+    updatedAt: `2026-06-${id.padStart(2, '0')}T00:00:00.000Z`,
     visibility: 'private',
     iconPath: null,
     iconUrl: null,

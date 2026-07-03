@@ -5,12 +5,24 @@
   import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
   import type { Canvas } from '$lib/canvas/schema'
 
-  let { canvas, isOpening, isDimmed, onNavigate } = $props<{
-    canvas: Canvas
-    isOpening: boolean
-    isDimmed: boolean
-    onNavigate: (event: MouseEvent, canvas: Canvas) => void | Promise<void>
-  }>()
+  let { canvas, isOpening, isDimmed, dateLabel, dateValue, onNavigate } =
+    $props<{
+      canvas: Canvas
+      isOpening: boolean
+      isDimmed: boolean
+      dateLabel: string
+      dateValue: string
+      onNavigate: (event: MouseEvent, canvas: Canvas) => void | Promise<void>
+    }>()
+
+  function formatCanvasDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formattedDate = $derived(dateValue ? formatCanvasDate(dateValue) : '')
 </script>
 
 <a
@@ -33,12 +45,9 @@
       {canvas.title}
     </h2>
     <p class="m-0 text-xs text-muted-foreground">
-      {canvas.createdAt
-        ? new Date(canvas.createdAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric'
-          })
-        : ''}
+      {#if formattedDate}
+        {dateLabel} {formattedDate}
+      {/if}
     </p>
   </div>
 

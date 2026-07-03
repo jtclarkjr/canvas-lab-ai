@@ -17,6 +17,7 @@ export const canvasRowSchema = z.object({
   title: z.string(),
   created_by: z.string(),
   created_at: z.string(),
+  updated_at: z.string().optional(),
   visibility: canvasVisibilitySchema.default('private'),
   icon_path: z.string().nullable().default(null)
 })
@@ -29,16 +30,22 @@ export const createCanvasInputSchema = z.object({
     .max(100, 'Keep titles under 100 characters.')
 })
 
-export const canvasSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  createdBy: z.string(),
-  createdAt: z.string(),
-  visibility: canvasVisibilitySchema.default('private'),
-  iconPath: z.string().nullable().default(null),
-  iconUrl: z.string().nullable().default(null),
-  role: roleSchema.optional()
-})
+export const canvasSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    createdBy: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string().optional(),
+    visibility: canvasVisibilitySchema.default('private'),
+    iconPath: z.string().nullable().default(null),
+    iconUrl: z.string().nullable().default(null),
+    role: roleSchema.optional()
+  })
+  .transform(({ updatedAt, ...canvas }) => ({
+    ...canvas,
+    updatedAt: updatedAt ?? canvas.createdAt
+  }))
 
 export const getCanvasResponseSchema = z.object({
   item: canvasSchema
