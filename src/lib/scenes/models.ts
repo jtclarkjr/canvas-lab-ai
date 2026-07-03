@@ -21,7 +21,8 @@ export const modelOptions: ModelOption[] = [
   },
   { id: 'openai/gpt-5.5', label: 'GPT-5.5', provider: 'openai' },
   { id: 'openai/gpt-5.4', label: 'GPT-5.4', provider: 'openai' },
-  { id: 'openai/gpt-5.4-mini', label: 'GPT-5.4-mini', provider: 'openai' }
+  { id: 'openai/gpt-5.4-mini', label: 'GPT-5.4-mini', provider: 'openai' },
+  { id: 'openai/gpt-5.4-nano', label: 'GPT-5.4-nano', provider: 'openai' }
 ]
 
 export const defaultModelId = 'openai/gpt-5.4-mini'
