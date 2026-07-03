@@ -1,17 +1,27 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { isAnonymousUser } from '$lib/auth/anonymous'
+  import { getSignedInAccountUser } from '$lib/auth/account-user'
   import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
   import { signOut } from '$lib/auth/session-service'
   import Popover from '$lib/components/shared/Popover.svelte'
+  import { labelForTheme, themeOptions } from '$lib/settings/theme-options'
+  import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
   import { session } from '$lib/stores/shared/session.svelte'
   import { theme } from '$lib/stores/shared/theme.svelte'
-  import type { Theme } from '$lib/stores/shared/types'
-  import { CircleUserRound, LogOut, Monitor, Moon, Sun } from 'lucide-svelte'
+  import {
+    CircleUserRound,
+    LogOut,
+    Monitor,
+    Moon,
+    Settings,
+    Sun
+  } from 'lucide-svelte'
 
-  const themeOptions: Theme[] = ['light', 'dark', 'system']
   const activeThemeIndex = $derived(
-    Math.max(themeOptions.indexOf(theme.current), 0)
+    Math.max(
+      themeOptions.findIndex((option) => option.value === theme.current),
+      0
+    )
   )
   const themeThumbStyle = $derived(
     `transform: translateX(${activeThemeIndex * 2.5}rem);`
@@ -22,13 +32,11 @@
   )
   const sessionUser = $derived(session.data?.user ?? null)
   const pageUser = $derived(page.data.user ?? null)
-  const user = $derived.by(() => {
-    if (sessionUser && !isAnonymousUser(sessionUser)) return sessionUser
-    if (pageUser && !isAnonymousUser(pageUser)) return pageUser
-    return null
-  })
+  const user = $derived(getSignedInAccountUser(sessionUser, pageUser))
   const userDisplayName = $derived(user ? getUserDisplayName(user) : 'Guest')
-  const userEmail = $derived(user?.email ?? 'Signed in')
+  const userEmail = $derived(
+    typeof user?.email === 'string' && user.email ? user.email : 'Signed in'
+  )
   const userAvatarUrl = $derived(user ? getUserAvatarUrl(user) : null)
   const userInitial = $derived(userDisplayName.charAt(0).toUpperCase() || 'U')
 
@@ -43,12 +51,9 @@
     }
   })
 
-  function setTheme(nextTheme: Theme) {
-    theme.set(nextTheme)
-  }
-
-  function labelFor(option: Theme) {
-    return `${option.charAt(0).toUpperCase()}${option.slice(1)}`
+  function openSettings() {
+    popoverOpen = false
+    settingsDialog.open('general')
   }
 </script>
 
@@ -117,6 +122,15 @@
           </div>
         </div>
 
+        <button
+          type="button"
+          class="inline-flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          onclick={openSettings}
+        >
+          <Settings class="size-4" aria-hidden="true" />
+          Settings
+        </button>
+
         <div class="grid gap-2">
           <p
             class="m-0 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground"
@@ -133,22 +147,22 @@
               style={themeThumbStyle}
               aria-hidden="true"
             ></span>
-            {#each themeOptions as option}
+            {#each themeOptions as option (option.value)}
               <button
                 type="button"
                 class={`relative z-10 flex h-9 w-10 cursor-pointer items-center justify-center rounded-full p-0 transition-colors duration-200 ${
-                  theme.current === option
+                  theme.current === option.value
                     ? 'text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
-                onclick={() => setTheme(option)}
-                aria-label={`Use ${option} theme`}
-                aria-pressed={theme.current === option}
-                title={labelFor(option)}
+                onclick={() => theme.set(option.value)}
+                aria-label={`Use ${option.label} theme`}
+                aria-pressed={theme.current === option.value}
+                title={labelForTheme(option.value)}
               >
-                {#if option === 'light'}
+                {#if option.value === 'light'}
                   <Sun class="size-4" aria-hidden="true" />
-                {:else if option === 'dark'}
+                {:else if option.value === 'dark'}
                   <Moon class="size-4" aria-hidden="true" />
                 {:else}
                   <Monitor class="size-4" aria-hidden="true" />
