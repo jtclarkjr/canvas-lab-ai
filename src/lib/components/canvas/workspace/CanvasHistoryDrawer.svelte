@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition'
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import {
     Clock3,
     LoaderCircle,
@@ -169,152 +170,166 @@
 </script>
 
 {#if open}
-  <div
-    {id}
-    use:portal
-    class="fixed right-0 top-0 z-50 flex h-screen w-[min(28rem,calc(100vw-2rem))] flex-col border-l border-border/70 bg-card/95 text-card-foreground shadow-2xl backdrop-blur-xl"
-    role="dialog"
-    aria-label="Canvas history"
-    data-camera-exempt
-    transition:fly={{ x: 48, duration: 180 }}
-  >
-    <header
-      class="flex min-h-16 items-center justify-between gap-3 border-b border-border/70 px-4"
-    >
-      <div class="min-w-0">
-        <h2 class="m-0 text-sm font-semibold text-foreground">
-          Canvas history
-        </h2>
-        <p class="m-0 truncate text-xs text-muted-foreground">
-          Element activity for this canvas
-        </p>
-      </div>
-      <div class="flex items-center gap-1">
-        <button
-          type="button"
-          class="flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
-          onclick={() => void loadHistory(true)}
-          disabled={isLoading}
-          aria-label="Refresh canvas history"
-        >
-          <RefreshCw
-            class={`size-4 ${isLoading ? 'animate-spin' : ''}`}
-            aria-hidden="true"
-          />
-        </button>
-        <button
-          type="button"
-          class="flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
-          onclick={() => (open = false)}
-          aria-label="Close canvas history"
-        >
-          <X class="size-4" aria-hidden="true" />
-        </button>
-      </div>
-    </header>
+  <div use:portal class="fixed inset-0 z-50" data-camera-exempt>
+    <button
+      type="button"
+      class="absolute inset-0 bg-background/20 backdrop-blur-[1px]"
+      onclick={() => (open = false)}
+      aria-label="Close canvas history"
+      tabindex="-1"
+      data-drawer-backdrop
+      transition:fade={{ duration: 140 }}
+    ></button>
 
-    <div class="flex min-h-0 flex-1 flex-col">
-      {#if isLoading && entries.length === 0}
-        <div class="grid gap-2 px-3 py-3" aria-hidden="true">
-          {#each Array.from({ length: 6 }) as _, index (index)}
-            <div
-              class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-muted/25 px-3 py-3"
-            >
-              <div class="size-8 animate-pulse rounded-full bg-secondary"></div>
-              <div class="min-w-0 flex-1">
-                <div class="h-4 w-2/3 animate-pulse rounded bg-secondary"></div>
-                <div
-                  class="mt-2 h-3 w-1/2 animate-pulse rounded bg-secondary/80"
-                ></div>
-              </div>
-            </div>
-          {/each}
+    <div
+      {id}
+      class="absolute right-0 top-0 z-10 flex h-screen w-[min(28rem,calc(100vw-2rem))] flex-col border-l border-border/70 bg-card/95 text-card-foreground shadow-2xl backdrop-blur-xl"
+      role="dialog"
+      aria-label="Canvas history"
+      transition:fly={{ x: 48, duration: 180, easing: cubicOut }}
+    >
+      <header
+        class="flex min-h-16 items-center justify-between gap-3 border-b border-border/70 px-4"
+      >
+        <div class="min-w-0">
+          <h2 class="m-0 text-sm font-semibold text-foreground">
+            Canvas history
+          </h2>
+          <p class="m-0 truncate text-xs text-muted-foreground">
+            Element activity for this canvas
+          </p>
         </div>
-      {:else if error && entries.length === 0}
-        <div
-          class="flex h-full min-h-48 flex-col items-center justify-center gap-3 px-3 py-3 text-center"
-        >
-          <p class="m-0 text-sm font-medium text-foreground">{error}</p>
+        <div class="flex items-center gap-1">
           <button
             type="button"
-            class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+            class="flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
             onclick={() => void loadHistory(true)}
+            disabled={isLoading}
+            aria-label="Refresh canvas history"
           >
-            Try again
+            <RefreshCw
+              class={`size-4 ${isLoading ? 'animate-spin' : ''}`}
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            class="flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            onclick={() => (open = false)}
+            aria-label="Close canvas history"
+          >
+            <X class="size-4" aria-hidden="true" />
           </button>
         </div>
-      {:else if entries.length === 0}
-        <div
-          class="flex h-full min-h-48 flex-col items-center justify-center gap-2 px-3 py-3 text-center text-muted-foreground"
-        >
-          <Clock3 class="size-5" aria-hidden="true" />
-          <p class="m-0 text-sm">No element history yet.</p>
-        </div>
-      {:else}
-        <VirtualizedMessageList
-          items={entries}
-          keyForItem={(entry) => entry.id}
-          estimateSize={76}
-          gap={8}
-          active={open}
-          anchorTo="start"
-          initialScroll="start"
-          followMode="none"
-          className="px-3 py-3"
-        >
-          {#snippet item(entry)}
-            <article
-              class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-background/45 px-3 py-3"
-            >
-              <span
-                class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground"
-                aria-hidden="true"
-              >
-                {#if entry.action === 'created'}
-                  <Plus class="size-4" />
-                {:else if entry.action === 'modified'}
-                  <Pencil class="size-4" />
-                {:else if entry.action === 'deleted'}
-                  <Trash2 class="size-4" />
-                {:else if entry.action === 'undo'}
-                  <Undo2 class="size-4" />
-                {:else}
-                  <Redo2 class="size-4" />
-                {/if}
-              </span>
-              <div class="min-w-0 flex-1">
-                <p class="m-0 truncate text-sm font-semibold text-foreground">
-                  {getCanvasHistoryActionLabel(entry)}
-                </p>
-                <p class="m-0 mt-1 truncate text-xs text-muted-foreground">
-                  {actorLabel(entry)} · {timeLabel(entry.createdAt)}
-                </p>
-              </div>
-            </article>
-          {/snippet}
+      </header>
 
-          {#snippet after()}
-            <div class="mt-3 flex justify-center">
-              {#if hasMore}
-                <button
-                  type="button"
-                  class="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
-                  onclick={() => void loadHistory(false)}
-                  disabled={isLoadingMore}
+      <div class="flex min-h-0 flex-1 flex-col">
+        {#if isLoading && entries.length === 0}
+          <div class="grid gap-2 px-3 py-3" aria-hidden="true">
+            {#each Array.from({ length: 6 }) as _, index (index)}
+              <div
+                class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-muted/25 px-3 py-3"
+              >
+                <div
+                  class="size-8 animate-pulse rounded-full bg-secondary"
+                ></div>
+                <div class="min-w-0 flex-1">
+                  <div
+                    class="h-4 w-2/3 animate-pulse rounded bg-secondary"
+                  ></div>
+                  <div
+                    class="mt-2 h-3 w-1/2 animate-pulse rounded bg-secondary/80"
+                  ></div>
+                </div>
+              </div>
+            {/each}
+          </div>
+        {:else if error && entries.length === 0}
+          <div
+            class="flex h-full min-h-48 flex-col items-center justify-center gap-3 px-3 py-3 text-center"
+          >
+            <p class="m-0 text-sm font-medium text-foreground">{error}</p>
+            <button
+              type="button"
+              class="rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              onclick={() => void loadHistory(true)}
+            >
+              Try again
+            </button>
+          </div>
+        {:else if entries.length === 0}
+          <div
+            class="flex h-full min-h-48 flex-col items-center justify-center gap-2 px-3 py-3 text-center text-muted-foreground"
+          >
+            <Clock3 class="size-5" aria-hidden="true" />
+            <p class="m-0 text-sm">No element history yet.</p>
+          </div>
+        {:else}
+          <VirtualizedMessageList
+            items={entries}
+            keyForItem={(entry) => entry.id}
+            estimateSize={76}
+            gap={8}
+            active={open}
+            anchorTo="start"
+            initialScroll="start"
+            followMode="none"
+            className="px-3 py-3"
+          >
+            {#snippet item(entry)}
+              <article
+                class="flex min-h-16 items-start gap-3 rounded-lg border border-border/50 bg-background/45 px-3 py-3"
+              >
+                <span
+                  class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground"
+                  aria-hidden="true"
                 >
-                  {#if isLoadingMore}
-                    <LoaderCircle
-                      class="size-4 animate-spin"
-                      aria-hidden="true"
-                    />
+                  {#if entry.action === 'created'}
+                    <Plus class="size-4" />
+                  {:else if entry.action === 'modified'}
+                    <Pencil class="size-4" />
+                  {:else if entry.action === 'deleted'}
+                    <Trash2 class="size-4" />
+                  {:else if entry.action === 'undo'}
+                    <Undo2 class="size-4" />
+                  {:else}
+                    <Redo2 class="size-4" />
                   {/if}
-                  Load more
-                </button>
-              {/if}
-            </div>
-          {/snippet}
-        </VirtualizedMessageList>
-      {/if}
+                </span>
+                <div class="min-w-0 flex-1">
+                  <p class="m-0 truncate text-sm font-semibold text-foreground">
+                    {getCanvasHistoryActionLabel(entry)}
+                  </p>
+                  <p class="m-0 mt-1 truncate text-xs text-muted-foreground">
+                    {actorLabel(entry)} · {timeLabel(entry.createdAt)}
+                  </p>
+                </div>
+              </article>
+            {/snippet}
+
+            {#snippet after()}
+              <div class="mt-3 flex justify-center">
+                {#if hasMore}
+                  <button
+                    type="button"
+                    class="inline-flex h-9 items-center gap-2 rounded-md border border-border/70 bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
+                    onclick={() => void loadHistory(false)}
+                    disabled={isLoadingMore}
+                  >
+                    {#if isLoadingMore}
+                      <LoaderCircle
+                        class="size-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                    {/if}
+                    Load more
+                  </button>
+                {/if}
+              </div>
+            {/snippet}
+          </VirtualizedMessageList>
+        {/if}
+      </div>
     </div>
   </div>
 {/if}

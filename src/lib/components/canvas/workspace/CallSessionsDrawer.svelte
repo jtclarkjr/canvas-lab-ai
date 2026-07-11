@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { cubicOut } from 'svelte/easing'
+  import { fade, fly } from 'svelte/transition'
   import {
     CircleAlert,
     CircleCheck,
@@ -283,10 +285,22 @@
 </script>
 
 {#if open}
-  <div class="fixed inset-0 z-40 bg-background/20 backdrop-blur-[1px]">
-    <aside
-      class="absolute right-0 top-0 flex h-full w-[min(44rem,100vw)] flex-col border-l border-border bg-card text-card-foreground shadow-2xl"
+  <div class="fixed inset-0 z-40" data-camera-exempt>
+    <button
+      type="button"
+      class="absolute inset-0 bg-background/20 backdrop-blur-[1px]"
+      onclick={() => (open = false)}
+      aria-label="Close call sessions"
+      tabindex="-1"
+      data-drawer-backdrop
+      transition:fade={{ duration: 140 }}
+    ></button>
+
+    <div
+      class="absolute right-0 top-0 z-10 flex h-full w-[min(44rem,100vw)] flex-col border-l border-border bg-card text-card-foreground shadow-2xl"
+      role="dialog"
       aria-label="Call sessions"
+      transition:fly={{ x: 48, duration: 180, easing: cubicOut }}
     >
       <header
         class="flex items-center justify-between border-b border-border px-5 py-4"
@@ -596,6 +610,6 @@
           {/if}
         </section>
       </div>
-    </aside>
+    </div>
   </div>
 {/if}
