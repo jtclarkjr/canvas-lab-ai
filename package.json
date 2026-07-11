@@ -5,11 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
+    "dev:cloud": "node scripts/livekit-cloud-dev.mjs",
+    "dev:local": "node scripts/livekit-local-dev.mjs",
+    "dev:livekit": "LIVEKIT_URL=ws://127.0.0.1:7880 LIVEKIT_API_KEY=devkey LIVEKIT_API_SECRET=secret vp dev",
     "build": "vp build",
     "preview": "vp preview",
     "prepare": "vp config && svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "livekit:dev": "livekit-server --dev",
+    "agent:build": "vp build --config vite.agent.config.ts",
+    "agent:dev": "vp run agent:build && node dist-agent/canvas-transcriber.js dev",
+    "agent:dev:livekit": "LIVEKIT_URL=ws://127.0.0.1:7880 LIVEKIT_API_KEY=devkey LIVEKIT_API_SECRET=secret vp run agent:build && LIVEKIT_URL=ws://127.0.0.1:7880 LIVEKIT_API_KEY=devkey LIVEKIT_API_SECRET=secret node dist-agent/canvas-transcriber.js dev",
+    "agent:start": "node dist-agent/canvas-transcriber.js start",
+    "agent:cloud:secrets": "node scripts/prepare-livekit-agent-env.mjs",
+    "agent:cloud:create": "vp run agent:cloud:secrets && lk agent create --secrets-file .env.agent --region ${LIVEKIT_AGENT_REGION:-ap-south} --yes",
+    "agent:cloud:deploy": "vp run agent:cloud:secrets && lk agent deploy --secrets-file .env.agent",
+    "agent:cloud:status": "lk agent status",
+    "agent:cloud:logs": "lk agent logs",
+    "agent:summary:backfill": "bun scripts/backfill-call-summaries.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.87",
@@ -45,13 +59,12 @@
     "happy-dom": "^20.10.6",
     "svelte": "^5.56.4",
     "svelte-check": "^4.7.1",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@^0.2.1",
     "vite-plus": "^0.2.1"
   },
   "overrides": {
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
     "postcss": ">=8.5.10",
     "cookie": ">=0.7.0"
   },

@@ -4,10 +4,16 @@ import {
   captionsTokenResponseSchema,
   conferenceStatusResponseSchema,
   conferenceTokenResponseSchema,
+  getCallSessionResponseSchema,
+  listCallSessionsResponseSchema,
+  startCallTranscriptionResponseSchema,
   translateCaptionResponseSchema,
   type CaptionsTokenResponse,
+  type GetCallSessionResponse,
+  type ListCallSessionsResponse,
   type ConferenceStatusResponse,
   type ConferenceTokenResponse,
+  type StartCallTranscriptionResponse,
   type TranslateCaptionResponse
 } from '$lib/conference/schema'
 
@@ -43,6 +49,52 @@ export async function fetchCaptionsToken(
     parse: (payload) => captionsTokenResponseSchema.parse(payload),
     fallbackMessage: 'Could not start captions.'
   })
+}
+
+export async function listCallSessions(
+  canvasId: string
+): Promise<ListCallSessionsResponse> {
+  return apiRequest(`/api/canvases/${canvasId}/call-sessions`, {
+    parse: (payload) => listCallSessionsResponseSchema.parse(payload),
+    fallbackMessage: 'Could not load call sessions.'
+  })
+}
+
+export async function getCallSession(
+  canvasId: string,
+  sessionId: string
+): Promise<GetCallSessionResponse> {
+  return apiRequest(`/api/canvases/${canvasId}/call-sessions/${sessionId}`, {
+    parse: (payload) => getCallSessionResponseSchema.parse(payload),
+    fallbackMessage: 'Could not load the transcript.'
+  })
+}
+
+export async function reconcileCallSession(
+  canvasId: string,
+  sessionId: string
+): Promise<GetCallSessionResponse> {
+  return apiRequest(
+    `/api/canvases/${canvasId}/call-sessions/${sessionId}/reconcile`,
+    {
+      method: 'POST',
+      parse: (payload) => getCallSessionResponseSchema.parse(payload),
+      fallbackMessage: 'Could not reconcile the transcript.'
+    }
+  )
+}
+
+export async function startCallTranscription(
+  canvasId: string
+): Promise<StartCallTranscriptionResponse> {
+  return apiRequest(
+    `/api/canvases/${canvasId}/conference/transcription/start`,
+    {
+      method: 'POST',
+      parse: (payload) => startCallTranscriptionResponseSchema.parse(payload),
+      fallbackMessage: 'Could not start transcription.'
+    }
+  )
 }
 
 export async function translateCaption(

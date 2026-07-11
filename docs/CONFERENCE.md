@@ -10,16 +10,17 @@ to the four window corners.
 ```
 Supabase  ── decides who may access a canvas (canvas_members / owner)
 SvelteKit ── mints a short-lived LiveKit JWT after that access check
-LiveKit   ── carries all call media (WebRTC SFU); rooms are ephemeral
+LiveKit   ── carries call media and runs the managed transcript agent
 ```
 
-- Canvas data, cursors, chat, and scenes stay on Supabase. No call state is
-  persisted in Postgres — LiveKit is the source of truth. The token endpoint
-  creates rooms explicitly with a 30s `emptyTimeout` (instead of LiveKit's
-  5-minute auto-create default) so an ended call doesn't linger as active.
+- Canvas data, call sessions, participants, transcript artifacts, structured
+  summaries, and final transcript segments stay in Supabase. LiveKit remains
+  the media, STT, LLM, and worker runtime; Supabase is the durable source of
+  truth and access-control layer. The token endpoint creates rooms with a 30s
+  `emptyTimeout` and 10s `departureTimeout` for predictable shutdown.
 - Room name: `canvas:{canvasId}` (`conferenceRoomName` in
-  `src/lib/conference/schema.ts`). Keep it derived only from the canvas id —
-  LiveKit agent dispatch can target this pattern later.
+  `src/lib/conference/schema.ts`). Transcript jobs use explicit dispatch to
+  the fixed `canvas-transcriber` agent.
 - The browser never sees `LIVEKIT_API_KEY`/`LIVEKIT_API_SECRET`. The token
   endpoint returns the project's wss URL alongside the JWT, so no public env
   plumbing exists at all.
@@ -35,6 +36,17 @@ LiveKit   ── carries all call media (WebRTC SFU); rooms are ephemeral
 - `GET /api/canvases/[canvasId]/conference` — call status for the
   join-in-progress pill, backed by `RoomServiceClient.listParticipants`.
   Returns `{ active, count, participants }`.
+- `POST /api/canvases/[canvasId]/conference/transcription/start` — atomically
+  claims one transcript attempt and creates an explicit LiveKit dispatch.
+- `GET /api/canvases/[canvasId]/call-sessions` and
+  `GET /api/canvases/[canvasId]/call-sessions/[sessionId]` — participant-only
+  transcript history; canvas owners and admins can read all sessions.
+- `POST /api/canvases/[canvasId]/call-sessions/[sessionId]/reconcile` — one-shot
+  missed-event recovery after 30s in `starting` or 60s in `processing`.
+- `POST /api/livekit/webhook` — signed raw-body LiveKit webhook receiver.
+  `participant_joined` records actual call membership for transcript access.
+  `room_finished` owns `ended_at` and advances `active` to `processing`, or an
+  unacknowledged `starting` attempt to `failed/agent_unavailable`.
 
 ## Call-presence signal
 
@@ -62,6 +74,79 @@ LIVEKIT_API_SECRET=<secret>
 
 The project id and SIP URI shown in the dashboard are not needed for
 WebRTC conferencing.
+
+## Transcript agent deployment
+
+The transcript worker is a separate LiveKit Cloud Agent deployment. It is not
+started by the Vercel/SvelteKit application process.
+
+1. Select the LiveKit project. If it is already shown by `lk project list`,
+   skip this step. Otherwise, either use `lk cloud auth` or add the credentials
+   already stored in `.env`:
+
+```text
+set -a
+source .env
+set +a
+lk project add canvas-app --url "$LIVEKIT_URL" --api-key "$LIVEKIT_API_KEY" --api-secret "$LIVEKIT_API_SECRET" --default
+```
+
+2. Prepare the restricted agent secret file and create the deployment:
+
+```text
+vp run agent:cloud:secrets
+vp run agent:cloud:create
+```
+
+`agent:cloud:create` defaults to `ap-south`; set `LIVEKIT_AGENT_REGION` to
+`us-east` or `eu-central` when deploying nearer those regions. The generated
+`.env.agent` contains only `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and optional
+transcription, language, and summary-model settings. LiveKit injects its own
+connection credentials. `LIVEKIT_SUMMARY_MODEL` defaults to
+`openai/gpt-4.1-mini` through LiveKit Inference; no OpenAI API key is used. The
+CLI writes non-secret deployment identity to `livekit.toml`; commit that file.
+
+3. Deploy and inspect later revisions:
+
+```text
+vp run agent:cloud:deploy
+vp run agent:cloud:status
+vp run agent:cloud:logs
+```
+
+4. Configure a LiveKit Cloud webhook for
+`https://<app-domain>/api/livekit/webhook` and include `participant_joined` and
+`room_finished` events.
+
+If Vercel Firewall challenges automated POST requests, bypass only the signed
+webhook path and keep the rule first:
+
+```text
+vercel firewall rules add "LiveKit webhook" --condition '{"type":"path","op":"eq","value":"/api/livekit/webhook"}' --action bypass --yes
+vercel firewall rules reorder "LiveKit webhook" --first --yes
+vercel firewall publish --yes
+```
+
+An unsigned POST to that path must reach the app and return `401`, not a Vercel
+`429` challenge. Signature verification remains the authorization boundary.
+
+Local choices are `vp run dev:cloud` (Cloud LiveKit plus a local worker) or
+`vp run dev:local` (local LiveKit server, app, and worker).
+
+The durable lifecycle is
+`not_requested/failed -> starting -> active -> processing -> ready|failed`.
+Only the worker changes `starting` to `active`, and only room lifecycle code
+sets `ended_at`. The drawer and in-call controls subscribe to the session row
+through Supabase Realtime; there is no transcript polling loop.
+
+During finalization, the worker groups adjacent speech into speaker turns and
+generates a structured `summary` artifact before marking the transcript ready.
+The drawer opens on the summary and keeps the grouped transcript in a separate
+tab. To summarize older sessions that already contain segments:
+
+```text
+vp run agent:summary:backfill -- --limit 10
+```
 
 ## Code map
 
@@ -160,11 +245,12 @@ WebRTC conferencing.
 - The fullscreen chat button shows the combined unread count while the side
   panel is closed. Inside the panel, each tab owns its own badge/read state.
 
-## Agents later
+## Transcript diagnostics
 
-LiveKit agents join these rooms as ordinary participants: mint them a token
-server-side with the same grant shape (`roomJoin` on `canvas:{canvasId}`)
-and a distinct identity (e.g. `agent:<name>`), or configure automatic agent
-dispatch against the `canvas:` room-name prefix in LiveKit Cloud.
-`canPublishData` is already granted to every participant for future
-data-channel use.
+Each attempt records dispatch and job ids plus accepted, first-audio,
+first-segment, and completed timestamps. Terminal failures use a specific code:
+`agent_unavailable`, `agent_connect_failed`, `dispatch_failed`,
+`no_audio_received`, `no_speech_detected`, `stt_failed`,
+`finalization_timeout`, or `worker_did_not_finalize`. The agent resumes from
+the greatest stored segment position after a LiveKit job restart and drains
+all STT streams before writing the terminal state.

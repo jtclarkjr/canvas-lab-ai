@@ -18,6 +18,7 @@
   import ConferenceMicButton from './ConferenceMicButton.svelte'
   import ConferenceCamButton from './ConferenceCamButton.svelte'
   import ConferenceCCButton from './ConferenceCCButton.svelte'
+  import ConferenceMeetingToolsButton from './ConferenceMeetingToolsButton.svelte'
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()
@@ -105,6 +106,7 @@
     </button>
 
     <ConferenceCCButton />
+    <ConferenceMeetingToolsButton />
 
     <div class="relative" data-layout-picker>
       {#if layoutPickerOpen}

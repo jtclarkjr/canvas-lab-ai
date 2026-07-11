@@ -7,6 +7,7 @@
     VideoOff,
     Volume2
   } from 'lucide-svelte'
+  import ConferenceMeetingToolsButton from '$lib/components/canvas/conference/controls/ConferenceMeetingToolsButton.svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
 
   const store = useCanvasConferenceStore()
@@ -50,6 +51,8 @@
         <MicOff class="size-5" aria-hidden="true" />
       {/if}
     </button>
+
+    <ConferenceMeetingToolsButton />
 
     <button
       type="button"

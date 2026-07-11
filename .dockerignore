@@ -1,0 +1,13 @@
+.git
+.github
+.svelte-kit
+.vercel
+build
+dist-agent
+node_modules
+graphify-out
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store

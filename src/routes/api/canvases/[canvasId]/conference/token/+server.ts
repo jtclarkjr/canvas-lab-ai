@@ -10,6 +10,11 @@ import {
   requireRouteParam,
   withAuth
 } from '$lib/server/api-error'
+import {
+  endOpenCallSessions,
+  getOrCreateActiveCallSession,
+  loadCallSessionResponse
+} from '$lib/server/call-sessions'
 import { requireCanvasMember } from '$lib/server/canvas-access'
 import { getLiveKitConfig, getRoomService } from '$lib/server/livekit'
 import { withRateLimit } from '$lib/server/rate-limit'
@@ -38,14 +43,35 @@ export const POST: RequestHandler = async (event) =>
 
       const { url, apiKey, apiSecret } = getLiveKitConfig()
       const roomName = conferenceRoomName(canvasId)
+      const roomService = getRoomService()
+
+      let currentParticipants: Awaited<
+        ReturnType<ReturnType<typeof getRoomService>['listParticipants']>
+      > = []
+      try {
+        currentParticipants = await roomService.listParticipants(roomName)
+      } catch {
+        currentParticipants = []
+      }
+
+      if (currentParticipants.length === 0) {
+        await endOpenCallSessions(supabase, canvasId)
+      }
 
       // Idempotent: returns the existing room when a call is already
       // running, so every joiner can pass the same timeout options.
-      await getRoomService().createRoom({
+      const livekitRoom = await roomService.createRoom({
         name: roomName,
-        emptyTimeout: EMPTY_ROOM_TIMEOUT_SECONDS
+        emptyTimeout: EMPTY_ROOM_TIMEOUT_SECONDS,
+        departureTimeout: 10
       })
-
+      const callSession = await getOrCreateActiveCallSession({
+        supabase,
+        canvasId,
+        roomName,
+        roomSid: livekitRoom.sid,
+        user
+      })
       const token = new AccessToken(apiKey, apiSecret, {
         // identity = user id so call tiles reuse the same deterministic
         // presence colors as cursors and avatars.
@@ -70,7 +96,8 @@ export const POST: RequestHandler = async (event) =>
         conferenceTokenResponseSchema.parse({
           token: await token.toJwt(),
           url,
-          roomName
+          roomName,
+          callSession: await loadCallSessionResponse(supabase, callSession)
         })
       )
     } catch (error) {

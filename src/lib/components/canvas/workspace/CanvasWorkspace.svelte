@@ -22,6 +22,7 @@
   import LiveCursors from '$lib/components/canvas/workspace/LiveCursors.svelte'
   import RequestEditAccessBanner from '$lib/components/canvas/workspace/RequestEditAccessBanner.svelte'
   import ShareDialog from '$lib/components/canvas/workspace/ShareDialog.svelte'
+  import CallSessionsDrawer from '$lib/components/canvas/workspace/CallSessionsDrawer.svelte'
   import TextFormattingToolbar from '$lib/components/canvas/workspace/toolbars/TextFormattingToolbar.svelte'
   import SceneCardLayer from '$lib/components/canvas/scenes/SceneCardLayer.svelte'
   import SceneDialog from '$lib/components/canvas/scenes/SceneDialog.svelte'
@@ -107,6 +108,7 @@
   let rootEl = $state<HTMLDivElement | null>(null)
   let svgEl = $state<SVGSVGElement | null>(null)
   let textInputEl = $state<HTMLTextAreaElement | null>(null)
+  let callSessionsOpen = $state(false)
 
   $effect(() => {
     workspace.setProps(currentWorkspaceInput())
@@ -162,7 +164,9 @@
       currentUserId={userId}
       followedUserId={workspace.followedUserId}
       pendingCount={workspace.pendingRequests.length}
+      showCallSessions={!workspace.isPublicViewer}
       onShare={workspace.openShareDialog}
+      onOpenCallSessions={() => (callSessionsOpen = true)}
       onFollowMember={workspace.followMemberCursor}
     />
   {/if}
@@ -178,6 +182,13 @@
       pendingRequests={workspace.pendingRequests}
       onRequestResolved={workspace.handleRequestResolved}
       onVisibilityChange={workspace.saveVisibility}
+    />
+  {/if}
+
+  {#if !workspace.isAnonymousPublicViewer && !workspace.isPublicViewer}
+    <CallSessionsDrawer
+      bind:open={callSessionsOpen}
+      canvasId={workspace.canvasIdForActions}
     />
   {/if}
 

@@ -15,7 +15,9 @@
     currentUserId,
     followedUserId,
     pendingCount,
+    showCallSessions = true,
     onShare,
+    onOpenCallSessions,
     onFollowMember
   } = $props<{
     canvasId: string
@@ -24,7 +26,9 @@
     currentUserId: string
     followedUserId: string | null
     pendingCount: number
+    showCallSessions?: boolean
     onShare: () => void
+    onOpenCallSessions: () => void
     onFollowMember: (memberId: string | null) => void
   }>()
 
@@ -171,5 +175,12 @@
     <CanvasHistoryButton {canvasId} />
   {/if}
 
-  <CanvasOptionsButton {canvasId} {role} {pendingCount} {onShare} />
+  <CanvasOptionsButton
+    {canvasId}
+    {role}
+    {pendingCount}
+    {showCallSessions}
+    {onShare}
+    {onOpenCallSessions}
+  />
 </div>

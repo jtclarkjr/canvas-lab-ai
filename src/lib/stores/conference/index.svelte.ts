@@ -1,10 +1,23 @@
 import { getContext, setContext } from 'svelte'
+import { supabase } from '$lib/auth/session-store'
 import type {
   CaptionLanguageCode,
   CaptionTextColor,
   CaptionTextSize
 } from '$lib/conference/captions'
 import { CALL_CHAT_TEXT_TOPIC } from '$lib/conference/call-chat'
+import {
+  getCallSession,
+  reconcileCallSession,
+  startCallTranscription
+} from '$lib/conference/api'
+import {
+  isTerminalTranscriptStatus,
+  mergeCallSessionRealtimeRow,
+  transcriptReconciliationDelay,
+  transcriptWatchdogKey,
+  type CallSessionRealtimeRow
+} from '$lib/conference/call-session-realtime'
 import type {
   ConferenceFullscreenChatTab,
   ConferenceFullscreenPanel,
@@ -19,6 +32,7 @@ import { createConferenceDevicesStore } from '$lib/stores/conference/devices.sve
 import { createConferenceRoomStore } from '$lib/stores/conference/room.svelte'
 import { createConferenceStatusStore } from '$lib/stores/conference/status.svelte'
 import { createConferenceViewStore } from '$lib/stores/conference/view.svelte'
+import { toast } from '$lib/stores/shared/toast.svelte'
 
 const CANVAS_CONFERENCE_CONTEXT = Symbol('canvas-conference-store')
 
@@ -38,6 +52,9 @@ export function createCanvasConferenceStore({
   getEnabled
 }: CanvasConferenceStoreInput) {
   const view = createConferenceViewStore()
+  let transcriptionStarting = $state(false)
+  const reconciledWatchdogs = new Set<string>()
+  const terminalDetailRequests = new Set<string>()
 
   // The wiring closures below reference stores declared later; they only
   // run after creation, so the late binding is safe.
@@ -86,6 +103,128 @@ export function createCanvasConferenceStore({
       view.fullscreenChatTab === 'call'
   })
 
+  async function loadTerminalTranscript(sessionId: string, attempt: number) {
+    const key = `${sessionId}:${attempt}`
+    if (terminalDetailRequests.has(key)) return
+    terminalDetailRequests.add(key)
+
+    try {
+      const response = await getCallSession(getCanvasId(), sessionId)
+      if (room.callSession?.id === sessionId) {
+        room.setCallSession(response.item)
+      }
+    } catch (error) {
+      console.warn('[conference] could not load terminal transcript', error)
+    }
+  }
+
+  function applyRealtimeSession(row: CallSessionRealtimeRow) {
+    const current = room.callSession
+    if (!current || current.id !== row.id) return
+
+    const previousStatus = current.transcriptStatus
+    const next = mergeCallSessionRealtimeRow(current, row)
+    room.setCallSession(next)
+
+    if (previousStatus === next.transcriptStatus) return
+    if (next.transcriptStatus === 'active') {
+      toast.show({ title: 'Transcription started' })
+    } else if (next.transcriptStatus === 'ready') {
+      toast.show({ title: 'Transcript is ready' })
+    } else if (next.transcriptStatus === 'no_speech') {
+      toast.show({
+        title: 'No speech captured',
+        description: 'No transcript or summary was created for this call.'
+      })
+    } else if (next.transcriptStatus === 'failed') {
+      toast.show({
+        title: 'Transcription failed',
+        description: next.errorMessage ?? undefined,
+        variant: 'error'
+      })
+    }
+
+    if (isTerminalTranscriptStatus(next.transcriptStatus)) {
+      void loadTerminalTranscript(next.id, next.transcriptAttempt)
+    }
+  }
+
+  $effect(() => {
+    const client = supabase
+    const sessionId = room.callSession?.id
+    if (!client || !sessionId || !getEnabled()) return
+
+    const channel = client
+      .channel(`call-session:${sessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'canvas_call_sessions',
+          filter: `id=eq.${sessionId}`
+        },
+        (payload) => applyRealtimeSession(payload.new as CallSessionRealtimeRow)
+      )
+      .subscribe()
+
+    return () => {
+      void client.removeChannel(channel)
+    }
+  })
+
+  $effect(() => {
+    const session = room.callSession
+    if (!session || !getEnabled()) return
+
+    const delay = transcriptReconciliationDelay(session)
+    const key = transcriptWatchdogKey(session)
+    if (delay === null || reconciledWatchdogs.has(key)) return
+
+    const timer = setTimeout(() => {
+      reconciledWatchdogs.add(key)
+      void reconcileCallSession(getCanvasId(), session.id)
+        .then((response) => {
+          if (room.callSession?.id === response.item.id) {
+            room.setCallSession(response.item)
+          }
+        })
+        .catch((error) =>
+          console.warn('[conference] transcript reconciliation failed', error)
+        )
+    }, delay)
+
+    return () => clearTimeout(timer)
+  })
+
+  async function startTranscription() {
+    if (!room.callSession || transcriptionStarting) {
+      return
+    }
+
+    transcriptionStarting = true
+    try {
+      const { item } = await startCallTranscription(getCanvasId())
+      room.setCallSession(item)
+      let title = 'Transcription requested'
+      if (item.transcriptStatus === 'ready') title = 'Transcript is ready'
+      if (item.transcriptStatus === 'active') title = 'Transcription started'
+      if (item.transcriptStatus === 'no_speech') title = 'No speech captured'
+      toast.show({ title })
+    } catch (error) {
+      toast.show({
+        title: 'Could not start transcription',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'The transcriber could not be started.',
+        variant: 'error'
+      })
+    } finally {
+      transcriptionStarting = false
+    }
+  }
+
   return {
     get enabled() {
       return getEnabled()
@@ -128,6 +267,15 @@ export function createCanvasConferenceStore({
     get backgroundEffect() {
       return room.backgroundEffect
     },
+    get callSession() {
+      return room.callSession
+    },
+    get callTranscriptionStatus() {
+      return room.callSession?.transcriptStatus ?? 'not_requested'
+    },
+    get transcriptionStarting() {
+      return transcriptionStarting
+    },
     get virtualBgImage() {
       return room.virtualBgImage
     },
@@ -143,6 +291,7 @@ export function createCanvasConferenceStore({
     setBlurRadius: (value: number) => room.setBlurRadius(value),
     pin: room.pin,
     startAudio: room.startAudio,
+    startTranscription,
 
     // Devices
     get devices() {

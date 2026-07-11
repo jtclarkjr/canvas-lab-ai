@@ -7,6 +7,7 @@ import type {
 import { ApiClientError } from '$lib/api-client'
 import { colorFromId } from '$lib/canvas/helpers/color-from-id'
 import { fetchConferenceToken } from '$lib/conference/api'
+import type { CallSession } from '$lib/conference/schema'
 import {
   isRenderableVideoTrack,
   loadBgPrefs,
@@ -105,6 +106,7 @@ export function createConferenceRoomStore({
   let lastActiveSpeaker = $state<string | null>(null)
   let pinnedIdentity = $state<string | null>(null)
   let canPlayAudio = $state(true)
+  let callSession = $state<CallSession | null>(null)
   const _bgPrefs = loadBgPrefs()
   let backgroundEffect = $state<BackgroundEffect>(_bgPrefs.effect)
   let virtualBgImage = $state<string | null>(_bgPrefs.imagePath)
@@ -196,6 +198,7 @@ export function createConferenceRoomStore({
     lastActiveSpeaker = null
     pinnedIdentity = null
     canPlayAudio = true
+    callSession = null
     blurProcessor = null
     processorAttached = false
     onCallEnded()
@@ -281,7 +284,12 @@ export function createConferenceRoomStore({
     try {
       const livekit = await import('livekit-client')
       lk = livekit
-      const { token, url } = await fetchConferenceToken(canvasId)
+      const {
+        token,
+        url,
+        callSession: joinedCallSession
+      } = await fetchConferenceToken(canvasId)
+      callSession = joinedCallSession
       const prefs = devices.activeDeviceIds
 
       const r = new livekit.Room({
@@ -582,6 +590,10 @@ export function createConferenceRoomStore({
     await room?.localParticipant.setAttributes(attributes).catch(() => {})
   }
 
+  function setCallSession(value: CallSession | null) {
+    callSession = value
+  }
+
   // Leave any live call when the active canvas switches
   // (CanvasTitleSwitcher keeps these components mounted).
   let currentCanvasId: string | null = null
@@ -652,6 +664,9 @@ export function createConferenceRoomStore({
     get blurRadius() {
       return blurRadius
     },
+    get callSession() {
+      return callSession
+    },
     join,
     leave,
     toggleMic,
@@ -664,7 +679,8 @@ export function createConferenceRoomStore({
     startAudio,
     publishData,
     sendText,
-    setLocalAttributes
+    setLocalAttributes,
+    setCallSession
   }
 }
 

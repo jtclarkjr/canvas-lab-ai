@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Link, Share2, UserPlus } from 'lucide-svelte'
+  import { Ellipsis, FileText, Link, UserPlus } from 'lucide-svelte'
   import Popover from '$lib/components/shared/Popover.svelte'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
@@ -8,12 +8,16 @@
     canvasId,
     role,
     pendingCount = 0,
-    onShare
+    showCallSessions = true,
+    onShare,
+    onOpenCallSessions
   } = $props<{
     canvasId: string
     role: CanvasRole
     pendingCount?: number
+    showCallSessions?: boolean
     onShare: () => void
+    onOpenCallSessions: () => void
   }>()
 
   let open = $state(false)
@@ -46,9 +50,9 @@
       aria-controls={id}
       aria-expanded={expanded}
       onclick={() => (open = !open)}
-      aria-label={`Share and access${canManage && pendingCount > 0 ? ` (${pendingCount} pending)` : ''}`}
+      aria-label={`Canvas menu${canManage && pendingCount > 0 ? ` (${pendingCount} pending)` : ''}`}
     >
-      <Share2 class="size-4" aria-hidden="true" />
+      <Ellipsis class="size-4" aria-hidden="true" />
       {#if canManage && pendingCount > 0}
         <span
           class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-warning px-1 text-[9px] font-bold text-warning-foreground"
@@ -60,6 +64,19 @@
   {/snippet}
 
   <div class="flex flex-col gap-1">
+    {#if showCallSessions}
+      <button
+        type="button"
+        class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-popover-foreground transition hover:bg-secondary"
+        onclick={() => {
+          open = false
+          onOpenCallSessions()
+        }}
+      >
+        <FileText class="size-4" />
+        Call sessions
+      </button>
+    {/if}
     <button
       type="button"
       class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-popover-foreground transition hover:bg-secondary"
