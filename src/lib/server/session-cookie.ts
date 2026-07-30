@@ -2,7 +2,7 @@ import type { Cookies } from '@sveltejs/kit'
 import { env as privateEnv } from '$env/dynamic/private'
 import { getSupabaseAuthCookieName } from '$lib/auth/supabase-cookie'
 
-export type SupabaseSessionCookieTokens = {
+type SupabaseSessionCookieTokens = {
   accessToken: string
   refreshToken: string
 }

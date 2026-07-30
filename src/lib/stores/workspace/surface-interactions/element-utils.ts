@@ -22,7 +22,7 @@ import type {
   TextElement
 } from './types'
 import type { HitElement } from './types'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 
 export function nowZ() {
   return Date.now()

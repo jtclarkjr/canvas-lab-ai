@@ -1,6 +1,5 @@
 import { ChartNoAxesColumn, UserRound } from 'lucide-svelte'
-
-export type SettingsTabId = 'general' | 'ai-usage'
+import type { SettingsTabId } from './tabs/types'
 
 export const settingsTabs = [
   {

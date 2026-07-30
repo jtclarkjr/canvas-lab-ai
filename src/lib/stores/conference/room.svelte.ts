@@ -20,7 +20,7 @@ import type {
   DeviceKind
 } from '$lib/conference/types'
 import { toast } from '$lib/stores/shared/toast.svelte'
-import type { ConferenceDevicesStore } from '$lib/stores/conference/devices.svelte'
+import type { ConferenceDevicesStore } from '$lib/stores/conference/devices/types'
 
 type ConferenceRoomInput = {
   getCanvasId: () => string
@@ -683,5 +683,3 @@ export function createConferenceRoomStore({
     setCallSession
   }
 }
-
-export type ConferenceRoomStore = ReturnType<typeof createConferenceRoomStore>

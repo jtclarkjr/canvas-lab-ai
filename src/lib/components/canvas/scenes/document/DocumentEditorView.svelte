@@ -244,6 +244,5 @@
     placeholder="Document content (markdown)"
     aria-label="Document content in Markdown"
     spellcheck="false"
-    disabled={!canModify}
-  ></textarea>
+    disabled={!canModify}></textarea>
 </div>

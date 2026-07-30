@@ -19,7 +19,7 @@ import type { CanvasRole } from '$lib/canvas/roles'
 import type { Scene } from '$lib/scenes/schema'
 import type { Workflow } from '$lib/workflows/schema'
 
-export type CanvasPageAccess =
+type CanvasPageAccess =
   | { state: 'member'; role: CanvasRole; canvasTitle: string }
   | { state: 'public-viewer'; canvasTitle: string }
   | { state: 'anonymous-public-viewer'; canvasTitle: string }

@@ -122,7 +122,3 @@ export function createConferenceStatusStore({
     broadcastChanged
   }
 }
-
-export type ConferenceStatusStore = ReturnType<
-  typeof createConferenceStatusStore
->

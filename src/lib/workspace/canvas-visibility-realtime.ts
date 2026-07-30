@@ -1,13 +1,9 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { CanvasVisibility } from '$lib/canvas/schema'
 import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
+import type { CanvasVisibilityChangedPayload } from './canvas-visibility-realtime/types'
 
 export const CANVAS_VISIBILITY_CHANGED_EVENT = 'canvas-visibility-changed'
-
-export type CanvasVisibilityChangedPayload = {
-  canvasId: string
-  visibility: CanvasVisibility
-}
 
 export function canvasVisibilityChannelName(canvasId: string) {
   return `canvas:${canvasId}:visibility`

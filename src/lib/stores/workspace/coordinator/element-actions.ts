@@ -1,7 +1,7 @@
 import { invalidateAll } from '$app/navigation'
 import { ApiClientError } from '$lib/canvas/api'
 import { createApplyCommand } from '$lib/canvas/apply-command'
-import type { Command, CommandAudit } from '$lib/canvas/commands'
+import type { Command, CommandAudit } from '$lib/canvas/commands/types'
 import {
   deleteElement as deleteElementApi,
   listElements,
@@ -108,7 +108,3 @@ export function createWorkspaceElementActions({
     loadCanvasElements
   }
 }
-
-export type WorkspaceElementActions = ReturnType<
-  typeof createWorkspaceElementActions
->

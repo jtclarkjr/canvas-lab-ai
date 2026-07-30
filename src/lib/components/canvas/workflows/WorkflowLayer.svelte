@@ -7,7 +7,7 @@
   } from 'lucide-svelte'
   import type { Camera, Tool } from '$lib/canvas/types'
   import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import type { WorkspaceMode } from '$lib/scenes/types'
   import type {
     UpdateWorkflowInput,

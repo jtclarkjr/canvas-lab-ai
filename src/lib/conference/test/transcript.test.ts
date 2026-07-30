@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
-import {
-  groupTranscriptSegments,
-  transcriptForSummary,
-  type TranscriptSegmentLike
-} from '../transcript'
+import { groupTranscriptSegments, transcriptForSummary } from '../transcript'
+import type { TranscriptSegmentLike } from '../transcript/types'
 
 function segment(
   position: number,

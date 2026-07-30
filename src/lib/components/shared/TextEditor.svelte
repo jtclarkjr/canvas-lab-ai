@@ -53,6 +53,5 @@
     onkeydown={onKeydown}
     onkeyup={onSelectionChange}
     onpointerup={onSelectionChange}
-    onselect={onSelectionChange}
-  ></textarea>
+    onselect={onSelectionChange}></textarea>
 {/if}

@@ -75,7 +75,7 @@ export async function settleWithForcedClose({
   }
 }
 
-export type TranscriptFailureCode =
+type TranscriptFailureCode =
   | 'agent_unavailable'
   | 'agent_connect_failed'
   | 'dispatch_failed'
@@ -85,7 +85,7 @@ export type TranscriptFailureCode =
   | 'finalization_timeout'
   | 'worker_did_not_finalize'
 
-export type TranscriptOutcome =
+type TranscriptOutcome =
   | { status: 'ready'; errorCode: null }
   | {
       status: 'no_speech'

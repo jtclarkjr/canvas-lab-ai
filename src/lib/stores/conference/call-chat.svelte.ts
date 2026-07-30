@@ -11,7 +11,7 @@ import type {
   ConferenceCallChatMessage,
   ConferenceTextStream
 } from '$lib/conference/types'
-import type { ConferenceRoomStore } from '$lib/stores/conference/room.svelte'
+import type { ConferenceRoomStore } from '$lib/stores/conference/room/types'
 
 type ConferenceCallChatInput = {
   getUserId: () => string
@@ -182,7 +182,3 @@ export function createConferenceCallChatStore({
     }
   }
 }
-
-export type ConferenceCallChatStore = ReturnType<
-  typeof createConferenceCallChatStore
->

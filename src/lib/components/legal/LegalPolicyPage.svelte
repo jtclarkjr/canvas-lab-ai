@@ -1,7 +1,10 @@
 <script lang="ts">
   import { LogIn } from 'lucide-svelte'
   import { onMount, tick } from 'svelte'
-  import type { LegalPolicy, LegalPolicySection } from '$lib/legal/policies'
+  import type {
+    LegalPolicy,
+    LegalPolicySection
+  } from '$lib/legal/policies/types'
 
   let { policy } = $props<{
     policy: LegalPolicy

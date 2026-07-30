@@ -1,4 +1,4 @@
-import type { SettingsTabId } from '$lib/components/settings/tabs'
+import type { SettingsTabId } from '$lib/components/settings/tabs/types'
 
 let isOpen = $state(false)
 let activeTab = $state<SettingsTabId>('general')

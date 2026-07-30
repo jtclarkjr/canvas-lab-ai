@@ -70,5 +70,3 @@ export function createConferenceViewStore() {
     }
   }
 }
-
-export type ConferenceViewStore = ReturnType<typeof createConferenceViewStore>

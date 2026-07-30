@@ -1,12 +1,10 @@
 import type { Tool } from '$lib/canvas/types'
 import type { WorkspaceMode } from '$lib/scenes/types'
 import type { CanvasWorkspaceStoreInput } from '$lib/workspace/types'
-import type { WorkspaceChildStores } from './child-stores.svelte'
-import type { WorkspaceElementActions } from './element-actions'
-import type {
-  WorkspaceCoordinatorState,
-  WorkspaceElements
-} from './state.svelte'
+import type { WorkspaceChildStores } from './child-stores/types'
+import type { WorkspaceElementActions } from './element-actions/types'
+import type { WorkspaceCoordinatorState } from './state.svelte'
+import type { WorkspaceElements } from './state/types'
 
 type WorkspaceCoordinatorActionsInput = {
   state: WorkspaceCoordinatorState
@@ -173,7 +171,3 @@ export function createWorkspaceCoordinatorActions({
     handleViewportPointerDown
   }
 }
-
-export type WorkspaceCoordinatorActions = ReturnType<
-  typeof createWorkspaceCoordinatorActions
->

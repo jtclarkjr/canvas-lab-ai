@@ -21,7 +21,7 @@ import type {
   Point,
   Scene
 } from './types'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 import {
   findElementById,
   nowZ,

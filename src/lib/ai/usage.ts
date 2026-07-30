@@ -1,12 +1,11 @@
 import { z } from 'zod'
+import type { PromptAiUsageFeature } from './usage/types'
 
 export const promptAiUsageFeatures = [
   'canvas_assistant',
   'document_scene_chat',
   'workflow_ai'
 ] as const
-
-export type PromptAiUsageFeature = (typeof promptAiUsageFeatures)[number]
 
 export const promptAiUsageFeatureLabels: Record<PromptAiUsageFeature, string> =
   {
@@ -37,8 +36,6 @@ export const promptAiUsageLimits = [
     capTokens: 50_000
   }
 ] as const
-
-export type PromptAiUsageLimitId = (typeof promptAiUsageLimits)[number]['id']
 
 export const promptAiUsageLimitSchema = z.object({
   id: z.enum(['five_hour', 'weekly']),

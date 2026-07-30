@@ -100,7 +100,3 @@ export function createConferenceDevicesStore({
     switchDevice
   }
 }
-
-export type ConferenceDevicesStore = ReturnType<
-  typeof createConferenceDevicesStore
->

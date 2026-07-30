@@ -5,7 +5,7 @@
   import type { CanvasElement } from '$lib/workspace/schema'
   import type { Scene } from '$lib/scenes/schema'
   import type { Workflow } from '$lib/workflows/schema'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
   import { createCanvasWorkspaceStore } from '$lib/stores/workspace/index.svelte'
   import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import { provideCanvasConferenceStore } from '$lib/stores/conference/index.svelte'

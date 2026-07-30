@@ -7,12 +7,8 @@ import {
   listAssistantThreads,
   updateAssistantThread
 } from '$lib/chat/api'
-import type { AssistantThread } from '$lib/chat/schema'
 import { asParts, partText } from '$lib/scenes/chat-parts'
-
-export type AssistantThreadEntry = AssistantThread & {
-  local?: boolean
-}
+import type { AssistantThreadEntry } from './canvas-assistant/types'
 
 type CanvasAssistantStoreInput = {
   getCanvasId: () => string
@@ -537,5 +533,3 @@ export function createCanvasAssistantStore({
     setStreamingThread
   }
 }
-
-export type CanvasAssistantStore = ReturnType<typeof createCanvasAssistantStore>

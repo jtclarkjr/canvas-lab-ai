@@ -6,9 +6,9 @@ import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
 import { toast } from '$lib/stores/shared/toast.svelte'
 import {
   CANVAS_VISIBILITY_CHANGED_EVENT,
-  canvasVisibilityChannelName,
-  type CanvasVisibilityChangedPayload
+  canvasVisibilityChannelName
 } from '$lib/workspace/canvas-visibility-realtime'
+import type { CanvasVisibilityChangedPayload } from '$lib/workspace/canvas-visibility-realtime/types'
 
 type WorkspaceAccessInput = {
   getActiveCanvasId: () => string

@@ -10,7 +10,7 @@
   import { cubicOut } from 'svelte/easing'
   import { fade, fly } from 'svelte/transition'
   import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import type {
     UpdateWorkflowInput,
     Workflow as CanvasWorkflow,

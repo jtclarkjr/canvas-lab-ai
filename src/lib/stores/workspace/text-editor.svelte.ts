@@ -1,5 +1,5 @@
 import { tick } from 'svelte'
-import type { Command } from '$lib/canvas/commands'
+import type { Command } from '$lib/canvas/commands/types'
 import {
   createCreateTextCommand,
   createDeleteElementCommand,

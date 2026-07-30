@@ -1,7 +1,7 @@
 import { hasConnectorBindingToAnyScene } from '$lib/canvas/diagram-utils'
 import type { WorkflowFlowType } from '$lib/workflows/schema'
-import type { WorkspaceCoordinatorActions } from './actions.svelte'
-import type { WorkspaceChildStores } from './child-stores.svelte'
+import type { WorkspaceCoordinatorActions } from './actions/types'
+import type { WorkspaceChildStores } from './child-stores/types'
 import type { WorkspaceCoordinatorState } from './state.svelte'
 
 type WorkspaceFacadeInput = {

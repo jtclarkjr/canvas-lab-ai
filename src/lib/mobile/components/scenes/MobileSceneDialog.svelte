@@ -10,11 +10,9 @@
   import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
   import { getSceneType } from '$lib/scenes/registry'
   import { toast } from '$lib/stores/shared/toast.svelte'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
-  import {
-    desktopDeviceProfile,
-    type WorkspaceDeviceProfile
-  } from '$lib/workspace/device-profile.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
+  import { desktopDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
   import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
   import MobileDocumentScenePanel from '$lib/mobile/components/scenes/MobileDocumentScenePanel.svelte'
   import MobileSceneEntry, {

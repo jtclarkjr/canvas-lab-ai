@@ -1,5 +1,5 @@
 import { apiRequest } from '$lib/api-client'
-import type { CaptionLanguageCode } from '$lib/conference/captions'
+import type { CaptionLanguageCode } from '$lib/conference/captions/types'
 import {
   captionsTokenResponseSchema,
   conferenceStatusResponseSchema,

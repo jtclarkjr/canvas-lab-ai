@@ -1,4 +1,10 @@
 import { z } from 'zod'
+import type {
+  CaptionLanguageCode,
+  CaptionTextSize,
+  CaptionTextColor,
+  CaptionPrefs
+} from './captions/types'
 
 // LiveKit data-channel topic caption segments travel on. Each speaker
 // transcribes their own microphone and publishes segments; every receiver
@@ -48,8 +54,6 @@ export const CAPTION_LANGUAGE_CODES = [
   'zh'
 ] as const
 
-export type CaptionLanguageCode = (typeof CAPTION_LANGUAGE_CODES)[number]
-
 // Order is the picker order: English first, Japanese second by request.
 export const CAPTION_LANGUAGES: Array<{
   code: CaptionLanguageCode
@@ -69,7 +73,6 @@ export function captionLanguageLabel(code: CaptionLanguageCode) {
 }
 
 export const CAPTION_TEXT_SIZE_CODES = ['small', 'medium', 'large'] as const
-export type CaptionTextSize = (typeof CAPTION_TEXT_SIZE_CODES)[number]
 
 export const DEFAULT_CAPTION_TEXT_SIZE: CaptionTextSize = 'medium'
 
@@ -89,7 +92,6 @@ export const CAPTION_TEXT_COLOR_CODES = [
   'cyan',
   'green'
 ] as const
-export type CaptionTextColor = (typeof CAPTION_TEXT_COLOR_CODES)[number]
 
 export const DEFAULT_CAPTION_TEXT_COLOR: CaptionTextColor = 'theme'
 
@@ -125,10 +127,6 @@ export const captionDataSchema = z.object({
 export type CaptionData = z.infer<typeof captionDataSchema>
 
 const CAPTION_PREFS_KEY = 'canvas-conference-captions'
-
-export type CaptionPrefs = {
-  language?: CaptionLanguageCode
-}
 
 export function loadCaptionPrefs(): CaptionPrefs {
   if (typeof localStorage === 'undefined') {

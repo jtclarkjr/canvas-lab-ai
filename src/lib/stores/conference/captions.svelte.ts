@@ -7,16 +7,18 @@ import {
   DEFAULT_CAPTION_TEXT_COLOR,
   DEFAULT_CAPTION_TEXT_SIZE,
   loadCaptionPrefs,
-  saveCaptionPrefs,
-  type CaptionLanguageCode,
-  type CaptionTextColor,
-  type CaptionTextSize
+  saveCaptionPrefs
 } from '$lib/conference/captions'
+import type {
+  CaptionLanguageCode,
+  CaptionTextColor,
+  CaptionTextSize
+} from '$lib/conference/captions/types'
 import { OPENAI_REALTIME_CALLS_URL } from '$lib/conference/openai-realtime'
 import type { CaptionSegment } from '$lib/conference/types'
 import { toast } from '$lib/stores/shared/toast.svelte'
-import type { ConferenceDevicesStore } from '$lib/stores/conference/devices.svelte'
-import type { ConferenceRoomStore } from '$lib/stores/conference/room.svelte'
+import type { ConferenceDevicesStore } from '$lib/stores/conference/devices/types'
+import type { ConferenceRoomStore } from '$lib/stores/conference/room/types'
 
 type ConferenceCaptionsInput = {
   getCanvasId: () => string
@@ -513,7 +515,3 @@ export function createConferenceCaptionsStore({
     handleData
   }
 }
-
-export type ConferenceCaptionsStore = ReturnType<
-  typeof createConferenceCaptionsStore
->

@@ -9,9 +9,9 @@
   import {
     getSettingsPanelId,
     getSettingsTabId,
-    settingsTabs,
-    type SettingsTabId
+    settingsTabs
   } from '$lib/components/settings/tabs'
+  import type { SettingsTabId } from '$lib/components/settings/tabs/types'
   import { session } from '$lib/stores/shared/session.svelte'
   import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
 

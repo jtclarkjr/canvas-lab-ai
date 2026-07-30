@@ -10,7 +10,7 @@
   } from 'lucide-svelte'
   import { defaultModelId } from '$lib/scenes/models'
   import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import { requestWorkflowAssistant } from '$lib/workflows/api'
   import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
   import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
@@ -403,8 +403,7 @@
           class="max-h-24 min-h-5 w-full resize-none bg-transparent text-xs leading-5 outline-none"
           placeholder={aiPromptPlaceholder}
           aria-label={`Describe the ${aiPromptSubject} to build`}
-          disabled={!canModify || isAsking}
-        ></textarea>
+          disabled={!canModify || isAsking}></textarea>
 
         <div class="flex items-center justify-between gap-1.5">
           <div class="flex min-w-0 flex-1 items-center gap-1">

@@ -1,4 +1,5 @@
-import { createCreateMultipleCommand, type Command } from '$lib/canvas/commands'
+import { createCreateMultipleCommand } from '$lib/canvas/commands'
+import type { Command } from '$lib/canvas/commands/types'
 import { buildDiagramTemplate } from '$lib/canvas/temple'
 import type {
   BuiltDiagramTemplate,

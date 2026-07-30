@@ -1,5 +1,5 @@
 import { findTextAtPoint } from '$lib/canvas/drawing-utils'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 import {
   findTopElementAtPoint,
   isConnectorElement,

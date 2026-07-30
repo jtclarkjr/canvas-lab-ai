@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import WorkflowAssistantPanel from '$lib/components/canvas/workflows/panels/WorkflowAssistantPanel.svelte'
   import WorkflowDetailsPanel from '$lib/components/canvas/workflows/panels/WorkflowDetailsPanel.svelte'
   import type {

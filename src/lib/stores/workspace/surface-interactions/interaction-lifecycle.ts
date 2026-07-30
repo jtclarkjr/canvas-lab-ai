@@ -20,7 +20,7 @@ import {
 } from '$lib/canvas/drawing-utils'
 import type { Point } from './types'
 import { MAX_SCENE_SIZE, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH } from './types'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 import { nowZ, persistElement, snapEndpoint } from './element-utils'
 import { cursorForInteraction, cursorForPoint, setCursorStyle } from './cursor'
 

@@ -1,4 +1,4 @@
-import type { Command } from '$lib/canvas/commands'
+import type { Command } from '$lib/canvas/commands/types'
 import type { ResizeHandle } from '$lib/canvas/types'
 import type {
   Arrowhead,

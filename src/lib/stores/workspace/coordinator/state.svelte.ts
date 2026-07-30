@@ -11,14 +11,7 @@ import type {
 import type { SceneMessage } from '$lib/scenes/schema'
 import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
 import type { CanvasWorkspaceStoreInput } from '$lib/workspace/types'
-
-export type WorkspaceElements = {
-  rootEl: HTMLDivElement | null
-  svgEl: SVGSVGElement | null
-  textInputEl: HTMLTextAreaElement | null
-}
-
-export type ElementSetter<T> = (next: T[] | ((previous: T[]) => T[])) => void
+import type { WorkspaceElements } from './state/types'
 
 export class WorkspaceCoordinatorState {
   canvasId = $state('')

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import type { CanvasWorkspaceStore } from '$lib/mobile/types'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
   import CanvasSurface from '$lib/components/canvas/CanvasSurface.svelte'
   import TextEditor from '$lib/components/shared/TextEditor.svelte'
   import LiveCursors from '$lib/components/canvas/workspace/LiveCursors.svelte'

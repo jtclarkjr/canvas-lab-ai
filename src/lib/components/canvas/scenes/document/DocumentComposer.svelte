@@ -79,8 +79,7 @@
         : 'Ask for changes, or describe a new document…'}
       aria-label="Ask for changes or describe a new document"
       class="document-composer-input max-h-52 w-full resize-none bg-transparent text-sm outline-none"
-      {disabled}
-    ></textarea>
+      {disabled}></textarea>
 
     <div class="flex items-center justify-between gap-2">
       <div class="flex flex-wrap items-center gap-1.5">

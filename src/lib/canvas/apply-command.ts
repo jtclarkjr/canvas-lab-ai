@@ -10,7 +10,7 @@ import type {
   ApplyCommandOptions,
   Command,
   CommandAudit
-} from '$lib/canvas/commands'
+} from '$lib/canvas/commands/types'
 import { textElementToData } from '$lib/canvas/drawing-utils'
 import { connectorToData, shapeToData } from '$lib/canvas/diagram-utils'
 

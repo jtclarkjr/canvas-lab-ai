@@ -285,8 +285,7 @@
         spellcheck="false"
         aria-label="Workflow YAML configuration"
         class="min-h-0 flex-1 resize-none rounded-md border border-input bg-background p-3 font-mono text-xs leading-relaxed text-foreground"
-        disabled={!canModify}
-      ></textarea>
+        disabled={!canModify}></textarea>
       <button
         type="button"
         class="flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"
@@ -308,8 +307,7 @@
         class="min-h-0 flex-1 resize-none rounded-md border border-input bg-background p-3 text-sm leading-relaxed text-foreground"
         placeholder="Workflow notes..."
         aria-label="Workflow notes"
-        disabled={!canModify}
-      ></textarea>
+        disabled={!canModify}></textarea>
       <button
         type="button"
         class="flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground disabled:opacity-60"

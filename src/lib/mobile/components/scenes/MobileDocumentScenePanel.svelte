@@ -27,7 +27,7 @@
     SceneActivity,
     SceneActivityKind
   } from '$lib/scenes/types'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
   import MobileDocumentChatPanel from '$lib/mobile/components/scenes/MobileDocumentChatPanel.svelte'
@@ -544,8 +544,7 @@
             bind:value={markdownDraft}
             disabled={!canModify}
             aria-label="Document markdown"
-            placeholder="Write document markdown..."
-          ></textarea>
+            placeholder="Write document markdown..."></textarea>
         </div>
         <div
           class="grid shrink-0 grid-cols-3 gap-2 border-t border-border/60 bg-card px-3 py-2"

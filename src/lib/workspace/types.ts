@@ -3,7 +3,7 @@ import type { Canvas } from '$lib/canvas/schema'
 import type { CanvasElement } from '$lib/workspace/schema'
 import type { Point } from '$lib/canvas/types'
 import type { Scene } from '$lib/scenes/schema'
-import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
 import type { Workflow } from '$lib/workflows/schema'
 
 export type CursorCoordinateSpace = 'canvas' | 'viewport'

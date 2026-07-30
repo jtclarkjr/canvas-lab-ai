@@ -1,12 +1,9 @@
 import type { Canvas } from '$lib/canvas/schema'
-
-export type CanvasSortKey = 'updated' | 'created' | 'title'
-export type CanvasSortDir = 'asc' | 'desc'
-
-export type CanvasSortState = {
-  key: CanvasSortKey
-  dir: CanvasSortDir
-}
+import type {
+  CanvasSortKey,
+  CanvasSortDir,
+  CanvasSortState
+} from './sort/types'
 
 export const DEFAULT_CANVAS_SORT: CanvasSortState = {
   key: 'updated',

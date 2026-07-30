@@ -10,7 +10,7 @@ import {
   getTextResizeCursor
 } from '$lib/canvas/drawing-utils'
 import type { ActiveInteraction, HitElement, Point } from './types'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 import { findTopElementAtPoint } from './element-utils'
 
 export function setCursorStyle(ctx: SurfaceCtx, next: string | null) {

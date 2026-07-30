@@ -4,7 +4,7 @@ import type {
   CaptionLanguageCode,
   CaptionTextColor,
   CaptionTextSize
-} from '$lib/conference/captions'
+} from '$lib/conference/captions/types'
 import { CALL_CHAT_TEXT_TOPIC } from '$lib/conference/call-chat'
 import {
   getCallSession,
@@ -391,9 +391,7 @@ export function createCanvasConferenceStore({
   }
 }
 
-export type CanvasConferenceStore = ReturnType<
-  typeof createCanvasConferenceStore
->
+type CanvasConferenceStore = ReturnType<typeof createCanvasConferenceStore>
 
 export function provideCanvasConferenceStore(
   input: CanvasConferenceStoreInput

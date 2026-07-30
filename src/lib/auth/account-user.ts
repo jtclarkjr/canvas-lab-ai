@@ -1,7 +1,7 @@
 import { isAccountUser } from '$lib/auth/anonymous'
 import type { User } from '$lib/auth/types'
 
-export type AccountUser = User | Record<string, unknown>
+type AccountUser = User | Record<string, unknown>
 
 export function getSignedInAccountUser(
   sessionUser: unknown,

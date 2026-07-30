@@ -187,8 +187,7 @@
       {placeholder}
       aria-label={placeholder}
       class="max-h-32 min-h-11 w-full resize-none rounded-[1.35rem] border border-border/60 bg-background/80 px-3.5 py-2.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:border-primary/50"
-      {disabled}
-    ></textarea>
+      {disabled}></textarea>
 
     <button
       type="button"

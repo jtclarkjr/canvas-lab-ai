@@ -1,10 +1,8 @@
 <script lang="ts">
   import { colorFromId } from '$lib/canvas/helpers/color-from-id'
   import { segmentMentions } from '$lib/chat/mentions'
-  import {
-    useCanvasChatStore,
-    type ChatEntry
-  } from '$lib/stores/chat/canvas-chat.svelte'
+  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
+  import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
   import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
 

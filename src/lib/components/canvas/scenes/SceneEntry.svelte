@@ -92,8 +92,7 @@
         placeholder="Describe the document you want to draft…"
         aria-label="Describe the document you want to draft"
         class="max-h-60 w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        disabled={readOnly}
-      ></textarea>
+        disabled={readOnly}></textarea>
 
       <div class="flex items-end justify-between gap-3">
         <div class="flex min-w-0 flex-col gap-2">

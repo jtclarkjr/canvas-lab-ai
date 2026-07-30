@@ -10,7 +10,7 @@
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneActivity } from '$lib/scenes/types'
   import { getSceneType } from '$lib/scenes/registry'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void

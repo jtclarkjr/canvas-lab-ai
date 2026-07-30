@@ -1,17 +1,4 @@
-export type LegalPolicySection = {
-  id: string
-  title: string
-  paragraphs?: string[]
-  bullets?: string[]
-}
-
-export type LegalPolicy = {
-  slug: string
-  title: string
-  description: string
-  lastUpdated: string
-  sections: LegalPolicySection[]
-}
+import type { LegalPolicy } from './policies/types'
 
 export const legalPolicies = {
   termsOfService: {

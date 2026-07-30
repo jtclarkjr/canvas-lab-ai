@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test'
-import type { Command } from '$lib/canvas/commands'
+import type { Command } from '$lib/canvas/commands/types'
 import type { DrawFormatting, Path, Point } from '$lib/canvas/types'
 import { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
-import type { SurfaceCtx } from '$lib/stores/workspace/surface-interactions/context'
+import type { SurfaceCtx } from '$lib/stores/workspace/surface-interactions/context/types'
 import {
   setDrawColor,
   setDrawWidth,

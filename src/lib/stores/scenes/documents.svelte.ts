@@ -198,7 +198,7 @@ function createSceneDocumentsStore({
   }
 }
 
-export type SceneDocumentsStore = ReturnType<typeof createSceneDocumentsStore>
+type SceneDocumentsStore = ReturnType<typeof createSceneDocumentsStore>
 
 export function provideSceneDocumentsStore(input: SceneDocumentsStoreInput) {
   const store = createSceneDocumentsStore(input)

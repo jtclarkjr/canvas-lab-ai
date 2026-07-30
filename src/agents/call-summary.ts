@@ -2,10 +2,8 @@ import { inference, llm } from '@livekit/agents'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { callSummarySchema, type CallSummary } from '../lib/conference/schema'
-import {
-  transcriptForSummary,
-  type TranscriptSegmentLike
-} from '../lib/conference/transcript'
+import { transcriptForSummary } from '../lib/conference/transcript'
+import type { TranscriptSegmentLike } from '../lib/conference/transcript/types'
 import type { Database, Json } from '../lib/server/database.types'
 
 type Supabase = SupabaseClient<Database>

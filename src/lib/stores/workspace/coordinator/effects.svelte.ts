@@ -1,6 +1,6 @@
-import type { WorkspaceCoordinatorActions } from './actions.svelte'
-import type { WorkspaceChildStores } from './child-stores.svelte'
-import type { WorkspaceElementActions } from './element-actions'
+import type { WorkspaceCoordinatorActions } from './actions/types'
+import type { WorkspaceChildStores } from './child-stores/types'
+import type { WorkspaceElementActions } from './element-actions/types'
 import type { WorkspaceCoordinatorState } from './state.svelte'
 
 type WorkspaceCoordinatorEffectsInput = {

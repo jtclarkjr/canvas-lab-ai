@@ -3,7 +3,7 @@
   import { MessageSquare, Pencil, Plus, Trash2 } from 'lucide-svelte'
   import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import type { AssistantThreadEntry } from '$lib/stores/chat/canvas-assistant.svelte'
+  import type { AssistantThreadEntry } from '$lib/stores/chat/canvas-assistant/types'
 
   const store = useCanvasChatStore()
 

@@ -1,5 +1,5 @@
 import { createApplyCommand } from '$lib/canvas/apply-command'
-import type { Command } from '$lib/canvas/commands'
+import type { Command } from '$lib/canvas/commands/types'
 import { screenToCanvas } from '$lib/canvas/drawing-utils'
 import type {
   Camera,

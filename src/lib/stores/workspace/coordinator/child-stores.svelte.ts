@@ -16,7 +16,7 @@ import { createWorkspaceSurfaceInteractionsStore } from '$lib/stores/workspace/s
 import { createWorkspaceTempleStore } from '$lib/stores/workspace/temple.svelte'
 import { createWorkspaceTextEditorStore } from '$lib/stores/workspace/text-editor.svelte'
 import type { CanvasWorkspaceStoreInput } from '$lib/workspace/types'
-import type { WorkspaceElementActions } from './element-actions'
+import type { WorkspaceElementActions } from './element-actions/types'
 import type { WorkspaceCoordinatorState } from './state.svelte'
 
 type WorkspaceChildStoresInput = {
@@ -310,5 +310,3 @@ export function createWorkspaceChildStores({
     templeStore
   }
 }
-
-export type WorkspaceChildStores = ReturnType<typeof createWorkspaceChildStores>

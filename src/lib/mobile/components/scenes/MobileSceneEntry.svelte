@@ -111,8 +111,7 @@
       rows="5"
       placeholder="Describe what this scene should contain..."
       class="min-h-36 w-full resize-none rounded-xl border border-border/70 bg-background p-3 text-base outline-none focus:border-primary"
-      disabled={readOnly}
-    ></textarea>
+      disabled={readOnly}></textarea>
   </label>
 
   <button

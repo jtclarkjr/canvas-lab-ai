@@ -16,7 +16,7 @@ import type {
   ShapeKind,
   StrokeStyle
 } from './types'
-import type { SurfaceCtx } from './context'
+import type { SurfaceCtx } from './context/types'
 import {
   allElements,
   isShapeElement,

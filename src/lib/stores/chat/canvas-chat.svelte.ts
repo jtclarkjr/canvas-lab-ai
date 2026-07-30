@@ -13,19 +13,13 @@ import {
   type ChatMessage
 } from '$lib/chat/schema'
 import { createCanvasAssistantStore } from '$lib/stores/chat/canvas-assistant.svelte'
+import type {
+  CanvasChatTab,
+  CanvasChatDisplayMode,
+  ChatEntry
+} from './canvas-chat/types'
 
 const CANVAS_CHAT_CONTEXT = Symbol('canvas-chat-store')
-
-export type CanvasChatTab = 'chat' | 'assistant'
-export type CanvasChatDisplayMode = 'compact' | 'fullscreen'
-
-export type ChatEntryStatus = 'sent' | 'pending' | 'failed'
-
-export type ChatEntry = {
-  message: ChatMessage
-  status: ChatEntryStatus
-  errorMessage?: string
-}
 
 // Module-level caches keyed by canvas id: the skeleton shows only on the
 // first-ever load of a canvas; reopening renders instantly from cache.
@@ -444,7 +438,7 @@ export function createCanvasChatStore({
   }
 }
 
-export type CanvasChatStore = ReturnType<typeof createCanvasChatStore>
+type CanvasChatStore = ReturnType<typeof createCanvasChatStore>
 
 export function provideCanvasChatStore(input: CanvasChatStoreInput) {
   const store = createCanvasChatStore(input)

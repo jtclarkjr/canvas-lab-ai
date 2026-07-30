@@ -12,7 +12,7 @@
   import { fade, fly } from 'svelte/transition'
   import { defaultModelId } from '$lib/scenes/models'
   import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
+  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import {
     createWorkflowVersion,
     listWorkflowVersions,
@@ -354,8 +354,7 @@
             class="min-h-[58dvh] w-full resize-none rounded-xl border border-border/70 bg-background p-3 font-mono text-xs leading-relaxed outline-none focus:border-primary"
             bind:value={yamlDraft}
             disabled={!canModify}
-            aria-label="Workflow YAML"
-          ></textarea>
+            aria-label="Workflow YAML"></textarea>
           <button
             type="button"
             class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
@@ -372,8 +371,7 @@
             bind:value={notesDraft}
             disabled={!canModify}
             aria-label="Workflow notes"
-            placeholder="Workflow notes..."
-          ></textarea>
+            placeholder="Workflow notes..."></textarea>
           <button
             type="button"
             class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
@@ -494,8 +492,7 @@
               bind:value={prompt}
               onkeydown={handlePromptKeydown}
               placeholder="Describe changes to make..."
-              disabled={!canModify || isAsking}
-            ></textarea>
+              disabled={!canModify || isAsking}></textarea>
             <button
               type="button"
               class="h-10 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50"

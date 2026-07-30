@@ -4,9 +4,9 @@ import {
   promptAiUsageFeatureLabels,
   promptAiUsageLimits,
   promptAiUnlimitedFeatureLabels,
-  type PromptAiUsageFeature,
   type PromptAiUsageResponse
 } from '$lib/ai/usage'
+import type { PromptAiUsageFeature } from '$lib/ai/usage/types'
 import {
   isPromptModelLimited,
   isPromptModelUnlimited,

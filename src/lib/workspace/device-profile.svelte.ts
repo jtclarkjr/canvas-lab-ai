@@ -1,13 +1,7 @@
-export type WorkspaceShell = 'desktop' | 'tablet' | 'phone'
-
-export type WorkspaceDeviceProfile = {
-  shell: WorkspaceShell
-  isTouchLike: boolean
-  hasFinePointer: boolean
-  hasHover: boolean
-  viewportWidth: number
-  viewportHeight: number
-}
+import type {
+  WorkspaceShell,
+  WorkspaceDeviceProfile
+} from './device-profile/types'
 
 const PHONE_MAX_WIDTH = 767
 const DESKTOP_MIN_WIDTH = 1180

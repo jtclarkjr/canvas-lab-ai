@@ -19,10 +19,9 @@
     CANVAS_SORT_OPTIONS,
     getNextCanvasSortState,
     parseCanvasSort,
-    sortCanvases,
-    type CanvasSortKey,
-    type CanvasSortState
+    sortCanvases
   } from '$lib/canvas/sort'
+  import type { CanvasSortKey, CanvasSortState } from '$lib/canvas/sort/types'
   import { isAnonymousUser } from '$lib/auth/anonymous'
   import CanvasDeleteDialog from '$lib/components/canvas/home/CanvasDeleteDialog.svelte'
   import CanvasHomeOwnedTile from '$lib/components/canvas/home/CanvasHomeOwnedTile.svelte'

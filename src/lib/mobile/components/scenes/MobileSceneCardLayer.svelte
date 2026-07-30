@@ -2,7 +2,7 @@
   import type { Camera } from '$lib/canvas/types'
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneActivity, WorkspaceMode } from '$lib/scenes/types'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
   import MobileSceneCard from '$lib/mobile/components/scenes/MobileSceneCard.svelte'
 
   type CardHandlers = {
