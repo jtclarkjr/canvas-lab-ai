@@ -1,6 +1,8 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
-  import PlatformIcons from '$lib/components/shared/PlatformIcons.svelte'
+  import { PlatformIcons } from '$lib/components/shared/branding'
+  import { Button, Input } from '$lib/components/ui'
+
   import {
     signInWithEmail,
     signInWithOAuth,
@@ -121,34 +123,40 @@
     {#if authConfig.providers.github || authConfig.providers.google || authConfig.providers.apple}
       <div class="grid gap-2">
         {#if authConfig.providers.github}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('github')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="github" size="sm" />
             <span>Continue with GitHub</span>
-          </button>
+          </Button>
         {/if}
         {#if authConfig.providers.google}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('google')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="google" size="sm" />
             <span>Continue with Google</span>
-          </button>
+          </Button>
         {/if}
         {#if authConfig.providers.apple}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('apple')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="apple" size="sm" />
             <span>Continue with Apple</span>
-          </button>
+          </Button>
         {/if}
       </div>
     {/if}
@@ -205,9 +213,9 @@
           <div transition:slide={{ duration: 200 }}>
             <label class="grid gap-2">
               <span class="text-sm font-medium text-foreground">Name</span>
-              <input
+              <Input
                 bind:value={name}
-                class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+                class="h-12 rounded-2xl bg-card px-4"
                 placeholder="Jane Doe"
                 autocomplete="name"
               />
@@ -217,9 +225,9 @@
 
         <label class="grid gap-2">
           <span class="text-sm font-medium text-foreground">Email</span>
-          <input
+          <Input
             bind:value={email}
-            class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+            class="h-12 rounded-2xl bg-card px-4"
             placeholder="you@example.com"
             autocomplete="email"
             type="email"
@@ -229,30 +237,28 @@
 
         <label class="grid gap-2">
           <span class="text-sm font-medium text-foreground">Password</span>
-          <input
+          <Input
             bind:value={password}
-            class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+            class="h-12 rounded-2xl bg-card px-4"
             placeholder="At least 8 characters"
             autocomplete={mode === 'sign-in'
               ? 'current-password'
               : 'new-password'}
             type="password"
-            minlength="8"
+            minlength={8}
             required
           />
         </label>
 
-        <button
+        <Button
           type="submit"
-          class="rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition hover:brightness-110 disabled:opacity-50"
+          size="lg"
+          class="w-full rounded-2xl"
+          loading={isSubmitting}
           disabled={isSubmitting}
         >
-          {#if isSubmitting}
-            {mode === 'sign-in' ? 'Signing In...' : 'Creating Account...'}
-          {:else}
-            {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
-          {/if}
-        </button>
+          {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
+        </Button>
       </form>
     {/if}
 

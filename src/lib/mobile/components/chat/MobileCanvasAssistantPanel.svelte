@@ -1,5 +1,6 @@
 <script lang="ts">
   import { PanelLeft } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import CanvasAssistantHistorySidebar from '$lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import MobileCanvasAssistantThread from '$lib/mobile/components/chat/MobileCanvasAssistantThread.svelte'
@@ -11,14 +12,14 @@
 </script>
 
 <div class="relative h-full min-h-0">
-  <button
-    type="button"
+  <IconButton
+    label="Open assistant histories"
+    variant="outline"
     class="absolute left-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/60 bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition active:bg-muted"
     onclick={() => (historyOpen = true)}
-    aria-label="Open assistant histories"
   >
     <PanelLeft class="size-4" aria-hidden="true" />
-  </button>
+  </IconButton>
 
   {#if store.assistantActiveThreadId && store.assistantInitialMessages !== null}
     {#key `${canvasId}:${store.assistantActiveThreadId}`}

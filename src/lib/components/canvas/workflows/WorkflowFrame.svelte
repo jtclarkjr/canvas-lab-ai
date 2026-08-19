@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { Database, GitBranch, Maximize2, Trash2 } from 'lucide-svelte'
+  import {
+    Database,
+    GitBranch,
+    Maximize2,
+    MousePointer2,
+    Trash2
+  } from 'lucide-svelte'
   import type { Camera } from '$lib/canvas/types'
   import type { Workflow, WorkflowDefinition } from '$lib/workflows/schema'
   import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
@@ -7,6 +13,7 @@
   import WorkflowGraph from '$lib/components/canvas/workflows/WorkflowGraph.svelte'
   import WorkflowResizeHandle from '$lib/components/canvas/workflows/WorkflowResizeHandle.svelte'
   import WorkflowTitleEditor from '$lib/components/canvas/workflows/WorkflowTitleEditor.svelte'
+  import { IconButton } from '$lib/components/ui'
 
   type FrameHandlers = {
     pointerDown: (event: PointerEvent, workflowId: string) => void
@@ -106,14 +113,14 @@
   }
 
   function handleKeydown(event: KeyboardEvent) {
+    if (event.target !== event.currentTarget) return
     if (event.key !== 'Enter' && event.key !== ' ') return
-    if (!interactive && !canActivate) return
-
     event.preventDefault()
     onFocus(workflow.id)
   }
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events Canvas workflow frames are pointer-draggable surfaces; keyboard focus is provided by the explicit focus control. -->
 <div
   class={`glass-card group absolute flex overflow-hidden p-0 transition-shadow ${
     interactive || canDrag || canActivate
@@ -122,10 +129,10 @@
   } ${focused ? 'ring-2 ring-primary/50' : ''}`}
   style={frameStyle}
   data-workflow-id={workflow.id}
-  role="button"
-  tabindex="0"
+  role="group"
+  tabindex="-1"
   title={interactive || canActivate ? 'Focus workflow' : 'Drag workflow'}
-  aria-label={`${interactive || canActivate ? 'Focus' : 'Drag'} workflow ${workflow.title}`}
+  aria-label={`Workflow ${workflow.title}`}
   onpointerdown={handlePointerDown}
   onpointermove={handlePointerMove}
   onpointerup={handlePointerUp}
@@ -157,32 +164,43 @@
           {steps.length} nodes
         {/if}
       </span>
+      {#if interactive || canActivate}
+        <IconButton
+          variant="ghost"
+          label={`Focus workflow ${workflow.title}`}
+          class="flex size-7 shrink-0 opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100"
+          onclick={(event) => {
+            event.stopPropagation()
+            onFocus(workflow.id)
+          }}
+        >
+          <MousePointer2 class="size-3.5" aria-hidden="true" />
+        </IconButton>
+      {/if}
       {#if interactive}
-        <button
-          type="button"
-          class="hidden size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
+        <IconButton
+          variant="ghost"
+          label="Maximize workflow"
+          class="flex size-7 shrink-0 opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100"
           onclick={(event) => {
             event.stopPropagation()
             onMaximize(workflow.id)
           }}
-          aria-label="Maximize workflow"
-          title="Maximize workflow"
         >
-          <Maximize2 class="size-3.5" />
-        </button>
+          <Maximize2 class="size-3.5" aria-hidden="true" />
+        </IconButton>
         {#if canModify}
-          <button
-            type="button"
-            class="hidden size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive group-hover:flex"
+          <IconButton
+            variant="ghost"
+            label="Delete workflow"
+            class="flex size-7 shrink-0 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100"
             onclick={(event) => {
               event.stopPropagation()
               onDelete(workflow.id)
             }}
-            aria-label="Delete workflow"
-            title="Delete workflow"
           >
-            <Trash2 class="size-3.5" />
-          </button>
+            <Trash2 class="size-3.5" aria-hidden="true" />
+          </IconButton>
         {/if}
       {/if}
     </div>

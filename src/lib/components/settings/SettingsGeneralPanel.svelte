@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ChevronDown } from 'lucide-svelte'
   import { themeOptions } from '$lib/settings/theme-options'
+  import { Select } from '$lib/components/ui'
   import { theme } from '$lib/stores/shared/theme.svelte'
   import type { Theme } from '$lib/stores/shared/types'
 
@@ -78,24 +78,15 @@
         <p class="m-0 text-sm font-medium text-foreground">Appearance</p>
       </div>
 
-      <label class="relative w-full sm:w-40">
+      <label class="w-full sm:w-40">
         <span class="sr-only">Select theme</span>
-        <select
-          class="h-9 w-full cursor-pointer appearance-none rounded-md border border-border bg-background px-3 pr-9 text-sm text-foreground outline-none transition focus:border-primary"
+        <Select
+          class="h-9 rounded-md"
+          options={themeOptions}
           value={theme.current}
           onchange={setTheme}
           aria-label="Select theme"
-        >
-          {#each themeOptions as option (option.value)}
-            <option value={option.value}>{option.label}</option>
-          {/each}
-        </select>
-        <span
-          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        >
-          <ChevronDown class="size-4" />
-        </span>
+        />
       </label>
     </div>
   </div>

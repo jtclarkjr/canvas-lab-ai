@@ -391,14 +391,23 @@ export function createCanvasConferenceStore({
   }
 }
 
-type CanvasConferenceStore = ReturnType<typeof createCanvasConferenceStore>
+export type CanvasConferenceStore = ReturnType<
+  typeof createCanvasConferenceStore
+>
+
+/** Provides an already-created store, enabling isolated component composition and tests. */
+export function provideCanvasConferenceStoreInstance(
+  store: CanvasConferenceStore
+) {
+  setContext(CANVAS_CONFERENCE_CONTEXT, store)
+  return store
+}
 
 export function provideCanvasConferenceStore(
   input: CanvasConferenceStoreInput
 ) {
   const store = createCanvasConferenceStore(input)
-  setContext(CANVAS_CONFERENCE_CONTEXT, store)
-  return store
+  return provideCanvasConferenceStoreInstance(store)
 }
 
 export function useCanvasConferenceStore() {

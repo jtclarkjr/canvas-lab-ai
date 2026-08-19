@@ -23,7 +23,7 @@
   const sheetStyle = $derived(`transform:translateY(${dragY}px)`)
   const tabClass = (active: boolean) =>
     `relative flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-bold transition ${
-      active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+      active ? 'bg-foreground text-background' : 'text-muted-foreground'
     }`
 
   function close() {

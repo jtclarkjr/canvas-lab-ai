@@ -231,6 +231,7 @@
               class={participant.micEnabled
                 ? 'text-muted-foreground'
                 : 'text-destructive'}
+              role="img"
               aria-label={participant.micEnabled
                 ? 'Microphone on'
                 : 'Microphone muted'}

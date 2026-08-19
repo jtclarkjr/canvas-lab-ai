@@ -4,7 +4,7 @@
   import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
   import { segmentMentions } from '$lib/chat/mentions'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   // alwaysVisible: hosts outside the chat window (the call's fullscreen
   // chat panel) control their own visibility, so the auto-scroll behavior
@@ -105,10 +105,7 @@
         {@const label = authorLabel(entry)}
         {@const segs = segmentMentions(entry.message.content, myName)}
         <div class={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
-          <span
-            class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground"
-            style={label.color ? `color:${label.color}` : undefined}
-          >
+          <span class="mb-0.5 px-1 text-[11px] font-medium text-foreground">
             {label.name} · {timeLabel(entry.message.createdAt)}
           </span>
           <div
@@ -116,7 +113,7 @@
               entry.status === 'failed'
                 ? 'border border-destructive/50 bg-destructive/10 text-foreground'
                 : own
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-foreground font-medium text-background'
                   : 'border border-border/60 bg-background/70 text-foreground'
             } ${entry.status === 'pending' ? 'opacity-60' : ''}`}
           >

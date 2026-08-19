@@ -10,7 +10,7 @@
   import { exportAnnotatedNotesPdf } from '$lib/scenes/notes-pdf'
   import { createNotesSceneStore } from '$lib/stores/scenes/notes.svelte'
   import CanvasSurface from '$lib/components/canvas/CanvasSurface.svelte'
-  import TextEditor from '$lib/components/shared/TextEditor.svelte'
+  import { TextEditor } from '$lib/components/shared/editors'
   import NotesToolbar from '$lib/components/canvas/scenes/notes/NotesToolbar.svelte'
 
   let {

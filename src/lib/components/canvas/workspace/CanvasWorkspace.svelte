@@ -12,7 +12,7 @@
   import CanvasActionToolbar from '$lib/components/canvas/workspace/toolbars/CanvasActionToolbar.svelte'
   import CanvasPresenceActions from '$lib/components/canvas/workspace/CanvasPresenceActions.svelte'
   import CanvasSurface from '$lib/components/canvas/CanvasSurface.svelte'
-  import TextEditor from '$lib/components/shared/TextEditor.svelte'
+  import { TextEditor } from '$lib/components/shared/editors'
   import CanvasTitleSwitcher from '$lib/components/canvas/workspace/CanvasTitleSwitcher.svelte'
   import CanvasZoomControls from '$lib/components/canvas/workspace/CanvasZoomControls.svelte'
   import CanvasChat from '$lib/components/canvas/chat/CanvasChat.svelte'

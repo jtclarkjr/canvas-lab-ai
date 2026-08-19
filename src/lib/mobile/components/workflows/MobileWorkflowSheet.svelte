@@ -29,7 +29,7 @@
     WorkflowSettings,
     WorkflowVersion
   } from '$lib/workflows/schema'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   type SheetTab = 'overview' | 'code' | 'notes' | 'versions' | 'assistant'
   type ChatEntry = {

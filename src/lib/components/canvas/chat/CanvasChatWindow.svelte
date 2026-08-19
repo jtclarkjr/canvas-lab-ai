@@ -7,6 +7,7 @@
     Minus,
     Sparkles
   } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import CanvasAssistantWorkspace from '$lib/components/canvas/chat/CanvasAssistantWorkspace.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
@@ -155,8 +156,8 @@
   const tabClass = (active: boolean) =>
     `flex h-7 items-center gap-1.5 rounded-full px-3 text-xs transition ${
       active
-        ? 'bg-primary/10 text-primary'
-        : 'text-muted-foreground hover:text-foreground'
+        ? 'bg-primary/10 font-semibold text-foreground'
+        : 'text-foreground hover:text-primary'
     }`
 </script>
 
@@ -225,35 +226,35 @@
 
     <div class="flex items-center gap-1">
       {#if fullscreen}
-        <button
-          type="button"
+        <IconButton
+          label="Return to compact chat"
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           onclick={restoreCompact}
-          aria-label="Return to compact chat"
           title="Return to compact chat"
         >
           <Minimize2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {:else if store.activeTab === 'assistant'}
-        <button
-          type="button"
+        <IconButton
+          label="Maximize chat"
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           onclick={maximize}
-          aria-label="Maximize chat"
           title="Maximize chat"
         >
           <Maximize2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
-      <button
-        type="button"
+      <IconButton
+        label="Minimize chat"
+        variant="ghost"
         class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
         onclick={() => void minimize()}
-        aria-label="Minimize chat"
         title="Minimize chat"
       >
         <Minus class="size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
     </div>
   </header>
 

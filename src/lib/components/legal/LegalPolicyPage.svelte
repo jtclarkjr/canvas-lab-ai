@@ -22,13 +22,11 @@
       label: `Last Updated: ${policy.lastUpdated}`,
       isHeader: true
     },
-    ...policy.sections.map(
-      (section: LegalPolicySection): TocEntry => ({
-        id: section.id,
-        label: section.title,
-        isHeader: false
-      })
-    )
+    ...policy.sections.map((section: LegalPolicySection): TocEntry => ({
+      id: section.id,
+      label: section.title,
+      isHeader: false
+    }))
   ])
 
   let activeSectionId = $state('')
@@ -41,7 +39,7 @@
   function tocLinkClass(entryId: string, isHeader: boolean, isMobile = false) {
     const inactiveColor = isMobile
       ? 'text-zinc-400 hover:text-zinc-100'
-      : 'text-zinc-500 hover:text-zinc-200'
+      : 'text-zinc-400 hover:text-zinc-100'
 
     return [
       'block text-sm leading-5 transition-colors duration-200',
@@ -129,7 +127,7 @@
   >
     <aside class="hidden lg:block">
       <nav class="sticky top-10 max-h-[calc(100vh-5rem)] overflow-y-auto pr-6">
-        <p class="m-0 mb-4 text-xs font-medium uppercase text-zinc-500">
+        <p class="m-0 mb-4 text-xs font-medium uppercase text-zinc-400">
           On this page
         </p>
         <ol
@@ -176,7 +174,7 @@
       <nav
         class="my-8 rounded-lg border border-zinc-800 bg-zinc-950/70 p-4 lg:hidden"
       >
-        <p class="m-0 mb-3 text-xs font-medium uppercase text-zinc-500">
+        <p class="m-0 mb-3 text-xs font-medium uppercase text-zinc-400">
           On this page
         </p>
         <ol

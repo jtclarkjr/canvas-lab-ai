@@ -19,7 +19,7 @@
     toCanvasHistoryEntry
   } from '$lib/workspace/canvas-history'
   import type { CanvasHistoryEntry } from '$lib/workspace/schema'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   const PAGE_SIZE = 50
 

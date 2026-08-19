@@ -50,7 +50,7 @@
   {/if}
 
   <span
-    class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
+    class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
   >
     {#if pinned}
       <Pin class="size-3" />

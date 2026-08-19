@@ -1,5 +1,6 @@
 <script lang="ts">
   import { PanelLeft } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import CanvasAssistantHistorySidebar from '$lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte'
   import CanvasAssistantPanel from '$lib/components/canvas/chat/CanvasAssistantPanel.svelte'
@@ -23,14 +24,14 @@
       <CanvasAssistantHistorySidebar />
     </div>
 
-    <button
-      type="button"
+    <IconButton
+      label="Open assistant histories"
+      variant="outline"
       class="absolute left-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/60 bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition hover:text-foreground md:hidden"
       onclick={() => (mobileHistoryOpen = true)}
-      aria-label="Open assistant histories"
     >
       <PanelLeft class="size-4" aria-hidden="true" />
-    </button>
+    </IconButton>
   {/if}
 
   <div class="min-w-0 flex-1">

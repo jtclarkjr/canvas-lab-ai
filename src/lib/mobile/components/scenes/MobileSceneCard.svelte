@@ -89,17 +89,21 @@
   }
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions a11y_click_events_have_key_events The card remains pointer-openable; its explicit Open button is the keyboard action. -->
 <div
   class={`glass-card group ${touchLike ? 'pointer-events-auto' : interactive ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex cursor-pointer flex-col overflow-hidden p-3 text-left transition-shadow active:scale-[0.99]`}
   style={cardStyle}
   data-scene-id={scene.id}
-  role="button"
-  tabindex="0"
+  role="group"
+  tabindex="-1"
   title="Open scene"
   aria-label={`Open scene ${scene.title || sceneType?.defaultTitle || 'scene'}`}
   onclick={handleOpen}
   onkeydown={(event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (
+      event.target === event.currentTarget &&
+      (event.key === 'Enter' || event.key === ' ')
+    ) {
       event.preventDefault()
       handlers.open(event, scene.id)
     }
@@ -145,7 +149,7 @@
     <span>{sceneType?.label ?? scene.type}</span>
     {#if activityLabel}
       <span
-        class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary"
+        class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-foreground"
         aria-live="polite"
         aria-label={`${activity?.userName ?? 'A collaborator'} is ${activityLabel?.toLowerCase()}`}
       >

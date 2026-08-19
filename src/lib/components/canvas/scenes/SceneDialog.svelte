@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Minimize2, Trash2 } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import type {
     Scene,
     SceneMessage,
@@ -8,7 +9,7 @@
   import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
   import { getSceneType } from '$lib/scenes/registry'
   import { toast } from '$lib/stores/shared/toast.svelte'
-  import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
+  import { ConfirmDialog } from '$lib/components/shared/feedback'
   import SceneEntry, {
     type SceneEntryStart
   } from '$lib/components/canvas/scenes/SceneEntry.svelte'
@@ -203,7 +204,7 @@
   >
     <div class="flex min-w-0 items-center gap-2">
       <span
-        class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+        class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-foreground"
       >
         {sceneType?.label ?? scene.type}
       </span>
@@ -217,23 +218,23 @@
 
     <div class="flex items-center gap-1">
       {#if canModify}
-        <button
-          type="button"
+        <IconButton
+          label="Delete scene"
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
           onclick={() => (confirmDeleteOpen = true)}
-          aria-label="Delete scene"
         >
           <Trash2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
-      <button
-        type="button"
+      <IconButton
+        label="Minimize scene"
+        variant="ghost"
         class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
         onclick={() => void minimize()}
-        aria-label="Minimize scene"
       >
         <Minimize2 class="size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
     </div>
   </header>
 

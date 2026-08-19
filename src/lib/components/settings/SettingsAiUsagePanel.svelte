@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { ChevronDown, RefreshCw } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import { promptAiUsageResponseSchema } from '$lib/ai/usage'
   import { apiRequest } from '$lib/api-client'
   import type { PromptAiUsageLimit, PromptAiUsageResponse } from '$lib/ai/usage'
@@ -11,9 +12,14 @@
     | 'unlimited-features'
     | 'unlimited-models'
 
-  let { id, labelledby } = $props<{
+  let {
+    id,
+    labelledby,
+    getCurrentTime = Date.now
+  } = $props<{
     id: string
     labelledby: string
+    getCurrentTime?: () => number
   }>()
 
   let usage = $state<PromptAiUsageResponse | null>(null)
@@ -65,7 +71,7 @@
   }
 
   function formatReset(resetsAt: string) {
-    const deltaMs = new Date(resetsAt).getTime() - Date.now()
+    const deltaMs = new Date(resetsAt).getTime() - getCurrentTime()
     if (!Number.isFinite(deltaMs) || deltaMs <= 0) {
       return 'Resets now'
     }
@@ -105,18 +111,18 @@
       AI Usage
     </h2>
 
-    <button
-      type="button"
-      class="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-secondary hover:text-foreground disabled:cursor-default disabled:opacity-60"
+    <IconButton
+      label="Refresh AI usage"
+      variant="ghost"
+      class="size-9"
       onclick={() => void loadUsage()}
       disabled={loading}
-      aria-label="Refresh AI usage"
     >
       <RefreshCw
         class={`size-4 ${loading ? 'animate-spin' : ''}`}
         aria-hidden="true"
       />
-    </button>
+    </IconButton>
   </div>
 
   <div class="border-t border-border">

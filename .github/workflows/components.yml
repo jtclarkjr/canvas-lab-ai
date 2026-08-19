@@ -1,0 +1,53 @@
+name: Component safeguards
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: components-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Types, architecture, tests, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - run: vp check
+      - run: vp dlx sv check
+      - run: vp run check:components
+      - run: vp test
+      - run: vp build
+
+  component-browser:
+    name: Stories, accessibility, behavior, and visuals
+    runs-on: macos-14
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - run: vp exec playwright install chromium firefox webkit
+      - run: vp run storybook:build
+      - run: vp run test:stories
+      - run: vp run test:playwright
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-browser-failures
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7

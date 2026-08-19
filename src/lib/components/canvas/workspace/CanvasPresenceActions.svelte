@@ -4,7 +4,7 @@
   import CanvasHistoryButton from '$lib/components/canvas/workspace/CanvasHistoryButton.svelte'
   import CanvasOptionsButton from '$lib/components/canvas/workspace/CanvasOptionsButton.svelte'
   import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
   import type { DisplayMember } from '$lib/workspace/types'
 
@@ -76,13 +76,13 @@
     align="end"
     bind:open={membersOpen}
   >
-    {#snippet trigger({ id, expanded })}
+    {#snippet trigger({ id, expanded, props })}
       <button
+        {...props}
         type="button"
         class="flex -space-x-2 cursor-pointer"
         aria-controls={id}
         aria-expanded={expanded}
-        onclick={() => (membersOpen = !membersOpen)}
         aria-label={`${members.length} active member${members.length !== 1 ? 's' : ''} — view list`}
       >
         {#each members.slice(0, 5) as member (member.id)}

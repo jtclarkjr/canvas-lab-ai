@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte'
   import { BookMarked, Download, MessageSquare, Save } from 'lucide-svelte'
+  import { Button, Input, Textarea } from '$lib/components/ui'
+
   import {
     markdownDocumentContentSchema,
     type SceneDocument
@@ -180,12 +182,12 @@
   <div
     class="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 px-5 py-2.5"
   >
-    <input
+    <Input
       type="text"
       bind:value={title}
       placeholder="Document title"
       aria-label="Document title"
-      class="min-w-0 flex-1 bg-transparent text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground"
+      class="h-auto min-w-0 flex-1 border-0 bg-transparent px-0 text-sm font-semibold text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:border-0 focus:ring-0"
       disabled={!canModify}
     />
 
@@ -194,38 +196,41 @@
         <span class="text-xs text-muted-foreground">{saveStateLabel}</span>
       {/if}
       <!-- Only useful below md, where chat and editor are toggled. -->
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="sm"
         class="flex h-8 items-center gap-1.5 rounded-full border border-border/60 px-3 text-xs text-muted-foreground transition hover:text-foreground md:hidden"
         onclick={onBack}
         aria-label="Back to AI chat"
       >
         <MessageSquare class="size-3.5" aria-hidden="true" />
         Back to AI
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
         class="flex h-8 items-center gap-1.5 rounded-full border border-border/60 px-3 text-xs text-muted-foreground transition hover:text-foreground"
         onclick={() => downloadMarkdown(title || 'document', markdown)}
         aria-label="Download as Markdown file"
       >
         <Download class="size-3.5" aria-hidden="true" />
         .md
-      </button>
+      </Button>
       {#if canModify}
         {#if sceneDocument.status === 'draft'}
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             class="flex h-8 items-center gap-1.5 rounded-full border border-border/60 px-3 text-xs text-muted-foreground transition hover:text-foreground"
             onclick={onPromote}
             aria-label="Save to the scene's library"
           >
             <BookMarked class="size-3.5" aria-hidden="true" />
             Save to library
-          </button>
+          </Button>
         {/if}
-        <button
-          type="button"
+        <Button
+          size="sm"
           class="flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground transition disabled:opacity-40"
           onclick={() => void saveSnapshot(currentSnapshot(), { manual: true })}
           disabled={!isDirty || isSaving}
@@ -233,16 +238,17 @@
         >
           <Save class="size-3.5" aria-hidden="true" />
           Save
-        </button>
+        </Button>
       {/if}
     </div>
   </div>
 
-  <textarea
+  <Textarea
     bind:value={markdown}
-    class="min-h-0 flex-1 resize-none bg-transparent px-5 py-4 font-mono text-sm leading-relaxed text-foreground outline-none"
+    class="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent px-5 py-4 font-mono text-sm leading-relaxed text-foreground shadow-none outline-none focus:border-0 focus:ring-0"
     placeholder="Document content (markdown)"
     aria-label="Document content in Markdown"
     spellcheck="false"
-    disabled={!canModify}></textarea>
+    disabled={!canModify}
+  />
 </div>

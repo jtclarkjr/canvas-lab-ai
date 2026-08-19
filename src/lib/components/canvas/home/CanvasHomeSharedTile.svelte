@@ -2,7 +2,7 @@
   import { LoaderCircle } from 'lucide-svelte'
   import { fade, scale } from 'svelte/transition'
   import CanvasTilePreview from '$lib/components/canvas/home/CanvasTilePreview.svelte'
-  import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
+  import { RoleBadge } from '$lib/components/shared/canvas'
   import type { Canvas } from '$lib/canvas/schema'
 
   let { canvas, isOpening, isDimmed, dateLabel, dateValue, onNavigate } =

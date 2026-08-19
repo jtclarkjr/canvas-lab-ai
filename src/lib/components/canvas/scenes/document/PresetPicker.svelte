@@ -26,7 +26,7 @@
         type="button"
         class={`rounded-full border px-3 py-1 text-xs transition disabled:opacity-50 ${
           entry.id === categoryId
-            ? 'border-primary/60 bg-primary/10 text-primary'
+            ? 'border-primary/60 bg-primary/10 font-semibold text-foreground'
             : 'border-border/60 text-muted-foreground hover:text-foreground'
         }`}
         onclick={() => onCategoryChange(entry.id)}

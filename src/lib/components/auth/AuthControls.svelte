@@ -3,7 +3,7 @@
   import { getSignedInAccountUser } from '$lib/auth/account-user'
   import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
   import { signOut } from '$lib/auth/session-service'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import { labelForTheme, themeOptions } from '$lib/settings/theme-options'
   import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
   import { session } from '$lib/stores/shared/session.svelte'
@@ -66,13 +66,13 @@
   >
     {#snippet trigger(popover)}
       <button
+        {...popover.props}
         type="button"
         class="flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-border/70 bg-card/80 shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
         aria-label={`${userDisplayName} account menu`}
         aria-haspopup="dialog"
         aria-expanded={popover.expanded}
         aria-controls={popover.id}
-        onclick={() => (popoverOpen = !popoverOpen)}
       >
         {#if userAvatarUrl && !avatarLoadFailed}
           <img

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Check, ClipboardList } from 'lucide-svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
 
   let {
@@ -45,8 +45,9 @@
   align="start"
   {side}
 >
-  {#snippet trigger({ id: popoverId, expanded })}
+  {#snippet trigger({ id: popoverId, expanded, props })}
     <button
+      {...props}
       type="button"
       class={`flex items-center rounded-full border transition disabled:opacity-50 ${
         compact
@@ -54,10 +55,9 @@
           : 'h-8 gap-1.5 px-3 text-xs'
       } ${
         selectedCount > 0
-          ? 'border-primary/60 bg-primary/10 text-primary'
+          ? 'border-primary/60 bg-primary/10 text-foreground'
           : 'border-border/60 bg-background/70 text-muted-foreground hover:text-foreground'
       }`}
-      onclick={() => (open = !open)}
       aria-expanded={expanded}
       aria-haspopup="dialog"
       aria-controls={popoverId}
@@ -94,7 +94,7 @@
           role="checkbox"
           aria-checked={selected}
           class={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-            selected ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            selected ? 'bg-primary/10 text-foreground' : 'hover:bg-muted'
           }`}
           onclick={() => onToggleScene(scene.id)}
           {disabled}
@@ -118,7 +118,7 @@
           role="checkbox"
           aria-checked={selected}
           class={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-            selected ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            selected ? 'bg-primary/10 text-foreground' : 'hover:bg-muted'
           }`}
           onclick={() => onToggleDocument(document.id)}
           {disabled}

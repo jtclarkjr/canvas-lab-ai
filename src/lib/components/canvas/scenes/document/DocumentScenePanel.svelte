@@ -28,7 +28,7 @@
   import type { DraftToolPart } from '$lib/scenes/types'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import { useSceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
-  import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
+  import { ConfirmDialog } from '$lib/components/shared/feedback'
   import DocumentChatPanel from '$lib/components/canvas/scenes/document/DocumentChatPanel.svelte'
   import DocumentComposer from '$lib/components/canvas/scenes/document/DocumentComposer.svelte'
   import DocumentEditorView from '$lib/components/canvas/scenes/document/DocumentEditorView.svelte'
