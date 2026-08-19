@@ -27,10 +27,50 @@ jobs:
       - run: vp test
       - run: vp build
 
-  component-browser:
-    name: Stories, accessibility, behavior, and visuals
+  storybook-build:
+    name: Build Storybook
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - run: vp run storybook:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
+
+  storybook-tests:
+    name: Stories and accessibility
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - run: vp exec playwright install chromium
+      - run: vp run test:stories
+
+  playwright:
+    name: Playwright (${{ matrix.shard }}/${{ matrix.total }})
+    needs: storybook-build
     runs-on: macos-14
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+        total: [4]
     steps:
       - uses: actions/checkout@v4
       - uses: voidzero-dev/setup-vp@v1
@@ -39,15 +79,52 @@ jobs:
           cache: true
       - run: vp install
       - run: vp exec playwright install chromium firefox webkit
-      - run: vp run storybook:build
-      - run: vp run test:stories
-      - run: vp run test:playwright
+      - uses: actions/download-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static
+      - run:
+          vp exec playwright test --retries=0 --reporter=list,blob --shard=${{
+          matrix.shard }}/${{ matrix.total }}
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pw-blob-${{ matrix.shard }}
+          path: blob-report
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 1
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: component-browser-failures
-          path: |
-            playwright-report
-            test-results
+          name: pw-fail-${{ matrix.shard }}-${{ github.run_attempt }}
+          path: test-results
           if-no-files-found: ignore
+          retention-days: 7
+
+  playwright-report:
+    name: Merge Playwright report
+    if: ${{ !cancelled() && needs.playwright.result != 'skipped' }}
+    needs: playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pw-blob-*
+          path: all-blob-reports
+          merge-multiple: true
+      - run: vp exec playwright merge-reports --reporter=html ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pw-report
+          path: playwright-report
+          if-no-files-found: error
+          overwrite: true
           retention-days: 7
