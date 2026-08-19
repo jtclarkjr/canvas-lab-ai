@@ -93,9 +93,10 @@ export function createCanvasChatStore({
         const known = new Set(response.items.map((item) => item.id))
         const extras = entries.filter((entry) => !known.has(entry.message.id))
         entries = [
-          ...response.items.map(
-            (message): ChatEntry => ({ message, status: 'sent' })
-          ),
+          ...response.items.map((message): ChatEntry => ({
+            message,
+            status: 'sent'
+          })),
           ...extras
         ]
         cacheSentMessages(canvasId)
@@ -271,9 +272,10 @@ export function createCanvasChatStore({
     currentCanvasId = canvasId
 
     const cached = chatMessagesCache.get(canvasId)
-    entries = (cached ?? []).map(
-      (message): ChatEntry => ({ message, status: 'sent' })
-    )
+    entries = (cached ?? []).map((message): ChatEntry => ({
+      message,
+      status: 'sent'
+    }))
     unreadCount = 0
     chatLoadError = null
     isLoadingChat = false
