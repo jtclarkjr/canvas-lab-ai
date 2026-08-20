@@ -4,6 +4,10 @@ test('dialog traps focus, closes on Escape, and restores the trigger', async ({
   page
 }) => {
   await page.goto('/iframe.html?id=ui-overlays-dialog--keyboard&viewMode=story')
+  await page.addStyleTag({
+    content:
+      '.ui-dialog-content[data-state="open"] { animation-duration: 10s !important; }'
+  })
   const trigger = page.getByRole('button', { name: 'Open dialog' })
 
   await trigger.focus()
