@@ -35,7 +35,7 @@
     if (!nextOpen) closePanel()
   }}
   {title}
-  layerClass="z-30"
+  layerClass="z-[60]"
   handleLabel="Drag down to close call panel"
 >
   {#snippet header()}
