@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte'
   import { ArrowUp, Globe } from 'lucide-svelte'
   import { IconButton, Textarea } from '$lib/components/ui'
   import { cn } from '$lib/utils'
@@ -59,7 +60,7 @@
     query = ''
   }
 
-  function pick(member: MentionMember) {
+  async function pick(member: MentionMember) {
     if (atIndex === null || !textareaEl) return
     const position = textareaEl.selectionStart
     const before = text.slice(0, atIndex)
@@ -68,13 +69,12 @@
     text = `${before}${inserted}${after}`
     atIndex = null
     query = ''
-    requestAnimationFrame(() => {
-      if (!textareaEl) return
-      const nextPosition = before.length + inserted.length
-      textareaEl.setSelectionRange(nextPosition, nextPosition)
-      textareaEl.focus()
-      autogrow()
-    })
+    await tick()
+    if (!textareaEl) return
+    const nextPosition = before.length + inserted.length
+    textareaEl.setSelectionRange(nextPosition, nextPosition)
+    textareaEl.focus()
+    autogrow()
   }
 
   function send() {
@@ -100,7 +100,7 @@
       }
       if (event.key === 'Enter' || event.key === 'Tab') {
         event.preventDefault()
-        pick(matches[cursor])
+        void pick(matches[cursor])
         return
       }
       if (event.key === 'Escape') {
@@ -149,7 +149,7 @@
           )}
           onmousedown={(event) => {
             event.preventDefault()
-            pick(member)
+            void pick(member)
           }}
         >
           <span

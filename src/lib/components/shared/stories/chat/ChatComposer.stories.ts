@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
-import { expect, fn, userEvent, within } from 'storybook/test'
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test'
 import ChatComposer from '../../chat/ChatComposer.svelte'
 
 const meta = {
@@ -29,6 +29,11 @@ export const Compact: Story = {
     await userEvent.type(textbox, '@gr')
     await userEvent.keyboard('{Enter}')
     await expect(textbox).toHaveValue('@Grace Hopper ')
+    await waitFor(() =>
+      expect((textbox as HTMLTextAreaElement).selectionStart).toBe(
+        '@Grace Hopper '.length
+      )
+    )
     await userEvent.type(textbox, 'ship it')
     await userEvent.keyboard('{Enter}')
     await expect(args.onSend).toHaveBeenCalledWith('@Grace Hopper ship it')
