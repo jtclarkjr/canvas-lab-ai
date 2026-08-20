@@ -8,6 +8,7 @@ node_modules
 /.svelte-kit
 /build
 graphify-out
+dist-agent
 
 # OS
 .DS_Store
@@ -17,8 +18,32 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+!.env.agent.example
 !.env.test
 
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+.lean-ctx
+
+scripts/*
+!scripts/livekit-cloud-dev.mjs
+!scripts/livekit-local-dev.mjs
+!scripts/prepare-livekit-agent-env.mjs
+!scripts/check-component-architecture.mjs
+agent
+/.eve
+supabase/*
+!supabase/migrations/
+!supabase/migrations/*.sql
+!supabase/tests/
+!supabase/tests/*.sql
+livekit.toml
+/supabase
+
+# Component development output
+/storybook-static
+/playwright-report
+/test-results
+/blob-report
