@@ -1,8 +1,10 @@
 <script lang="ts">
   import { PanelLeft } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import CanvasAssistantHistorySidebar from '$lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import MobileCanvasAssistantThread from '$lib/mobile/components/chat/MobileCanvasAssistantThread.svelte'
+  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
 
   let { canvasId } = $props<{ canvasId: string }>()
 
@@ -11,14 +13,14 @@
 </script>
 
 <div class="relative h-full min-h-0">
-  <button
-    type="button"
+  <IconButton
+    label="Open assistant histories"
+    variant="outline"
     class="absolute left-3 top-3 z-10 flex size-9 items-center justify-center rounded-full border border-border/60 bg-background/90 text-muted-foreground shadow-sm backdrop-blur transition active:bg-muted"
     onclick={() => (historyOpen = true)}
-    aria-label="Open assistant histories"
   >
     <PanelLeft class="size-4" aria-hidden="true" />
-  </button>
+  </IconButton>
 
   {#if store.assistantActiveThreadId && store.assistantInitialMessages !== null}
     {#key `${canvasId}:${store.assistantActiveThreadId}`}
@@ -36,16 +38,7 @@
       {store.assistantLoadError ?? store.assistantThreadsLoadError}
     </div>
   {:else}
-    <div
-      class="flex h-full flex-col justify-end gap-3 px-4 py-4"
-      aria-hidden="true"
-    >
-      <div class="h-10 w-3/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-10 w-2/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-      <div class="h-10 w-4/5 animate-pulse rounded-2xl bg-muted/80"></div>
-    </div>
+    <ChatLoadingSkeleton rows={3} size="md" class="h-full" />
   {/if}
 
   {#if historyOpen}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte'
+  import { Button } from '$lib/components/ui'
   import type { Camera, Tool } from '$lib/canvas/types'
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneActivity, WorkspaceMode } from '$lib/scenes/types'
@@ -68,13 +69,14 @@
 </div>
 
 {#if mode === 'scenes' && canEdit}
-  <button
-    type="button"
+  <Button
+    variant="secondary"
+    size="lg"
     class="toolbar-pill fixed bottom-6 left-1/2 z-20 flex h-11 -translate-x-1/2 items-center gap-2 px-4 text-sm font-medium disabled:opacity-60"
     onclick={onCreateScene}
     disabled={isCreatingScene}
   >
     <Plus class="size-4" />
     {isCreatingScene ? 'Creating…' : 'New scene'}
-  </button>
+  </Button>
 {/if}

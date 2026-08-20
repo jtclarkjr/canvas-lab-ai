@@ -1,10 +1,14 @@
 <script lang="ts">
   import { VideoOff } from 'lucide-svelte'
-  import Modal from '$lib/components/shared/Modal.svelte'
+  import { Dialog as Modal } from '$lib/components/ui'
   import { BG_PRESETS, bgThumbnailUrl } from '$lib/conference/backgrounds'
   import type { BgPreset } from '$lib/conference/types'
   import { attachTrack } from '$lib/components/canvas/conference/media-actions'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+
+  let { getBackgroundThumbnail = bgThumbnailUrl } = $props<{
+    getBackgroundThumbnail?: typeof bgThumbnailUrl
+  }>()
 
   const store = useCanvasConferenceStore()
 
@@ -100,7 +104,7 @@
       <div class="flex gap-2 overflow-x-auto pb-1">
         {#each BG_PRESETS as preset (preset.id)}
           {@const active = isActive(preset)}
-          {@const thumb = bgThumbnailUrl(preset)}
+          {@const thumb = getBackgroundThumbnail(preset)}
           <button
             type="button"
             class={`group flex shrink-0 flex-col items-center gap-1.5 rounded-lg p-1 transition ${
@@ -133,14 +137,14 @@
               {:else if thumb}
                 <img
                   src={thumb}
-                  alt={preset.label}
+                  alt=""
                   class="h-full w-full object-cover"
                   loading="lazy"
                 />
               {/if}
             </div>
             <span
-              class={`text-[11px] font-medium ${active ? 'text-primary' : 'text-muted-foreground'}`}
+              class={`text-[11px] font-medium ${active ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}
             >
               {preset.label}
             </span>

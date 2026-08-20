@@ -1,6 +1,8 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
-  import PlatformIcons from '$lib/components/shared/PlatformIcons.svelte'
+  import { PlatformIcons } from '$lib/components/shared/branding'
+  import { Button, Input, SegmentedControl } from '$lib/components/ui'
+
   import {
     signInWithEmail,
     signInWithOAuth,
@@ -28,9 +30,10 @@
   let message = $state<string | null>(null)
   let isSubmitting = $state(false)
 
-  const modeThumbStyle = $derived(
-    `transform: translateX(${mode === 'sign-up' ? '100%' : '0'});`
-  )
+  const authModes = [
+    { value: 'sign-in', label: 'Sign In' },
+    { value: 'sign-up', label: 'Create Account' }
+  ]
 
   function setMode(nextMode: AuthMode) {
     mode = nextMode
@@ -121,34 +124,40 @@
     {#if authConfig.providers.github || authConfig.providers.google || authConfig.providers.apple}
       <div class="grid gap-2">
         {#if authConfig.providers.github}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('github')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="github" size="sm" />
             <span>Continue with GitHub</span>
-          </button>
+          </Button>
         {/if}
         {#if authConfig.providers.google}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('google')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="google" size="sm" />
             <span>Continue with Google</span>
-          </button>
+          </Button>
         {/if}
         {#if authConfig.providers.apple}
-          <button
+          <Button
+            variant="outline"
+            size="lg"
             class="flex items-center justify-center gap-2.5 rounded-2xl border border-border/80 bg-card/70 px-4 py-3 text-sm font-medium transition hover:bg-secondary disabled:opacity-60"
             onclick={() => void handleSso('apple')}
             disabled={isSubmitting}
           >
             <PlatformIcons provider="apple" size="sm" />
             <span>Continue with Apple</span>
-          </button>
+          </Button>
         {/if}
       </div>
     {/if}
@@ -162,52 +171,25 @@
         </div>
       {/if}
 
-      <div
-        class="relative grid w-full grid-cols-2 rounded-full border border-border bg-secondary p-1"
-      >
-        <span
-          class="pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/2)] rounded-full bg-primary shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
-          style={modeThumbStyle}
-          aria-hidden="true"
-        ></span>
-        <button
-          type="button"
-          class={`relative z-10 flex h-9 min-w-0 items-center justify-center rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-200 ${
-            mode === 'sign-in'
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          aria-pressed={mode === 'sign-in'}
-          onclick={() => {
-            setMode('sign-in')
-          }}
-        >
-          Sign In
-        </button>
-        <button
-          type="button"
-          class={`relative z-10 flex h-9 min-w-0 items-center justify-center rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-200 ${
-            mode === 'sign-up'
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          aria-pressed={mode === 'sign-up'}
-          onclick={() => {
-            setMode('sign-up')
-          }}
-        >
-          Create Account
-        </button>
-      </div>
+      <SegmentedControl
+        value={mode}
+        items={authModes}
+        label="Authentication mode"
+        listClass="border border-border bg-secondary"
+        triggerClass="h-9 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+        onValueChange={(value) => {
+          if (value === 'sign-in' || value === 'sign-up') setMode(value)
+        }}
+      ></SegmentedControl>
 
       <form class="grid gap-3" onsubmit={handleSubmit}>
         {#if mode === 'sign-up'}
           <div transition:slide={{ duration: 200 }}>
             <label class="grid gap-2">
               <span class="text-sm font-medium text-foreground">Name</span>
-              <input
+              <Input
                 bind:value={name}
-                class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+                class="h-12 rounded-2xl bg-card px-4"
                 placeholder="Jane Doe"
                 autocomplete="name"
               />
@@ -217,9 +199,9 @@
 
         <label class="grid gap-2">
           <span class="text-sm font-medium text-foreground">Email</span>
-          <input
+          <Input
             bind:value={email}
-            class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+            class="h-12 rounded-2xl bg-card px-4"
             placeholder="you@example.com"
             autocomplete="email"
             type="email"
@@ -229,30 +211,28 @@
 
         <label class="grid gap-2">
           <span class="text-sm font-medium text-foreground">Password</span>
-          <input
+          <Input
             bind:value={password}
-            class="rounded-2xl border border-input bg-card px-4 py-3 outline-none focus:border-primary"
+            class="h-12 rounded-2xl bg-card px-4"
             placeholder="At least 8 characters"
             autocomplete={mode === 'sign-in'
               ? 'current-password'
               : 'new-password'}
             type="password"
-            minlength="8"
+            minlength={8}
             required
           />
         </label>
 
-        <button
+        <Button
           type="submit"
-          class="rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition hover:brightness-110 disabled:opacity-50"
+          size="lg"
+          class="w-full rounded-2xl"
+          loading={isSubmitting}
           disabled={isSubmitting}
         >
-          {#if isSubmitting}
-            {mode === 'sign-in' ? 'Signing In...' : 'Creating Account...'}
-          {:else}
-            {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
-          {/if}
-        </button>
+          {mode === 'sign-in' ? 'Sign In' : 'Create Account'}
+        </Button>
       </form>
     {/if}
 

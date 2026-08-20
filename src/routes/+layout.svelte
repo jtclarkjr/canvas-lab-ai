@@ -5,7 +5,7 @@
   import { injectAnalytics } from '@vercel/analytics/sveltekit'
   import AuthControls from '$lib/components/auth/AuthControls.svelte'
   import SettingsDialog from '$lib/components/settings/SettingsDialog.svelte'
-  import ToastViewport from '$lib/components/shared/ToastViewport.svelte'
+  import { ToastViewport } from '$lib/components/shared/feedback'
   import { session } from '$lib/stores/shared/session.svelte'
   import { theme } from '$lib/stores/shared/theme.svelte'
   import { page } from '$app/state'

@@ -7,6 +7,7 @@
     Minus,
     Sparkles
   } from 'lucide-svelte'
+  import { IconButton, SegmentedControl } from '$lib/components/ui'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import CanvasAssistantWorkspace from '$lib/components/canvas/chat/CanvasAssistantWorkspace.svelte'
   import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
@@ -152,12 +153,10 @@
       : 'glass-card fixed bottom-6 right-6 z-40 h-[min(35rem,calc(100vh-6rem))] w-[min(24rem,calc(100vw-3rem))] cursor-auto flex-col overflow-hidden'
   )
 
-  const tabClass = (active: boolean) =>
-    `flex h-7 items-center gap-1.5 rounded-full px-3 text-xs transition ${
-      active
-        ? 'bg-primary/10 text-primary'
-        : 'text-muted-foreground hover:text-foreground'
-    }`
+  const chatTabs = [
+    { value: 'chat', label: 'Chat' },
+    { value: 'assistant', label: 'Assistant' }
+  ]
 </script>
 
 <svelte:window onkeydown={handleWindowKeydown} />
@@ -188,72 +187,65 @@
         </div>
       </div>
     {:else}
-      <div
-        class="flex items-center gap-1"
-        role="tablist"
-        aria-label="Chat tabs"
+      <SegmentedControl
+        value={store.activeTab}
+        items={chatTabs}
+        label="Chat tabs"
+        size="sm"
+        class="w-56"
+        onValueChange={(value) => {
+          if (value === 'chat' || value === 'assistant') store.setTab(value)
+        }}
       >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={store.activeTab === 'chat'}
-          class={tabClass(store.activeTab === 'chat')}
-          onclick={() => store.setTab('chat')}
-        >
-          <MessageSquare class="size-3.5" />
-          Chat
-          {#if store.unreadCount > 0 && store.activeTab !== 'chat'}
+        {#snippet item(option)}
+          {#if option.value === 'chat'}
+            <MessageSquare class="size-3.5" aria-hidden="true" />
+          {:else}
+            <Sparkles class="size-3.5" aria-hidden="true" />
+          {/if}
+          <span class="truncate">{option.label}</span>
+          {#if option.value === 'chat' && store.unreadCount > 0 && store.activeTab !== 'chat'}
             <span
               class="flex h-4 min-w-4 items-center justify-center rounded-full bg-warning px-1 text-[9px] font-bold text-warning-foreground"
             >
               {store.unreadCount > 9 ? '9+' : store.unreadCount}
             </span>
           {/if}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={store.activeTab === 'assistant'}
-          class={tabClass(store.activeTab === 'assistant')}
-          onclick={() => store.setTab('assistant')}
-        >
-          <Sparkles class="size-3.5" />
-          Assistant
-        </button>
-      </div>
+        {/snippet}
+      </SegmentedControl>
     {/if}
 
     <div class="flex items-center gap-1">
       {#if fullscreen}
-        <button
-          type="button"
+        <IconButton
+          label="Return to compact chat"
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           onclick={restoreCompact}
-          aria-label="Return to compact chat"
           title="Return to compact chat"
         >
           <Minimize2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {:else if store.activeTab === 'assistant'}
-        <button
-          type="button"
+        <IconButton
+          label="Maximize chat"
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           onclick={maximize}
-          aria-label="Maximize chat"
           title="Maximize chat"
         >
           <Maximize2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
-      <button
-        type="button"
+      <IconButton
+        label="Minimize chat"
+        variant="ghost"
         class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
         onclick={() => void minimize()}
-        aria-label="Minimize chat"
         title="Minimize chat"
       >
         <Minus class="size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
     </div>
   </header>
 

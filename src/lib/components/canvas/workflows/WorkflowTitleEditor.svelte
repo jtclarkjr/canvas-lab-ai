@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { Pencil } from 'lucide-svelte'
+  import { IconButton, Input } from '$lib/components/ui'
 
   let {
     title,
@@ -71,11 +72,11 @@
 </script>
 
 {#if editing}
-  <input
-    bind:this={inputEl}
+  <Input
+    bind:ref={inputEl}
     bind:value={draft}
-    maxlength="120"
-    class={`min-w-0 flex-1 rounded border border-input bg-background px-2 py-1 text-sm font-semibold text-foreground outline-none focus:border-primary ${inputClassName}`}
+    maxlength={120}
+    class={`h-8 min-w-0 flex-1 rounded px-2 py-1 text-sm font-semibold ${inputClassName}`}
     aria-label="Workflow title"
     onblur={() => void commitTitle()}
     onclick={stopEvent}
@@ -89,15 +90,15 @@
     {title}
   </span>
   {#if canModify}
-    <button
+    <IconButton
       type="button"
-      class={`hidden size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex focus:flex ${buttonClassName}`}
+      variant="ghost"
+      label="Rename workflow"
+      class={`flex size-7 shrink-0 opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 ${buttonClassName}`}
       onclick={startEditing}
       onpointerdown={stopEvent}
-      aria-label="Rename workflow"
-      title="Rename workflow"
     >
       <Pencil class="size-3.5" aria-hidden="true" />
-    </button>
+    </IconButton>
   {/if}
 {/if}

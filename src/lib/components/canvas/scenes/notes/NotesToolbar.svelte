@@ -10,6 +10,8 @@
     Type,
     Undo2
   } from 'lucide-svelte'
+  import { Button, IconButton } from '$lib/components/ui'
+
   import type { Tool } from '$lib/canvas/types'
 
   let {
@@ -76,19 +78,19 @@
       class="flex items-center gap-0.5 rounded-full border border-border/60 p-0.5"
     >
       {#each tools as tool (tool.id)}
-        <button
-          type="button"
+        <IconButton
+          label={tool.label}
+          variant="ghost"
           class={`flex size-8 items-center justify-center rounded-full transition ${
             selectedTool === tool.id
               ? 'bg-primary text-primary-foreground'
               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
           onclick={() => onToolChange(tool.id)}
-          aria-label={tool.label}
           aria-pressed={selectedTool === tool.id}
         >
           <tool.icon class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/each}
     </div>
 
@@ -111,15 +113,15 @@
 
     <div class="flex items-center gap-0.5">
       {#each widths as width (width)}
-        <button
-          type="button"
+        <IconButton
+          label={`Stroke width ${width}`}
+          variant="ghost"
           class={`flex size-8 items-center justify-center rounded-full transition ${
             drawWidth === width
               ? 'bg-muted text-foreground'
               : 'text-muted-foreground hover:bg-muted'
           }`}
           onclick={() => onWidthChange(width)}
-          aria-label={`Stroke width ${width}`}
           aria-pressed={drawWidth === width}
         >
           <span
@@ -127,52 +129,52 @@
             style={`width:${width + 4}px;height:${width + 4}px`}
             aria-hidden="true"
           ></span>
-        </button>
+        </IconButton>
       {/each}
     </div>
 
-    <button
-      type="button"
+    <IconButton
+      label="Highlighter"
+      variant="ghost"
       class={`flex size-8 items-center justify-center rounded-full transition ${
         isHighlighter
-          ? 'bg-warning/20 text-warning'
+          ? 'bg-warning/20 text-amber-700 dark:text-amber-300'
           : 'text-muted-foreground hover:bg-muted'
       }`}
       onclick={onHighlighterToggle}
-      aria-label="Highlighter"
       aria-pressed={isHighlighter}
     >
       <Highlighter class="size-4" aria-hidden="true" />
-    </button>
+    </IconButton>
 
     <div class="flex items-center gap-0.5">
-      <button
-        type="button"
+      <IconButton
+        label="Undo"
+        variant="ghost"
         class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-30"
         onclick={onUndo}
         disabled={!canUndo}
-        aria-label="Undo"
       >
         <Undo2 class="size-4" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
+      </IconButton>
+      <IconButton
+        label="Redo"
+        variant="ghost"
         class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-30"
         onclick={onRedo}
         disabled={!canRedo}
-        aria-label="Redo"
       >
         <Redo2 class="size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
       {#if selectedCount > 0}
-        <button
-          type="button"
+        <IconButton
+          label={`Delete ${selectedCount} selected`}
+          variant="ghost"
           class="flex size-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
           onclick={onDeleteSelected}
-          aria-label={`Delete ${selectedCount} selected`}
         >
           <Trash2 class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
     </div>
   {/if}
@@ -181,14 +183,15 @@
     {#if saveLabel}
       <span class="text-xs text-muted-foreground">{saveLabel}</span>
     {/if}
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
       class="flex h-8 items-center gap-1.5 rounded-full border border-border/60 px-3 text-xs text-muted-foreground transition hover:text-foreground"
       onclick={onExportPdf}
       aria-label="Download as PDF"
     >
       <Download class="size-3.5" aria-hidden="true" />
       PDF
-    </button>
+    </Button>
   </div>
 </div>

@@ -178,7 +178,6 @@
             for="draw-color-mobile"
             style={`background:${color}`}
             title="Stroke color"
-            aria-label="Stroke color"
           >
             <Palette class="size-4 opacity-0" aria-hidden="true" />
           </label>

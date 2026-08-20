@@ -3,7 +3,7 @@
   import { segmentMentions } from '$lib/chat/mentions'
   import type { ConferenceCallChatEntry } from '$lib/conference/types'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   const store = useCanvasConferenceStore()
 
@@ -63,9 +63,15 @@
       {@const segs = segmentMentions(entry.message.content, myName)}
       <div class={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
         <span
-          class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground"
-          style={own ? undefined : `color:${entry.message.author.color}`}
+          class="mb-0.5 flex items-center gap-1 px-1 text-[11px] font-medium text-muted-foreground"
         >
+          {#if !own}
+            <span
+              class="size-1.5 shrink-0 rounded-full"
+              style={`background-color:${entry.message.author.color}`}
+              aria-hidden="true"
+            ></span>
+          {/if}
           {authorName(entry)} · {timeLabel(entry.message.createdAt)}
         </span>
         <div

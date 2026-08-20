@@ -1,5 +1,6 @@
 <script lang="ts">
   import { FileText, Maximize2, NotebookPen, Sparkles } from 'lucide-svelte'
+  import { Card, IconButton } from '$lib/components/ui'
   import type { Camera } from '$lib/canvas/types'
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneActivity } from '$lib/scenes/types'
@@ -106,72 +107,82 @@
   }
 </script>
 
-<div
-  class={`glass-card group ${interactive || canActivate ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex ${
+<Card
+  variant="glass"
+  interactive={interactive || canActivate}
+  class={`group ${interactive || canActivate ? 'pointer-events-auto' : 'pointer-events-none'} absolute flex ${
     interactive && canModify
       ? 'cursor-grab active:cursor-grabbing'
       : canActivate
         ? 'cursor-pointer'
         : 'cursor-default'
   } flex-col overflow-hidden p-3 transition-shadow hover:shadow-[0_18px_60px_rgba(15,23,42,0.2)]`}
-  style={cardStyle}
-  data-scene-id={scene.id}
-  role="button"
-  tabindex={interactive || canActivate ? 0 : -1}
-  title={interactive ? 'Double-click to open' : 'Switch to scenes'}
-  aria-label={`${interactive ? 'Open' : 'Switch to'} scene ${scene.title || sceneType?.defaultTitle || 'scene'}${interactive ? ' (double-click)' : ''}`}
-  onpointerdown={handlePointerDown}
-  onpointermove={handlePointerMove}
-  onpointerup={handlePointerUp}
-  onpointercancel={handlePointerCancel}
-  onclick={handleClick}
-  ondblclick={(event) => handlers.open(event, scene.id)}
-  onkeydown={handleKeydown}
 >
-  <div class="flex items-center gap-2">
-    <TypeIcon
-      class="size-4 shrink-0 text-muted-foreground"
-      aria-hidden="true"
-    />
-    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-      {scene.title || sceneType?.defaultTitle || 'Scene'}
-    </span>
-    <button
-      type="button"
-      class="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
-      onclick={(event) => handlers.open(event, scene.id)}
-      title="Open scene"
-      aria-label="Open scene"
+  {#snippet child({ props })}
+    <div
+      {...props}
+      style={cardStyle}
+      data-scene-id={scene.id}
+      role="button"
+      tabindex={interactive || canActivate ? 0 : -1}
+      title={interactive ? 'Double-click to open' : 'Switch to scenes'}
+      aria-label={`${interactive ? 'Open' : 'Switch to'} scene ${scene.title || sceneType?.defaultTitle || 'scene'}${interactive ? ' (double-click)' : ''}`}
+      onpointerdown={handlePointerDown}
+      onpointermove={handlePointerMove}
+      onpointerup={handlePointerUp}
+      onpointercancel={handlePointerCancel}
+      onclick={handleClick}
+      ondblclick={(event) => handlers.open(event, scene.id)}
+      onkeydown={handleKeydown}
     >
-      <Maximize2 class="size-3.5" />
-    </button>
-  </div>
+      <div class="flex items-center gap-2">
+        <TypeIcon
+          class="size-4 shrink-0 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <span
+          class="min-w-0 flex-1 truncate text-sm font-semibold text-foreground"
+        >
+          {scene.title || sceneType?.defaultTitle || 'Scene'}
+        </span>
+        <IconButton
+          label="Open scene"
+          variant="ghost"
+          class="hidden size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
+          onclick={(event) => handlers.open(event, scene.id)}
+          title="Open scene"
+        >
+          <Maximize2 class="size-3.5" />
+        </IconButton>
+      </div>
 
-  <div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-    <span>{sceneType?.label ?? scene.type}</span>
-    {#if activityLabel}
-      <span
-        class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary"
-        aria-live="polite"
-        aria-label={`${activity?.userName ?? 'A collaborator'} is ${activityLabel?.toLowerCase()}`}
+      <div class="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+        <span>{sceneType?.label ?? scene.type}</span>
+        {#if activityLabel}
+          <span
+            class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-foreground"
+            aria-live="polite"
+            aria-label={`${activity?.userName ?? 'A collaborator'} is ${activityLabel?.toLowerCase()}`}
+          >
+            <Sparkles class="size-3 animate-pulse" aria-hidden="true" />
+            {activityLabel}
+          </span>
+        {/if}
+      </div>
+
+      <div
+        class="mt-2 flex-1 overflow-hidden text-xs leading-relaxed text-muted-foreground"
       >
-        <Sparkles class="size-3 animate-pulse" aria-hidden="true" />
-        {activityLabel}
-      </span>
-    {/if}
-  </div>
+        {#if typeof scene.settings.preview === 'string' && scene.settings.preview}
+          {scene.settings.preview}
+        {:else}
+          <span class="italic opacity-70">Click to open</span>
+        {/if}
+      </div>
 
-  <div
-    class="mt-2 flex-1 overflow-hidden text-xs leading-relaxed text-muted-foreground"
-  >
-    {#if typeof scene.settings.preview === 'string' && scene.settings.preview}
-      {scene.settings.preview}
-    {:else}
-      <span class="italic opacity-70">Click to open</span>
-    {/if}
-  </div>
-
-  {#if interactive && canModify}
-    <SceneResizeHandle sceneId={scene.id} {handlers} />
-  {/if}
-</div>
+      {#if interactive && canModify}
+        <SceneResizeHandle sceneId={scene.id} {handlers} />
+      {/if}
+    </div>
+  {/snippet}
+</Card>

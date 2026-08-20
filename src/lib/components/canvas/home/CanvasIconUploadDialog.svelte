@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { ImageOff, LoaderCircle, Upload } from 'lucide-svelte'
+  import { ImageOff, Upload } from 'lucide-svelte'
   import { removeCanvasIcon, uploadCanvasIcon } from '$lib/canvas/api'
-  import Modal from '$lib/components/shared/Modal.svelte'
+  import { Button, Dialog as Modal } from '$lib/components/ui'
+
   import type { Canvas } from '$lib/canvas/schema'
 
   let {
@@ -210,47 +211,38 @@
       class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
       {#if canvas?.iconPath}
-        <button
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-full border border-destructive/30 px-4 py-2 text-sm font-semibold text-destructive transition hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
+          variant="outline"
+          class="border-destructive/30 text-destructive hover:bg-destructive/10"
+          loading={removing}
           onclick={() => void handleRemove()}
           disabled={isBusy}
         >
-          {#if removing}
-            <LoaderCircle class="size-4 animate-spin" aria-hidden="true" />
-            Removing
-          {:else}
+          {#if !removing}
             <ImageOff class="size-4" aria-hidden="true" />
-            Remove icon
           {/if}
-        </button>
+          Remove icon
+        </Button>
       {/if}
       <div
         class="flex flex-col-reverse gap-3 sm:ml-auto sm:flex-row sm:justify-end"
       >
-        <button
-          type="button"
-          class="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60"
+        <Button
+          variant="outline"
           onclick={() => {
             open = false
           }}
           disabled={isBusy}
         >
           Cancel
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+        </Button>
+        <Button
+          loading={uploading}
           onclick={() => void handleUpload()}
           disabled={!selectedFile || isBusy}
         >
-          {#if uploading}
-            <LoaderCircle class="size-4 animate-spin" aria-hidden="true" />
-            Uploading
-          {:else}
-            Upload icon
-          {/if}
-        </button>
+          Upload icon
+        </Button>
       </div>
     </div>
   </div>

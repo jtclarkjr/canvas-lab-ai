@@ -13,7 +13,7 @@
     Wrench,
     X
   } from 'lucide-svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
 
   const store = useCanvasConferenceStore()
@@ -87,15 +87,15 @@
   side="top"
   bind:open
 >
-  {#snippet trigger({ id, expanded })}
+  {#snippet trigger({ id, expanded, props })}
     <button
+      {...props}
       type="button"
       class={`flex size-11 items-center justify-center rounded-full transition ${
         expanded
           ? 'bg-primary/15 text-primary'
           : 'bg-secondary text-foreground hover:bg-muted'
       }`}
-      onclick={() => (open = !open)}
       title="Meeting tools"
       aria-label="Meeting tools"
       aria-controls={id}

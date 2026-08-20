@@ -1,5 +1,6 @@
 <script lang="ts">
   import { MessageCircle } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
 
   let { buttonEl = $bindable(null) } = $props<{
@@ -13,16 +14,16 @@
      buttons + 2 × gap-2 = 124px) + its bottom-6 (24px) + an 8px gap. While
      the window is open the launcher hides but stays in the DOM so the
      minimize FLIP can measure its live rect. -->
-<button
-  bind:this={buttonEl}
-  type="button"
+<IconButton
+  bind:ref={buttonEl}
+  label={store.unreadCount > 0 && !store.open
+    ? `Open canvas chat (${store.unreadCount} unread message${store.unreadCount !== 1 ? 's' : ''})`
+    : 'Open canvas chat'}
+  variant="secondary"
   class={`toolbar-pill toolbar-button fixed bottom-[156px] right-6 z-30 transition-opacity ${
     store.open ? 'pointer-events-none opacity-0' : 'pointer-events-auto'
   }`}
   onclick={() => store.openWindow()}
-  aria-label={store.unreadCount > 0 && !store.open
-    ? `Open canvas chat (${store.unreadCount} unread message${store.unreadCount !== 1 ? 's' : ''})`
-    : 'Open canvas chat'}
 >
   <MessageCircle class="size-4" aria-hidden="true" />
   {#if store.unreadCount > 0 && !store.open}
@@ -33,4 +34,4 @@
       {store.unreadCount > 9 ? '9+' : store.unreadCount}
     </span>
   {/if}
-</button>
+</IconButton>

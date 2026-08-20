@@ -13,7 +13,7 @@
   import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
   import { desktopDeviceProfile } from '$lib/workspace/device-profile.svelte'
   import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
+  import { ConfirmDialog } from '$lib/components/shared/feedback'
   import MobileDocumentScenePanel from '$lib/mobile/components/scenes/MobileDocumentScenePanel.svelte'
   import MobileSceneEntry, {
     type MobileSceneEntryStart
@@ -332,7 +332,7 @@
     <div class="flex items-center justify-between gap-3">
       <div class="flex min-w-0 items-center gap-2">
         <span
-          class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+          class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-foreground"
         >
           {sceneType?.label ?? scene.type}
         </span>

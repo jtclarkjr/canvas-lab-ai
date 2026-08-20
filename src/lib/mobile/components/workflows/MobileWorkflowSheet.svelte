@@ -8,8 +8,6 @@
     NotebookPen,
     Save
   } from 'lucide-svelte'
-  import { cubicOut } from 'svelte/easing'
-  import { fade, fly } from 'svelte/transition'
   import { defaultModelId } from '$lib/scenes/models'
   import type { Scene } from '$lib/scenes/schema'
   import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
@@ -29,7 +27,8 @@
     WorkflowSettings,
     WorkflowVersion
   } from '$lib/workflows/schema'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  import { BottomSheet, SegmentedControl } from '$lib/components/ui'
 
   type SheetTab = 'overview' | 'code' | 'notes' | 'versions' | 'assistant'
   type ChatEntry = {
@@ -88,6 +87,7 @@
     { id: 'versions' as SheetTab, label: 'Versions', icon: History },
     { id: 'assistant' as SheetTab, label: 'AI', icon: Bot }
   ]
+  const tabItems = tabs.map((tab) => ({ value: tab.id, label: tab.label }))
   const canSend = $derived(canModify && !isAsking && prompt.trim().length > 0)
   const followKey = $derived(`${messages.length}:${isAsking}`)
 
@@ -262,256 +262,241 @@
   }
 </script>
 
-<div class="fixed inset-0 z-50" transition:fade={{ duration: 120 }}>
-  <button
-    type="button"
-    class="absolute inset-0 bg-black/35"
-    onclick={onClose}
-    aria-label="Close workflow sheet"
-  ></button>
-
-  <div
-    class="absolute inset-x-0 bottom-0 z-10 flex h-[94dvh] flex-col overflow-hidden rounded-t-2xl border border-border/70 bg-card text-card-foreground shadow-2xl"
-    role="dialog"
-    aria-label="Workflow editor"
-    transition:fly={{ y: 36, duration: 180, easing: cubicOut }}
-  >
-    <header class="shrink-0 border-b border-border/60 px-4 pb-3 pt-2">
-      <button
-        type="button"
-        class="mx-auto mb-3 block h-5 w-16 rounded-full"
-        onclick={onClose}
-        aria-label="Close workflow sheet"
+<BottomSheet
+  open
+  onOpenChange={(nextOpen) => {
+    if (!nextOpen) onClose()
+  }}
+  title="Workflow editor"
+  heightClass="h-[94dvh]"
+  handleLabel="Drag down to close workflow sheet"
+>
+  {#snippet header()}
+    <div class="border-b border-border/60 px-4 pb-3">
+      <SegmentedControl
+        value={activeTab}
+        items={tabItems}
+        label="Workflow editor sections"
+        onValueChange={(value) => {
+          if (tabs.some((tab) => tab.id === value))
+            activeTab = value as SheetTab
+        }}
       >
-        <span class="mx-auto block h-1 w-10 rounded-full bg-muted-foreground/30"
-        ></span>
-      </button>
-      <div class="flex rounded-full bg-muted/50 p-1">
-        {#each tabs as tab (tab.id)}
-          <button
-            type="button"
-            class={`flex h-9 min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 text-xs font-bold transition ${
-              activeTab === tab.id
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground'
-            }`}
-            onclick={() => (activeTab = tab.id)}
-            aria-pressed={activeTab === tab.id}
-          >
+        {#snippet item(option)}
+          {@const tab = tabs.find((entry) => entry.id === option.value)}
+          {#if tab}
             <tab.icon class="size-3.5" aria-hidden="true" />
-            <span class="truncate">{tab.label}</span>
-          </button>
-        {/each}
-      </div>
-    </header>
+          {/if}
+          <span class="truncate">{option.label}</span>
+        {/snippet}
+      </SegmentedControl>
+    </div>
+  {/snippet}
 
-    <div class="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-      {#if activeTab === 'overview'}
-        <div class="space-y-4">
-          <label class="block">
-            <span
-              class="mb-1 block text-xs font-bold uppercase tracking-wide text-muted-foreground"
-            >
-              Title
-            </span>
-            <input
-              class="h-11 w-full rounded-xl border border-border/70 bg-background px-3 text-sm outline-none focus:border-primary"
-              bind:value={titleDraft}
-              maxlength="120"
-              disabled={!canModify}
-            />
-          </label>
-          <button
-            type="button"
-            class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-            onclick={() => void saveTitle()}
-            disabled={!canModify || isSaving}
+  <div class="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+    {#if activeTab === 'overview'}
+      <div class="space-y-4">
+        <label class="block">
+          <span
+            class="mb-1 block text-xs font-bold uppercase tracking-wide text-muted-foreground"
           >
-            {isSaving ? 'Saving...' : 'Save title'}
-          </button>
-          <div class="rounded-xl border border-border/70 bg-background/70 p-3">
-            <p
-              class="text-xs font-bold uppercase tracking-wide text-muted-foreground"
-            >
-              Context
-            </p>
-            <p class="mt-1 text-sm text-muted-foreground">
-              {workflow.settings.context.sceneIds.length} scenes,
-              {workflow.settings.context.documentIds.length} documents selected.
-            </p>
-            <p class="mt-1 text-xs text-muted-foreground">
-              {scenes.length} scenes and
-              {scenes.flatMap((scene: Scene) =>
-                sceneDocumentsStore.getItems(scene.id)
-              ).length}
-              saved/draft documents are available on this canvas.
-            </p>
+            Title
+          </span>
+          <input
+            class="h-11 w-full rounded-xl border border-border/70 bg-background px-3 text-sm outline-none focus:border-primary"
+            bind:value={titleDraft}
+            maxlength="120"
+            disabled={!canModify}
+          />
+        </label>
+        <button
+          type="button"
+          class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          onclick={() => void saveTitle()}
+          disabled={!canModify || isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save title'}
+        </button>
+        <div class="rounded-xl border border-border/70 bg-background/70 p-3">
+          <p
+            class="text-xs font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            Context
+          </p>
+          <p class="mt-1 text-sm text-muted-foreground">
+            {workflow.settings.context.sceneIds.length} scenes,
+            {workflow.settings.context.documentIds.length} documents selected.
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {scenes.length} scenes and
+            {scenes.flatMap((scene: Scene) =>
+              sceneDocumentsStore.getItems(scene.id)
+            ).length}
+            saved/draft documents are available on this canvas.
+          </p>
+        </div>
+      </div>
+    {:else if activeTab === 'code'}
+      <div class="space-y-3">
+        <textarea
+          class="min-h-[58dvh] w-full resize-none rounded-xl border border-border/70 bg-background p-3 font-mono text-xs leading-relaxed outline-none focus:border-primary"
+          bind:value={yamlDraft}
+          disabled={!canModify}
+          aria-label="Workflow YAML"></textarea>
+        <button
+          type="button"
+          class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          onclick={() => void saveYaml()}
+          disabled={!canModify || isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save YAML'}
+        </button>
+      </div>
+    {:else if activeTab === 'notes'}
+      <div class="space-y-3">
+        <textarea
+          class="min-h-[58dvh] w-full resize-none rounded-xl border border-border/70 bg-background p-3 text-sm leading-relaxed outline-none focus:border-primary"
+          bind:value={notesDraft}
+          disabled={!canModify}
+          aria-label="Workflow notes"
+          placeholder="Workflow notes..."></textarea>
+        <button
+          type="button"
+          class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          onclick={() => void saveNotes()}
+          disabled={!canModify || isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save notes'}
+        </button>
+      </div>
+    {:else if activeTab === 'versions'}
+      <div class="space-y-3">
+        <button
+          type="button"
+          class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          onclick={() => void saveVersion()}
+          disabled={!canModify || isSavingVersion}
+        >
+          {isSavingVersion ? 'Saving...' : 'Save version'}
+        </button>
+        {#if isLoadingVersions}
+          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <LoaderCircle class="size-4 animate-spin" />
+            Loading versions...
           </div>
-        </div>
-      {:else if activeTab === 'code'}
-        <div class="space-y-3">
-          <textarea
-            class="min-h-[58dvh] w-full resize-none rounded-xl border border-border/70 bg-background p-3 font-mono text-xs leading-relaxed outline-none focus:border-primary"
-            bind:value={yamlDraft}
-            disabled={!canModify}
-            aria-label="Workflow YAML"></textarea>
-          <button
-            type="button"
-            class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-            onclick={() => void saveYaml()}
-            disabled={!canModify || isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Save YAML'}
-          </button>
-        </div>
-      {:else if activeTab === 'notes'}
-        <div class="space-y-3">
-          <textarea
-            class="min-h-[58dvh] w-full resize-none rounded-xl border border-border/70 bg-background p-3 text-sm leading-relaxed outline-none focus:border-primary"
-            bind:value={notesDraft}
-            disabled={!canModify}
-            aria-label="Workflow notes"
-            placeholder="Workflow notes..."></textarea>
-          <button
-            type="button"
-            class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-            onclick={() => void saveNotes()}
-            disabled={!canModify || isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Save notes'}
-          </button>
-        </div>
-      {:else if activeTab === 'versions'}
-        <div class="space-y-3">
-          <button
-            type="button"
-            class="h-10 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50"
-            onclick={() => void saveVersion()}
-            disabled={!canModify || isSavingVersion}
-          >
-            {isSavingVersion ? 'Saving...' : 'Save version'}
-          </button>
-          {#if isLoadingVersions}
-            <div class="flex items-center gap-2 text-sm text-muted-foreground">
-              <LoaderCircle class="size-4 animate-spin" />
-              Loading versions...
-            </div>
-          {:else if versions.length === 0}
-            <p class="text-sm text-muted-foreground">No versions saved yet.</p>
-          {:else}
-            <div class="space-y-2">
-              {#each versions as version (version.id)}
-                <div
-                  class="rounded-xl border border-border/70 bg-background/70 p-3"
+        {:else if versions.length === 0}
+          <p class="text-sm text-muted-foreground">No versions saved yet.</p>
+        {:else}
+          <div class="space-y-2">
+            {#each versions as version (version.id)}
+              <div
+                class="rounded-xl border border-border/70 bg-background/70 p-3"
+              >
+                <p class="truncate text-sm font-semibold">{version.title}</p>
+                <p class="text-xs text-muted-foreground">
+                  {new Date(version.createdAt).toLocaleString()}
+                </p>
+                <button
+                  type="button"
+                  class="mt-2 h-9 rounded-full border border-border/70 px-3 text-xs font-semibold disabled:opacity-50"
+                  onclick={() => void restoreVersion(version)}
+                  disabled={!canModify}
                 >
-                  <p class="truncate text-sm font-semibold">{version.title}</p>
-                  <p class="text-xs text-muted-foreground">
-                    {new Date(version.createdAt).toLocaleString()}
-                  </p>
+                  Restore
+                </button>
+              </div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {:else}
+      <div class="flex min-h-full flex-col gap-3">
+        <VirtualizedMessageList
+          items={messages}
+          keyForItem={(message) => message.id}
+          estimateSize={92}
+          active={activeTab === 'assistant'}
+          followMode="when-at-end"
+          {followKey}
+          className="min-h-[36dvh] max-h-[58dvh]"
+        >
+          {#snippet item(message)}
+            <div
+              class={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
+            >
+              <div
+                class={`max-w-[88%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                  message.role === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-border/70 bg-background/70'
+                }`}
+              >
+                <p class="whitespace-pre-wrap">{message.text}</p>
+                {#if message.proposal}
                   <button
                     type="button"
-                    class="mt-2 h-9 rounded-full border border-border/70 px-3 text-xs font-semibold disabled:opacity-50"
-                    onclick={() => void restoreVersion(version)}
-                    disabled={!canModify}
+                    class="mt-2 inline-flex h-8 items-center gap-1 rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+                    onclick={() =>
+                      void applyProposal(message.id, message.proposal!)}
+                    disabled={applyingProposalIds.includes(message.id) ||
+                      appliedProposalIds.includes(message.id)}
                   >
-                    Restore
+                    {#if appliedProposalIds.includes(message.id)}
+                      <Check class="size-3" aria-hidden="true" />
+                      Applied
+                    {:else}
+                      Apply proposal
+                    {/if}
                   </button>
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </div>
-      {:else}
-        <div class="flex min-h-full flex-col gap-3">
-          <VirtualizedMessageList
-            items={messages}
-            keyForItem={(message) => message.id}
-            estimateSize={92}
-            active={activeTab === 'assistant'}
-            followMode="when-at-end"
-            {followKey}
-            className="min-h-[36dvh] max-h-[58dvh]"
-          >
-            {#snippet item(message)}
-              <div
-                class={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-              >
-                <div
-                  class={`max-w-[88%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border/70 bg-background/70'
-                  }`}
-                >
-                  <p class="whitespace-pre-wrap">{message.text}</p>
-                  {#if message.proposal}
-                    <button
-                      type="button"
-                      class="mt-2 inline-flex h-8 items-center gap-1 rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground disabled:opacity-60"
-                      onclick={() =>
-                        void applyProposal(message.id, message.proposal!)}
-                      disabled={applyingProposalIds.includes(message.id) ||
-                        appliedProposalIds.includes(message.id)}
-                    >
-                      {#if appliedProposalIds.includes(message.id)}
-                        <Check class="size-3" aria-hidden="true" />
-                        Applied
-                      {:else}
-                        Apply proposal
-                      {/if}
-                    </button>
-                  {/if}
-                </div>
+                {/if}
               </div>
-            {/snippet}
+            </div>
+          {/snippet}
 
-            {#snippet after()}
-              {#if isAsking}
-                <div
-                  class="mt-3 flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                  <LoaderCircle class="size-4 animate-spin" />
-                  Thinking...
-                </div>
-              {/if}
-            {/snippet}
+          {#snippet after()}
+            {#if isAsking}
+              <div
+                class="mt-3 flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <LoaderCircle class="size-4 animate-spin" />
+                Thinking...
+              </div>
+            {/if}
+          {/snippet}
 
-            {#snippet empty()}
-              {#if !isAsking}
-                <p class="py-8 text-center text-sm text-muted-foreground">
-                  Ask AI to revise this workflow for mobile.
-                </p>
-              {/if}
-            {/snippet}
-          </VirtualizedMessageList>
-          <div
-            class="sticky bottom-0 -mx-4 border-t border-border/60 bg-card px-4 py-3"
-          >
-            <textarea
-              class="mb-2 max-h-32 min-h-20 w-full resize-none rounded-xl border border-border/70 bg-background p-3 text-sm outline-none focus:border-primary"
-              bind:value={prompt}
-              onkeydown={handlePromptKeydown}
-              placeholder="Describe changes to make..."
-              disabled={!canModify || isAsking}></textarea>
-            <button
-              type="button"
-              class="h-10 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50"
-              onclick={() => void askAssistant()}
-              disabled={!canSend}
-            >
-              Ask AI
-            </button>
-          </div>
-        </div>
-      {/if}
-
-      {#if error}
-        <p
-          class="mt-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive"
+          {#snippet empty()}
+            {#if !isAsking}
+              <p class="py-8 text-center text-sm text-muted-foreground">
+                Ask AI to revise this workflow for mobile.
+              </p>
+            {/if}
+          {/snippet}
+        </VirtualizedMessageList>
+        <div
+          class="sticky bottom-0 -mx-4 border-t border-border/60 bg-card px-4 py-3"
         >
-          {error}
-        </p>
-      {/if}
-    </div>
+          <textarea
+            class="mb-2 max-h-32 min-h-20 w-full resize-none rounded-xl border border-border/70 bg-background p-3 text-sm outline-none focus:border-primary"
+            bind:value={prompt}
+            onkeydown={handlePromptKeydown}
+            placeholder="Describe changes to make..."
+            disabled={!canModify || isAsking}></textarea>
+          <button
+            type="button"
+            class="h-10 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            onclick={() => void askAssistant()}
+            disabled={!canSend}
+          >
+            Ask AI
+          </button>
+        </div>
+      </div>
+    {/if}
+
+    {#if error}
+      <p class="mt-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+        {error}
+      </p>
+    {/if}
   </div>
-</div>
+</BottomSheet>

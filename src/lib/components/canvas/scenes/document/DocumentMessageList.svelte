@@ -19,7 +19,7 @@
     writeDocumentPart
   } from '$lib/scenes/chat-parts'
   import type { DisplayMessage } from '$lib/scenes/types'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   let {
     messages,
@@ -82,10 +82,7 @@
     >
       {#if message.role === 'user'}
         {@const label = userLabel(message)}
-        <span
-          class="mb-0.5 px-1 text-[11px] font-medium text-muted-foreground"
-          style={label.color ? `color:${label.color}` : undefined}
-        >
+        <span class="mb-0.5 px-1 text-[11px] font-medium text-foreground">
           {label.name}
         </span>
       {:else}
@@ -99,7 +96,7 @@
       <div
         class={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           message.role === 'user'
-            ? 'bg-primary text-primary-foreground'
+            ? 'bg-foreground font-medium text-background'
             : 'border border-border/60 bg-background/70 text-foreground'
         }`}
       >
@@ -170,7 +167,9 @@
         <div
           class="max-w-[85%] rounded-2xl border border-dashed border-primary/40 bg-primary/5 px-4 py-2.5 text-sm leading-relaxed text-foreground"
         >
-          <span class="mb-1 flex items-center gap-1.5 text-xs text-primary">
+          <span
+            class="mb-1 flex items-center gap-1.5 text-xs font-semibold text-foreground"
+          >
             <Sparkles class="size-3 animate-pulse" />
             {remoteGeneratorName || 'A collaborator'} is generating…
           </span>
