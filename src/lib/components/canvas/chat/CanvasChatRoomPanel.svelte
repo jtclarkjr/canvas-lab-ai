@@ -5,6 +5,7 @@
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
   import { segmentMentions } from '$lib/chat/mentions'
   import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
 
   // alwaysVisible: hosts outside the chat window (the call's fullscreen
   // chat panel) control their own visibility, so the auto-scroll behavior
@@ -60,19 +61,7 @@
 
 <div class="flex h-full min-h-0 flex-col">
   {#if store.isLoadingChat}
-    <div
-      class="flex flex-1 flex-col justify-end gap-3 px-4 py-4"
-      aria-hidden="true"
-    >
-      <div class="h-9 w-3/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-9 w-2/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-      <div class="h-9 w-4/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-9 w-3/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-    </div>
+    <ChatLoadingSkeleton class="flex-1" />
   {:else}
     <VirtualizedMessageList
       items={store.entries}

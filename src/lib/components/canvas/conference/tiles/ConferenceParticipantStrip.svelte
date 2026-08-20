@@ -2,6 +2,7 @@
   import { MicOff } from 'lucide-svelte'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
   import { attachTrack } from '$lib/components/canvas/conference/media-actions'
+  import { Avatar } from '$lib/components/shared/identity'
 
   let { placement } = $props<{ placement: 'above' | 'below' }>()
 
@@ -45,12 +46,12 @@
           class={`h-full w-full object-cover ${participant.isLocal ? '-scale-x-100' : ''}`}
         ></video>
       {:else}
-        <span
-          class="flex h-full w-full items-center justify-center text-[10px] font-bold"
-          style={`background-color:${participant.color};color:var(--canvas-avatar-foreground)`}
-        >
-          {participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
-        </span>
+        <Avatar
+          name={participant.name}
+          fallback={participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
+          color={participant.color}
+          class="size-full text-[10px] font-bold text-[var(--canvas-avatar-foreground)]"
+        />
       {/if}
       {#if !participant.micEnabled}
         <span

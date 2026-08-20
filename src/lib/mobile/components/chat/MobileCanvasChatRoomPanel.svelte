@@ -5,6 +5,7 @@
   import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
   import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
 
   let { userId, alwaysVisible = false } = $props<{
     userId: string
@@ -53,19 +54,7 @@
 
 <div class="flex h-full min-h-0 flex-col">
   {#if store.isLoadingChat}
-    <div
-      class="flex flex-1 flex-col justify-end gap-3 px-4 py-4"
-      aria-hidden="true"
-    >
-      <div class="h-10 w-3/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-10 w-2/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-      <div class="h-10 w-4/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-10 w-3/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-    </div>
+    <ChatLoadingSkeleton size="md" class="flex-1" />
   {:else}
     <VirtualizedMessageList
       items={store.entries}

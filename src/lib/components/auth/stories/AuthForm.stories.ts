@@ -20,9 +20,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.click(
-      canvas.getByRole('button', { name: 'Create Account' })
-    )
+    await userEvent.click(canvas.getByRole('tab', { name: 'Create Account' }))
     await userEvent.type(canvas.getByLabelText('Name'), 'Ada Lovelace')
     await userEvent.type(canvas.getByLabelText('Email'), 'ada@example.com')
     await userEvent.type(canvas.getByLabelText('Password'), 'safe-password')

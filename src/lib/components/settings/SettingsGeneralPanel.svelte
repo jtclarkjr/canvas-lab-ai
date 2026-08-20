@@ -3,6 +3,7 @@
   import { Select } from '$lib/components/ui'
   import { theme } from '$lib/stores/shared/theme.svelte'
   import type { Theme } from '$lib/stores/shared/types'
+  import { Avatar } from '$lib/components/shared/identity'
 
   let { id, labelledby, displayName, email, avatarUrl, initial } = $props<{
     id: string
@@ -12,16 +13,6 @@
     avatarUrl: string | null
     initial: string
   }>()
-
-  let avatarLoadFailed = $state(false)
-  let lastAvatarUrl = $state<string | null>(null)
-
-  $effect(() => {
-    if (avatarUrl !== lastAvatarUrl) {
-      lastAvatarUrl = avatarUrl
-      avatarLoadFailed = false
-    }
-  })
 
   function setTheme(event: Event) {
     theme.set((event.currentTarget as HTMLSelectElement).value as Theme)
@@ -37,22 +28,13 @@
 
   <div class="border-t border-border">
     <div class="flex items-start gap-4 border-b border-border py-5">
-      <div
-        class="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground"
-      >
-        {#if avatarUrl && !avatarLoadFailed}
-          <img
-            src={avatarUrl}
-            alt={`${displayName} avatar`}
-            class="size-full object-cover"
-            onerror={() => {
-              avatarLoadFailed = true
-            }}
-          />
-        {:else}
-          {initial}
-        {/if}
-      </div>
+      <Avatar
+        name={displayName}
+        src={avatarUrl}
+        fallback={initial}
+        class="size-12 bg-primary text-sm text-primary-foreground"
+        decorative={false}
+      />
 
       <div class="min-w-0 flex-1 space-y-4">
         <div>

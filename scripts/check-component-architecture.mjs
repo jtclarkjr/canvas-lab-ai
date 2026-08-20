@@ -116,6 +116,45 @@ const coveredFeatureRoots = [
   }
 ]
 const errors = []
+const manualDialogAllowlist = new Map([
+  [
+    'src/lib/components/canvas/chat/CanvasChatWindow.svelte',
+    'persistent FLIP chat window with deliberate minimize-only dismissal'
+  ],
+  [
+    'src/lib/components/canvas/conference/layout/ConferenceFullscreen.svelte',
+    'fullscreen conference workspace'
+  ],
+  [
+    'src/lib/components/canvas/conference/layout/ConferenceFullscreenPanel.svelte',
+    'non-modal panel nested inside the conference workspace'
+  ],
+  [
+    'src/lib/components/canvas/scenes/SceneDialog.svelte',
+    'desktop scene FLIP transition into its source card'
+  ],
+  [
+    'src/lib/components/canvas/workflows/WorkflowFullscreenView.svelte',
+    'fullscreen workflow workspace'
+  ],
+  [
+    'src/lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte',
+    'modeless draggable and resizable workspace panel'
+  ],
+  [
+    'src/lib/mobile/components/conference/MobileConferenceFullscreen.svelte',
+    'fullscreen conference workspace'
+  ],
+  [
+    'src/lib/mobile/components/navigation/MobileTopMenu.svelte',
+    'anchored modeless navigation panel'
+  ],
+  [
+    'src/lib/mobile/components/scenes/MobileSceneDialog.svelte',
+    'dual desktop FLIP and mobile drag surface pending animation split'
+  ]
+])
+const seenManualDialogs = new Set()
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -194,6 +233,21 @@ for (const file of sourceFiles) {
     errors.push(`${relative}: bits-ui may only be imported by /components/ui`)
   }
 
+  if (
+    !insideUi &&
+    file.endsWith('.svelte') &&
+    (/<dialog(?:\s|>)/.test(content) ||
+      /role\s*=\s*['"]dialog['"]/.test(content))
+  ) {
+    if (!manualDialogAllowlist.has(relative)) {
+      errors.push(
+        `${relative}: manual dialog surfaces must compose Dialog, Drawer, or BottomSheet from $lib/components/ui`
+      )
+    } else {
+      seenManualDialogs.add(relative)
+    }
+  }
+
   if (!insideUi && /from\s+['"]\$lib\/components\/ui\//.test(content)) {
     errors.push(
       `${relative}: cross-layer UI imports must use $lib/components/ui`
@@ -236,6 +290,14 @@ for (const file of sourceFiles) {
         errors.push(`${relative}: /shared cannot import ${specifier}`)
       }
     }
+  }
+}
+
+for (const [relative, reason] of manualDialogAllowlist) {
+  if (!seenManualDialogs.has(relative)) {
+    errors.push(
+      `${relative}: stale manual dialog allowlist entry (${reason}); remove it after migrating the surface`
+    )
   }
 }
 

@@ -168,14 +168,14 @@
   @keyframes ui-dialog-content-in {
     from {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.95);
+      transform: scale(0.95);
     }
   }
 
   @keyframes ui-dialog-content-out {
     to {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.95);
+      transform: scale(0.95);
     }
   }
 

@@ -16,7 +16,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await userEvent.click(
-      canvas.getByRole('button', { name: 'Switch to Workflows mode' })
+      canvas.getByRole('tab', { name: 'Switch to Workflows mode' })
     )
     await expect(canvas.getByTestId('scene-result')).toHaveTextContent(
       'workflows'

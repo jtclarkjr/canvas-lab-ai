@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { ChevronDown, RefreshCw } from 'lucide-svelte'
-  import { IconButton } from '$lib/components/ui'
+  import { IconButton, Skeleton } from '$lib/components/ui'
   import { promptAiUsageResponseSchema } from '$lib/ai/usage'
   import { apiRequest } from '$lib/api-client'
   import type { PromptAiUsageLimit, PromptAiUsageResponse } from '$lib/ai/usage'
@@ -314,12 +314,12 @@
     {:else if loading}
       <div class="space-y-5 border-b border-border py-5" aria-hidden="true">
         <div class="space-y-2">
-          <div class="h-4 w-32 animate-pulse rounded bg-muted"></div>
-          <div class="h-2 w-full animate-pulse rounded-full bg-muted"></div>
+          <Skeleton shape="text" class="w-32" />
+          <Skeleton class="h-2 w-full rounded-full" />
         </div>
         <div class="space-y-2">
-          <div class="h-4 w-28 animate-pulse rounded bg-muted"></div>
-          <div class="h-2 w-full animate-pulse rounded-full bg-muted"></div>
+          <Skeleton shape="text" class="w-28" />
+          <Skeleton class="h-2 w-full rounded-full" />
         </div>
       </div>
     {/if}

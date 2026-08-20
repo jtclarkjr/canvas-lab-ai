@@ -1,14 +1,21 @@
 export const crossBrowserVisualStories = {
   ui: [
     'ui-actions-button--default',
+    'ui-feedback-skeleton--default',
     'ui-forms-input--invalid',
+    'ui-layout-card--selected',
+    'ui-navigation-segmentedcontrol--default',
+    'ui-overlays-bottomsheet--open',
     'ui-overlays-dialog--open',
+    'ui-overlays-drawer--open',
     'ui-overlays-popover--open'
   ],
   shared: [
     'shared-chat-chatcomposer--compact',
+    'shared-chat-chatloadingskeleton--desktop',
     'shared-collections-virtualizedmessagelist--default',
-    'shared-feedback-confirmdialog--open'
+    'shared-feedback-confirmdialog--open',
+    'shared-identity-avatar--initials'
   ],
   desktop: [
     'desktop-auth-authform--default',

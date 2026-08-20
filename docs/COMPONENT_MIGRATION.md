@@ -8,8 +8,8 @@ pass.
 | Phase | Sections | Status |
 | --- | --- | --- |
 | 1 | Architecture, Storybook, browser tooling | Complete |
-| 2 | `components/ui` primitives | Complete |
-| 3 | `components/shared` domain components | Complete |
+| 2 | `components/ui` primitives, including overlays, cards, switchers, and skeletons | Complete |
+| 3 | `components/shared` domain components, including identity and chat loading | Complete |
 | 4 | Auth, settings, legal, home, search, access | Complete |
 | 5 | Workspace, sharing, navigation, toolbars | Complete |
 | 6 | Chat, scenes, documents, notes | Complete |
@@ -17,11 +17,11 @@ pass.
 | 8 | Workspace routers, cleanup, final full-coverage gate | Complete |
 
 The final architecture check covers every production `.svelte` component below
-the desktop and mobile component roots. The completed baseline contains 147
-components, 147 exact story files, 206 Storybook cases, and 257 Playwright
-visual/behavior cases (201 Chromium visual states, 19 critical states repeated
-in Firefox and WebKit, plus 18 focused cross-browser behavior cases). This
-stores 239 durable visual baselines instead of tripling every story image.
+the desktop and mobile component roots. The completed baseline contains 154
+components, 154 exact story files, 228 Storybook cases, and 304 Playwright
+visual/behavior cases (222 Chromium visual states, 26 critical states repeated
+in Firefox and WebKit, plus 30 focused cross-browser behavior cases). This
+stores 274 durable visual baselines instead of tripling every story image.
 
 ## Ongoing migration rule
 

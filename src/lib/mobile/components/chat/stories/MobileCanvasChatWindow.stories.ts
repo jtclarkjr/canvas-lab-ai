@@ -19,13 +19,13 @@ export const Closes: Story = {
   args: { fixtureId: 'closes' },
   tags: ['!visual'],
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
+    const body = within(canvasElement.ownerDocument.body)
     await userEvent.click(
-      canvas.getByRole('button', { name: 'Close canvas chat' })
+      body.getByRole('button', { name: 'Close canvas chat' })
     )
     await waitFor(() =>
       expect(
-        canvas.queryByRole('dialog', { name: 'Canvas chat' })
+        body.queryByRole('dialog', { name: 'Canvas chat' })
       ).not.toBeInTheDocument()
     )
   }

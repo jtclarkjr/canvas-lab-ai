@@ -1,7 +1,7 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
   import { PlatformIcons } from '$lib/components/shared/branding'
-  import { Button, Input } from '$lib/components/ui'
+  import { Button, Input, SegmentedControl } from '$lib/components/ui'
 
   import {
     signInWithEmail,
@@ -30,9 +30,10 @@
   let message = $state<string | null>(null)
   let isSubmitting = $state(false)
 
-  const modeThumbStyle = $derived(
-    `transform: translateX(${mode === 'sign-up' ? '100%' : '0'});`
-  )
+  const authModes = [
+    { value: 'sign-in', label: 'Sign In' },
+    { value: 'sign-up', label: 'Create Account' }
+  ]
 
   function setMode(nextMode: AuthMode) {
     mode = nextMode
@@ -170,43 +171,16 @@
         </div>
       {/if}
 
-      <div
-        class="relative grid w-full grid-cols-2 rounded-full border border-border bg-secondary p-1"
-      >
-        <span
-          class="pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/2)] rounded-full bg-primary shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
-          style={modeThumbStyle}
-          aria-hidden="true"
-        ></span>
-        <button
-          type="button"
-          class={`relative z-10 flex h-9 min-w-0 items-center justify-center rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-200 ${
-            mode === 'sign-in'
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          aria-pressed={mode === 'sign-in'}
-          onclick={() => {
-            setMode('sign-in')
-          }}
-        >
-          Sign In
-        </button>
-        <button
-          type="button"
-          class={`relative z-10 flex h-9 min-w-0 items-center justify-center rounded-full px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-200 ${
-            mode === 'sign-up'
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          aria-pressed={mode === 'sign-up'}
-          onclick={() => {
-            setMode('sign-up')
-          }}
-        >
-          Create Account
-        </button>
-      </div>
+      <SegmentedControl
+        value={mode}
+        items={authModes}
+        label="Authentication mode"
+        listClass="border border-border bg-secondary"
+        triggerClass="h-9 text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+        onValueChange={(value) => {
+          if (value === 'sign-in' || value === 'sign-up') setMode(value)
+        }}
+      ></SegmentedControl>
 
       <form class="grid gap-3" onsubmit={handleSubmit}>
         {#if mode === 'sign-up'}

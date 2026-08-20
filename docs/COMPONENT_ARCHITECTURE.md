@@ -34,6 +34,11 @@ be merged into conditional mega-components.
 - Svelte 5 typed props and snippets are the component interface.
 - Bindable state uses `$bindable`; behavior notifications use callback props.
 - Components forward relevant DOM props, `class`, and element references.
+- Surface primitives such as `Card` own their visual classes. A typed child
+  snippet preserves a consumer-owned anchor or interactive element without
+  exposing class-builder helpers.
+- Centered dialogs use neutral fade/scale motion; directional slide motion is
+  reserved for drawers and bottom sheets.
 - Icon-only actions require an accessible `label`.
 - Cross-layer imports use each layer's public `index.ts` or a domain barrel.
 - Temporary compatibility wrappers must be removed before a migration phase is
@@ -68,15 +73,15 @@ As of 2026-08-20, the enforced component inventory is:
 
 | Layer | Organization | Components |
 | --- | --- | ---: |
-| `components/ui` | actions, forms, feedback, overlays | 9 |
-| `components/shared` | branding, canvas, chat, collections, editors, feedback | 7 |
+| `components/ui` | actions, forms, feedback, layout, navigation, overlays | 14 |
+| `components/shared` | branding, canvas, chat, collections, editors, feedback, identity | 9 |
 | desktop and mobile features | 26 separately titled feature sections | 131 |
-| **Total** | exact component-to-story coverage | **147** |
+| **Total** | exact component-to-story coverage | **154** |
 
-The browser safeguards cover 206 Storybook interaction/accessibility cases,
-201 Chromium visual stories, 19 critical visual stories in each of Firefox and
-WebKit, and 18 focused cross-browser behavior cases. The Playwright run executes
-257 cases and stores 239 visual baselines. Temporary actual images, diffs,
+The browser safeguards cover 228 Storybook interaction/accessibility cases,
+222 Chromium visual stories, 26 critical visual stories in each of Firefox and
+WebKit, and 30 focused cross-browser behavior cases. The Playwright run executes
+304 cases and stores 274 visual baselines. Temporary actual images, diffs,
 traces, reports, and built Storybook output are ignored; expected baselines are
 versioned so CI has a durable known-good comparison.
 
