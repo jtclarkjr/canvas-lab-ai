@@ -17,7 +17,7 @@
   import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
   import WorkflowContextPicker from '$lib/components/canvas/workflows/panels/WorkflowContextPicker.svelte'
   import WorkflowDraggablePanel from '$lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
   import type {
     UpdateWorkflowInput,
     Workflow,

@@ -1,5 +1,7 @@
 <script lang="ts">
   import { ArrowUp } from 'lucide-svelte'
+  import { IconButton, Textarea } from '$lib/components/ui'
+
   import { documentCategories } from '$lib/scenes/document-categories'
   import { defaultModelId } from '$lib/scenes/models'
   import { sceneTypes } from '$lib/scenes/registry'
@@ -68,7 +70,7 @@
           type="button"
           class={`rounded-xl border px-4 py-2 text-sm transition disabled:opacity-50 ${
             selectedType === entry.id
-              ? 'border-primary/60 bg-primary/10 text-primary'
+              ? 'border-primary/60 bg-primary/10 font-semibold text-foreground'
               : 'border-border/60 text-muted-foreground hover:text-foreground'
           }`}
           onclick={() => (selectedType = entry.id)}
@@ -83,16 +85,17 @@
 
   <div class="w-full max-w-xl">
     <div class="surface-card flex flex-col gap-3 rounded-2xl p-4">
-      <textarea
-        bind:this={textareaEl}
+      <Textarea
+        bind:ref={textareaEl}
         bind:value={prompt}
         oninput={autogrow}
         onkeydown={handleKeydown}
-        rows="3"
+        rows={3}
         placeholder="Describe the document you want to draft…"
         aria-label="Describe the document you want to draft"
-        class="max-h-60 w-full resize-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        disabled={readOnly}></textarea>
+        class="max-h-60 min-h-20 w-full resize-none border-0 bg-transparent text-sm text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:border-0 focus:ring-0"
+        disabled={readOnly}
+      />
 
       <div class="flex items-end justify-between gap-3">
         <div class="flex min-w-0 flex-col gap-2">
@@ -112,15 +115,14 @@
           />
         </div>
 
-        <button
-          type="button"
+        <IconButton
+          label="Start"
           class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition disabled:opacity-40"
           onclick={submit}
           disabled={!canSubmit}
-          aria-label="Start"
         >
           <ArrowUp class="size-4" aria-hidden="true" />
-        </button>
+        </IconButton>
       </div>
     </div>
   </div>

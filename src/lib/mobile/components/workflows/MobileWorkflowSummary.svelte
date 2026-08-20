@@ -2,6 +2,7 @@
   import { Database, Workflow } from 'lucide-svelte'
   import type { Workflow as CanvasWorkflow } from '$lib/workflows/schema'
   import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
+  import { Card } from '$lib/components/ui'
 
   let { workflow } = $props<{ workflow: CanvasWorkflow }>()
 </script>
@@ -10,7 +11,7 @@
   {#if isDatabaseFlowDefinition(workflow.definition)}
     <div class="space-y-3">
       {#each workflow.definition.tables as table (table.id)}
-        <section class="rounded-xl border border-border/70 bg-card p-3">
+        <Card as="section" padding="sm">
           <div class="mb-2 flex items-center gap-2">
             <Database class="size-4 text-primary" aria-hidden="true" />
             <h3 class="min-w-0 flex-1 truncate text-sm font-semibold">
@@ -34,13 +35,13 @@
               </div>
             {/each}
           </div>
-        </section>
+        </Card>
       {/each}
     </div>
   {:else}
     <div class="space-y-3">
       {#each workflow.definition.steps as step, index (step.id)}
-        <section class="rounded-xl border border-border/70 bg-card p-3">
+        <Card as="section" padding="sm">
           <div class="mb-1 flex items-center gap-2">
             <span
               class="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
@@ -68,7 +69,7 @@
               {/each}
             </div>
           {/if}
-        </section>
+        </Card>
       {/each}
 
       {#if workflow.definition.steps.length === 0}

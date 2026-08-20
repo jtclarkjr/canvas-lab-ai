@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Check, Link, X } from 'lucide-svelte'
-  import Modal from '$lib/components/shared/Modal.svelte'
-  import RoleBadge from '$lib/components/shared/RoleBadge.svelte'
+  import { Dialog as Modal } from '$lib/components/ui'
+  import { RoleBadge } from '$lib/components/shared/canvas'
   import {
     addMember,
     listMembers,

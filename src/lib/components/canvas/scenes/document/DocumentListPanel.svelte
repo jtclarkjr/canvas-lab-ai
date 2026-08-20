@@ -1,5 +1,6 @@
 <script lang="ts">
   import { BookMarked, FilePen, Plus, Trash2 } from 'lucide-svelte'
+  import { IconButton } from '$lib/components/ui'
   import type { SceneDocumentListItem } from '$lib/scenes/schema'
 
   let {
@@ -51,23 +52,23 @@
 
     {#if canModify}
       {#if document.status === 'draft'}
-        <button
-          type="button"
+        <IconButton
+          label={`Save "${document.title || 'document'}" to library`}
+          variant="ghost"
           class="hidden size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-primary/10 hover:text-primary group-hover:flex"
           onclick={() => onPromote(document.id)}
-          aria-label={`Save "${document.title || 'document'}" to library`}
         >
           <BookMarked class="size-3.5" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
-      <button
-        type="button"
+      <IconButton
+        label={`Delete "${document.title || 'document'}"`}
+        variant="ghost"
         class="hidden size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive group-hover:flex"
         onclick={() => onDelete(document.id)}
-        aria-label={`Delete "${document.title || 'document'}"`}
       >
         <Trash2 class="size-3.5" aria-hidden="true" />
-      </button>
+      </IconButton>
     {/if}
   </div>
 {/snippet}
@@ -82,14 +83,14 @@
         Drafts
       </h3>
       {#if canModify}
-        <button
-          type="button"
+        <IconButton
+          label="New draft"
+          variant="ghost"
           class="flex size-6 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
           onclick={onNewDraft}
-          aria-label="New draft"
         >
           <Plus class="size-3.5" aria-hidden="true" />
-        </button>
+        </IconButton>
       {/if}
     </div>
     <div class="flex flex-col gap-1">

@@ -1,7 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { MessageSquare, Pencil, Plus, Trash2 } from 'lucide-svelte'
-  import ConfirmDialog from '$lib/components/shared/ConfirmDialog.svelte'
+  import { IconButton, Input } from '$lib/components/ui'
+
+  import { ConfirmDialog } from '$lib/components/shared/feedback'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import type { AssistantThreadEntry } from '$lib/stores/chat/canvas-assistant/types'
 
@@ -77,16 +79,16 @@
       <p class="m-0 text-sm font-semibold text-foreground">Assistant</p>
       <p class="m-0 truncate text-xs text-muted-foreground">Canvas histories</p>
     </div>
-    <button
-      type="button"
+    <IconButton
+      label="New assistant chat"
+      variant="ghost"
       class="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-40"
       onclick={() => store.newAssistantThread()}
       disabled={busy}
-      aria-label="New assistant chat"
       title="New assistant chat"
     >
       <Plus class="size-4" aria-hidden="true" />
-    </button>
+    </IconButton>
   </div>
 
   {#if store.assistantThreadsLoadError}
@@ -117,11 +119,11 @@
             {#if editingThreadId === thread.id}
               <div class="flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5">
                 <MessageSquare class="size-3.5 shrink-0" aria-hidden="true" />
-                <input
-                  bind:this={editInputEl}
+                <Input
+                  bind:ref={editInputEl}
                   bind:value={editingTitle}
                   class="min-w-0 flex-1 rounded-md border border-primary/40 bg-background/90 px-2 py-1 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-                  maxlength="80"
+                  maxlength={80}
                   aria-label="Rename assistant chat"
                   onblur={() => void commitRenameThread(thread)}
                   onkeydown={(event) => handleRenameKeydown(event, thread)}
@@ -139,27 +141,27 @@
                 <MessageSquare class="size-3.5 shrink-0" aria-hidden="true" />
                 <span class="truncate">{thread.title}</span>
               </button>
-              <button
-                type="button"
+              <IconButton
+                label={`Rename ${thread.title}`}
+                variant="ghost"
                 class="flex size-7 shrink-0 items-center justify-center rounded-md opacity-70 transition hover:bg-background/80 hover:opacity-100 disabled:opacity-30"
                 onclick={() => startRenameThread(thread)}
                 disabled={busy}
-                aria-label={`Rename ${thread.title}`}
                 title="Rename chat"
               >
                 <Pencil class="size-3.5" aria-hidden="true" />
-              </button>
+              </IconButton>
             {/if}
-            <button
-              type="button"
+            <IconButton
+              label={`Delete ${thread.title}`}
+              variant="ghost"
               class="mr-1 flex size-7 shrink-0 items-center justify-center rounded-md opacity-70 transition hover:bg-destructive/10 hover:text-destructive hover:opacity-100 disabled:opacity-30"
               onclick={() => requestDeleteThread(thread)}
               disabled={busy}
-              aria-label={`Delete ${thread.title}`}
               title="Delete chat"
             >
               <Trash2 class="size-3.5" aria-hidden="true" />
-            </button>
+            </IconButton>
           </div>
         {/each}
       </div>

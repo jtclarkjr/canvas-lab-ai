@@ -3,7 +3,7 @@
   import type { CanvasWorkspaceStore } from '$lib/mobile/types'
   import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
   import CanvasSurface from '$lib/components/canvas/CanvasSurface.svelte'
-  import TextEditor from '$lib/components/shared/TextEditor.svelte'
+  import { TextEditor } from '$lib/components/shared/editors'
   import LiveCursors from '$lib/components/canvas/workspace/LiveCursors.svelte'
   import MobileCanvasChat from '$lib/mobile/components/chat/MobileCanvasChat.svelte'
   import MobileCanvasConference from '$lib/mobile/components/conference/MobileCanvasConference.svelte'

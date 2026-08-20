@@ -14,7 +14,7 @@
   import { renderMarkdown } from '$lib/scenes/markdown'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   let { canvasId, threadId, initialMessages } = $props<{
     canvasId: string
@@ -102,7 +102,7 @@
         <div
           class={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
             message.role === 'user'
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-foreground font-medium text-background'
               : 'border border-border/60 bg-background/80 text-foreground'
           }`}
         >

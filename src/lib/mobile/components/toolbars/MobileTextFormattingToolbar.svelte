@@ -188,7 +188,6 @@
             for="text-color-mobile"
             style={`background:${color}`}
             title="Text color"
-            aria-label="Text color"
           >
             <Palette class="size-4 opacity-0" aria-hidden="true" />
           </label>

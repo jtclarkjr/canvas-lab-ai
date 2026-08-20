@@ -142,7 +142,7 @@
           ? 'Open canvas menu, notifications available'
           : 'Open canvas menu'}
         aria-expanded={mobileMenuOpen}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
       >
         <Menu class="size-5" aria-hidden="true" />
         {#if hasMenuNotifications}
@@ -156,7 +156,8 @@
       {#if mobileMenuOpen}
         <div
           class="absolute left-0 top-12 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-border/70 bg-popover text-popover-foreground shadow-2xl"
-          role="menu"
+          role="dialog"
+          aria-label="Canvas menu"
           transition:fly={{ y: -8, duration: 160, easing: cubicOut }}
         >
           <div class="border-b border-border/70 p-2">
@@ -193,7 +194,6 @@
               <a
                 href="/home"
                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-secondary"
-                role="menuitem"
               >
                 <House class="size-4" aria-hidden="true" />
                 Dashboard
@@ -208,7 +208,7 @@
                       type="button"
                       class={`flex h-10 min-w-0 items-center justify-center gap-1 rounded-lg px-2 text-xs font-semibold transition ${
                         mode === item.id
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-foreground text-background'
                           : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                       }`}
                       onclick={() => {
@@ -256,10 +256,9 @@
                             type="button"
                             class={`mt-1 w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
                               canvas.id === activeCanvasId
-                                ? 'bg-primary text-primary-foreground'
+                                ? 'bg-foreground text-background'
                                 : 'text-popover-foreground hover:bg-secondary'
                             }`}
-                            role="menuitem"
                             onclick={() => {
                               mobileMenuOpen = false
                               canvasesOpen = false

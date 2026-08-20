@@ -1,6 +1,7 @@
 <script lang="ts">
   import { LayoutGrid, PenLine, Workflow as WorkflowIcon } from 'lucide-svelte'
   import type { WorkspaceMode } from '$lib/scenes/types'
+  import { SegmentedControl } from '$lib/components/ui'
 
   let {
     mode,
@@ -30,6 +31,13 @@
       : [])
   ])
   const modes = $derived(availableModes)
+  const modeItems = $derived(
+    modes.map((entry) => ({
+      value: entry.id,
+      label: `Switch to ${entry.label} mode`,
+      title: entry.label
+    }))
+  )
 
   const activeIndex = $derived(
     Math.max(
@@ -54,40 +62,38 @@
 <!-- Bottom-left: top-center belongs to the drawing/text formatting
      toolbars, which would overlap the switcher there. -->
 <div class="fixed bottom-6 left-6 z-30">
-  <div
+  <SegmentedControl
+    value={mode}
+    items={modeItems}
+    label="Workspace mode"
+    variant="unstyled"
     class="mode-switcher toolbar-pill relative overflow-hidden p-1"
     style={switcherStyle}
-    role="group"
-    aria-label="Workspace mode"
+    listClass="mode-switcher__track relative z-10 flex items-center"
+    triggerClass="mode-switcher__button flex h-8 shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full px-3 text-xs font-medium whitespace-nowrap text-muted-foreground hover:text-foreground data-[state=active]:text-primary-foreground"
+    onValueChange={(value) => {
+      const entry = modes.find((candidate) => candidate.id === value)
+      if (entry) onModeChange(entry.id)
+    }}
   >
-    <span
-      class="mode-switcher__thumb pointer-events-none absolute top-1 bottom-1 left-1 rounded-full bg-primary shadow-sm"
-      aria-hidden="true"
-    ></span>
-    <div class="mode-switcher__track relative z-10 flex items-center">
-      {#each modes as entry (entry.id)}
-        <button
-          type="button"
-          class={`mode-switcher__button flex h-8 shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full px-3 text-xs font-medium whitespace-nowrap ${
-            mode === entry.id
-              ? 'text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-          aria-label={`Switch to ${entry.label} mode`}
-          aria-pressed={mode === entry.id}
-          title={entry.label}
-          onclick={() => onModeChange(entry.id)}
-        >
-          <entry.icon class="size-4 shrink-0" aria-hidden="true" />
-          <span class="mode-switcher__label">{entry.label}</span>
-        </button>
-      {/each}
-    </div>
-  </div>
+    {#snippet decoration()}
+      <span
+        class="mode-switcher__thumb pointer-events-none absolute top-1 bottom-1 left-1 rounded-full bg-primary shadow-sm"
+        aria-hidden="true"
+      ></span>
+    {/snippet}
+    {#snippet item(option)}
+      {@const entry = modes.find((candidate) => candidate.id === option.value)}
+      {#if entry}
+        <entry.icon class="size-4 shrink-0" aria-hidden="true" />
+        <span class="mode-switcher__label">{entry.label}</span>
+      {/if}
+    {/snippet}
+  </SegmentedControl>
 </div>
 
 <style>
-  .mode-switcher {
+  :global(.mode-switcher) {
     --switcher-button-width: 6.5rem;
     --switcher-icon-width: 2rem;
     /* 2rem icon + 0.5rem padding + 2px for the toolbar-pill border (border-box). */
@@ -101,12 +107,12 @@
       color 200ms ease-out;
   }
 
-  .mode-switcher__track {
+  :global(.mode-switcher__track) {
     transform: translateX(0);
     transition: transform 220ms ease-out;
   }
 
-  .mode-switcher__thumb {
+  :global(.mode-switcher__thumb) {
     width: var(--switcher-button-width);
     transform: translateX(var(--switcher-expanded-thumb-offset));
     transition:
@@ -114,7 +120,7 @@
       transform 220ms ease-out;
   }
 
-  .mode-switcher__button {
+  :global(.mode-switcher__button) {
     width: var(--switcher-button-width);
     transition:
       width 220ms ease-out,
@@ -123,7 +129,7 @@
       color 200ms ease-out;
   }
 
-  .mode-switcher__label {
+  :global(.mode-switcher__label) {
     display: inline-block;
     max-width: 4.75rem;
     overflow: hidden;
@@ -134,38 +140,46 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    .mode-switcher:not(:hover):not(:focus-within) {
+    :global(.mode-switcher:not(:hover):not(:focus-within)) {
       width: var(--switcher-collapsed-width);
     }
 
-    .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__track {
+    :global(
+      .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__track
+    ) {
       transform: translateX(var(--switcher-collapsed-track-offset));
     }
 
-    .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__thumb {
+    :global(
+      .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__thumb
+    ) {
       width: var(--switcher-icon-width);
       transform: translateX(0);
     }
 
-    .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__button {
+    :global(
+      .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__button
+    ) {
       width: var(--switcher-icon-width);
       gap: 0;
       padding-left: 0;
       padding-right: 0;
     }
 
-    .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__label {
+    :global(
+      .mode-switcher:not(:hover):not(:focus-within) .mode-switcher__label
+    ) {
       max-width: 0;
       opacity: 0;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mode-switcher,
-    .mode-switcher__track,
-    .mode-switcher__thumb,
-    .mode-switcher__button,
-    .mode-switcher__label {
+    :global(.mode-switcher),
+    :global(.mode-switcher__track),
+    :global(.mode-switcher__thumb),
+    :global(.mode-switcher__button),
+    :global(.mode-switcher__label) {
       transition: none;
     }
   }

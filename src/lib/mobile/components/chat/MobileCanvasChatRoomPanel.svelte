@@ -4,7 +4,8 @@
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
 
   let { userId, alwaysVisible = false } = $props<{
     userId: string
@@ -53,19 +54,7 @@
 
 <div class="flex h-full min-h-0 flex-col">
   {#if store.isLoadingChat}
-    <div
-      class="flex flex-1 flex-col justify-end gap-3 px-4 py-4"
-      aria-hidden="true"
-    >
-      <div class="h-10 w-3/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-10 w-2/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-      <div class="h-10 w-4/5 animate-pulse rounded-2xl bg-muted/80"></div>
-      <div
-        class="ml-auto h-10 w-3/5 animate-pulse rounded-2xl bg-muted/60"
-      ></div>
-    </div>
+    <ChatLoadingSkeleton size="md" class="flex-1" />
   {:else}
     <VirtualizedMessageList
       items={store.entries}
@@ -98,10 +87,7 @@
         {@const label = authorLabel(entry)}
         {@const segs = segmentMentions(entry.message.content, myName)}
         <div class={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
-          <span
-            class="mb-1 px-1 text-[11px] font-medium text-muted-foreground"
-            style={label.color ? `color:${label.color}` : undefined}
-          >
+          <span class="mb-1 px-1 text-[11px] font-medium text-foreground">
             {label.name} · {timeLabel(entry.message.createdAt)}
           </span>
           <div
@@ -109,7 +95,7 @@
               entry.status === 'failed'
                 ? 'border border-destructive/50 bg-destructive/10 text-foreground'
                 : own
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-foreground font-medium text-background'
                   : 'border border-border/60 bg-background/80 text-foreground'
             } ${entry.status === 'pending' ? 'opacity-60' : ''}`}
           >

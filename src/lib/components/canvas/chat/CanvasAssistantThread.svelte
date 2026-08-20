@@ -14,7 +14,7 @@
   import { renderMarkdown } from '$lib/scenes/markdown'
   import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
   import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   let { canvasId, threadId, initialMessages } = $props<{
     canvasId: string

@@ -28,7 +28,7 @@
     SceneActivityKind
   } from '$lib/scenes/types'
   import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import VirtualizedMessageList from '$lib/components/shared/VirtualizedMessageList.svelte'
+  import { VirtualizedMessageList } from '$lib/components/shared/collections'
 
   let {
     initialMessages,

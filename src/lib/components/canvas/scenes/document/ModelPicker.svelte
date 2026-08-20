@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Cpu } from 'lucide-svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import { getModelOption, modelOptions } from '$lib/scenes/models'
 
   let {
@@ -30,15 +30,15 @@
   align="start"
   {side}
 >
-  {#snippet trigger({ id: popoverId, expanded })}
+  {#snippet trigger({ id: popoverId, expanded, props })}
     <button
+      {...props}
       type="button"
       class={`flex items-center rounded-full border border-border/60 bg-background/70 text-muted-foreground transition hover:text-foreground disabled:opacity-50 ${
         compact
           ? 'h-7 max-w-[112px] gap-1 px-2 text-[11px]'
           : 'h-8 gap-1.5 px-3 text-xs'
       }`}
-      onclick={() => (open = !open)}
       aria-expanded={expanded}
       aria-haspopup="menu"
       aria-controls={popoverId}
@@ -58,7 +58,7 @@
         aria-checked={option.id === modelId}
         class={`flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition ${
           option.id === modelId
-            ? 'bg-primary/10 text-primary'
+            ? 'bg-primary/10 font-semibold text-foreground'
             : 'hover:bg-muted'
         }`}
         onclick={() => {

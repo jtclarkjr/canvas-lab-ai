@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Ellipsis, FileText, Link, UserPlus } from 'lucide-svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import { toast } from '$lib/stores/shared/toast.svelte'
   import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
 
@@ -43,13 +43,13 @@
   align="end"
   bind:open
 >
-  {#snippet trigger({ id, expanded })}
+  {#snippet trigger({ id, expanded, props })}
     <button
+      {...props}
       type="button"
       class="toolbar-pill toolbar-button relative"
       aria-controls={id}
       aria-expanded={expanded}
-      onclick={() => (open = !open)}
       aria-label={`Canvas menu${canManage && pendingCount > 0 ? ` (${pendingCount} pending)` : ''}`}
     >
       <Ellipsis class="size-4" aria-hidden="true" />
@@ -67,6 +67,7 @@
     {#if showCallSessions}
       <button
         type="button"
+        role="menuitem"
         class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-popover-foreground transition hover:bg-secondary"
         onclick={() => {
           open = false
@@ -79,6 +80,7 @@
     {/if}
     <button
       type="button"
+      role="menuitem"
       class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-popover-foreground transition hover:bg-secondary"
       onclick={() => {
         open = false
@@ -89,7 +91,7 @@
       Share…
       {#if canManage && pendingCount > 0}
         <span
-          class="ml-auto rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning"
+          class="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-semibold text-foreground"
         >
           {pendingCount} pending
         </span>
@@ -97,6 +99,7 @@
     </button>
     <button
       type="button"
+      role="menuitem"
       class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium text-popover-foreground transition hover:bg-secondary"
       onclick={copyLink}
     >

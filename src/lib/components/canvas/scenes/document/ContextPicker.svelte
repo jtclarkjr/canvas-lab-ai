@@ -1,6 +1,6 @@
 <script lang="ts">
   import { BookOpen, Check } from 'lucide-svelte'
-  import Popover from '$lib/components/shared/Popover.svelte'
+  import { Popover } from '$lib/components/ui'
   import type { SceneDocumentListItem } from '$lib/scenes/schema'
 
   let {
@@ -29,15 +29,15 @@
     align="start"
     {side}
   >
-    {#snippet trigger({ id: popoverId, expanded })}
+    {#snippet trigger({ id: popoverId, expanded, props })}
       <button
+        {...props}
         type="button"
         class={`flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs transition disabled:opacity-50 ${
           selectedIds.length > 0
-            ? 'border-primary/60 bg-primary/10 text-primary'
+            ? 'border-primary/60 bg-primary/10 font-semibold text-foreground'
             : 'border-border/60 bg-background/70 text-muted-foreground hover:text-foreground'
         }`}
-        onclick={() => (open = !open)}
         aria-expanded={expanded}
         aria-haspopup="menu"
         aria-controls={popoverId}
@@ -64,7 +64,9 @@
           role="menuitemcheckbox"
           aria-checked={selected}
           class={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-            selected ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+            selected
+              ? 'bg-primary/10 font-semibold text-foreground'
+              : 'hover:bg-muted'
           }`}
           onclick={() => onToggle(document.id)}
         >

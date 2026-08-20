@@ -5,6 +5,7 @@
   import { supabase, ensureSessionInitialized } from '$lib/auth/session-store'
   import { getCanvas, getMyAccessRequest, requestAccess } from '$lib/canvas/api'
   import type { AccessRequest } from '$lib/canvas/schema'
+  import { Button } from '$lib/components/ui'
 
   let { canvasId } = $props<{ canvasId: string }>()
 
@@ -193,32 +194,30 @@
       Your previous request was denied. You can send a new request if you think
       this was a mistake.
     </p>
-    <button
-      type="button"
-      class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+    <Button
+      loading={isSubmitting}
       disabled={isSubmitting}
       onclick={() => void submitRequest()}
     >
-      {isSubmitting ? 'Requesting…' : 'Request again'}
-    </button>
+      Request again
+    </Button>
   {:else}
     <h1 class="text-2xl font-bold text-foreground">You need access</h1>
     <p class="max-w-sm text-center text-sm text-muted-foreground">
       This canvas is private. Request access and the owner will be notified
       right away.
     </p>
-    <button
-      type="button"
-      class="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+    <Button
+      loading={isSubmitting}
       disabled={isSubmitting}
       onclick={() => void submitRequest()}
     >
-      {isSubmitting ? 'Requesting…' : 'Request access'}
-    </button>
+      Request access
+    </Button>
   {/if}
 
   {#if errorMessage}
-    <p class="text-sm text-destructive">{errorMessage}</p>
+    <p class="text-sm text-destructive" role="alert">{errorMessage}</p>
   {/if}
 
   <a

@@ -3,6 +3,7 @@
   import type { ConferenceParticipant } from '$lib/conference/types'
   import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
   import { attachTrack } from '../media-actions'
+  import { Avatar } from '$lib/components/shared/identity'
 
   const store = useCanvasConferenceStore()
 
@@ -40,17 +41,17 @@
     ></video>
   {:else}
     <div class="flex h-full w-full items-center justify-center">
-      <span
-        class="flex size-20 items-center justify-center rounded-full text-2xl font-bold shadow-inner"
-        style={`background-color:${participant.color};color:var(--canvas-avatar-foreground)`}
-      >
-        {participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
-      </span>
+      <Avatar
+        name={participant.name}
+        fallback={participant.name.trim().slice(0, 2).toUpperCase() || 'ME'}
+        color={participant.color}
+        class="size-20 text-2xl font-bold text-[var(--canvas-avatar-foreground)] shadow-inner"
+      />
     </div>
   {/if}
 
   <span
-    class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
+    class="absolute bottom-2 left-2 flex max-w-[70%] items-center gap-1.5 rounded-full bg-black/75 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur"
   >
     {#if pinned}
       <Pin class="size-3" />

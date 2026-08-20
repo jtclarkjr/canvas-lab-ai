@@ -1,5 +1,7 @@
 <script lang="ts">
   import { ArrowUp, Globe } from 'lucide-svelte'
+  import { Button, IconButton, Textarea } from '$lib/components/ui'
+
   import type { SceneDocumentListItem } from '$lib/scenes/schema'
   import ContextPicker from '$lib/components/canvas/scenes/document/ContextPicker.svelte'
   import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
@@ -68,18 +70,19 @@
   <div
     class="document-composer-shell surface-card flex flex-col gap-2 rounded-2xl p-3"
   >
-    <textarea
-      bind:this={textareaEl}
+    <Textarea
+      bind:ref={textareaEl}
       bind:value={prompt}
       oninput={autogrow}
       onkeydown={handleKeydown}
-      rows="1"
+      rows={1}
       placeholder={disabled
         ? 'You have view-only access to this scene'
         : 'Ask for changes, or describe a new document…'}
       aria-label="Ask for changes or describe a new document"
-      class="document-composer-input max-h-52 w-full resize-none bg-transparent text-sm outline-none"
-      {disabled}></textarea>
+      class="document-composer-input max-h-52 min-h-9 w-full resize-none border-0 bg-transparent text-sm shadow-none outline-none focus:border-0 focus:ring-0"
+      {disabled}
+    />
 
     <div class="flex items-center justify-between gap-2">
       <div class="flex flex-wrap items-center gap-1.5">
@@ -89,11 +92,12 @@
           disabled={disabled || isStreaming}
           side={popoverSide}
         />
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="sm"
           class={`flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs transition disabled:opacity-50 ${
             webSearch
-              ? 'border-primary/60 bg-primary/10 text-primary'
+              ? 'border-primary/60 bg-primary/10 font-semibold text-foreground'
               : 'border-border/60 bg-background/70 text-muted-foreground hover:text-foreground'
           }`}
           onclick={onWebSearchToggle}
@@ -103,7 +107,7 @@
         >
           <Globe class="size-3.5" aria-hidden="true" />
           Search
-        </button>
+        </Button>
         <ContextPicker
           {savedDocuments}
           selectedIds={contextDocumentIds}
@@ -113,15 +117,14 @@
         />
       </div>
 
-      <button
-        type="button"
+      <IconButton
+        label="Send message"
         class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition disabled:opacity-40"
         onclick={send}
         disabled={!canSend}
-        aria-label="Send message"
       >
         <ArrowUp class="size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
     </div>
   </div>
 </div>
@@ -140,11 +143,11 @@
     border-color: rgb(148 163 184 / 0.28);
   }
 
-  .document-composer-input {
+  :global(.document-composer-input) {
     color: var(--document-composer-foreground);
   }
 
-  .document-composer-input::placeholder {
+  :global(.document-composer-input::placeholder) {
     color: var(--document-composer-placeholder);
   }
 </style>
