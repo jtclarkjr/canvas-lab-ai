@@ -23,7 +23,6 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            // @ts-expect-error Vite+ bundles its own Vitest type identity.
             provider: playwright({}),
             instances: [{ browser: 'chromium' }]
           }
