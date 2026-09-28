@@ -103,6 +103,9 @@ for (const story of visualStories) {
           transition-delay: 0s !important;
           transition-duration: 0s !important;
         }
+        textarea {
+          resize: none !important;
+        }
       `
       })
       await page.waitForTimeout(500)
