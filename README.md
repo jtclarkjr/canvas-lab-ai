@@ -19,6 +19,7 @@ Goal: Building a agentic enabled platform for live collaboration.
 - [Supabase](https://supabase.com/) — auth, database, and realtime
 - [Tailwind CSS 4](https://tailwindcss.com/)
 - [Vite+](https://voidzero.dev/) — unified toolchain (Vite, Vitest, Oxlint, Oxfmt)
+- [Sentry](https://sentry.io/) — browser error monitoring and frontend performance tracing
 - TypeScript 6, Zod 4
 
 ## Getting Started

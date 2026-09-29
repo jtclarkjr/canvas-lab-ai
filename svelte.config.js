@@ -8,6 +8,10 @@ const config = {
       filename.split(/[/\\]/).includes('node_modules') ? undefined : true
   },
   kit: {
+    experimental: {
+      instrumentation: { server: true },
+      tracing: { server: true }
+    },
     adapter: adapter({
       runtime: 'nodejs24.x'
     })

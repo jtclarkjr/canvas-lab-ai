@@ -1,8 +1,14 @@
+import { sentrySvelteKit } from '@sentry/sveltekit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_SENTRY_DSN': JSON.stringify(
+      process.env.SENTRY_DSN ?? ''
+    )
+  },
   resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
   staged: {
     '*': 'vp check --fix'
@@ -28,5 +34,13 @@ export default defineConfig({
   test: {
     includeSource: ['src/**/*.{ts,svelte}']
   },
-  plugins: [tailwindcss(), sveltekit()]
+  plugins: [
+    sentrySvelteKit({
+      org: 'jtclarkjr',
+      project: 'sentry-aqua-ball',
+      telemetry: false
+    }),
+    tailwindcss(),
+    sveltekit()
+  ]
 })

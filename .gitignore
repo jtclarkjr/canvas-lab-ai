@@ -20,6 +20,7 @@ Thumbs.db
 !.env.example
 !.env.agent.example
 !.env.test
+.env.sentry-build-plugin
 
 # Vite
 vite.config.js.timestamp-*
