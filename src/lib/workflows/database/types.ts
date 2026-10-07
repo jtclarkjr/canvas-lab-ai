@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/svelte'
-import type { DatabaseTable } from '$lib/workflows/database/schema'
+import type { DatabaseTable } from '#lib/workflows/database/schema.js'
 
 export type DatabaseTableNodeData = {
   table: DatabaseTable

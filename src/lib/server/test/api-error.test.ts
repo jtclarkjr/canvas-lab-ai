@@ -10,7 +10,7 @@ import {
   serializeApiError,
   validationError,
   withAccountAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 
 describe('api-error', () => {
   it('creates 403 errors with forbidden()', () => {

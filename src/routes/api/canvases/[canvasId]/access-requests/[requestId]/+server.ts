@@ -1,7 +1,7 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { accessRequestResponseSchema } from '$lib/canvas/schema'
-import { resolveAccessRequestInputSchema } from '$lib/workspace/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import { accessRequestResponseSchema } from '#lib/canvas/schema.js'
+import { resolveAccessRequestInputSchema } from '#lib/workspace/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
@@ -9,9 +9,9 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const PATCH: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -88,7 +88,7 @@ export const PATCH: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to resolve access request')
       }
 
-      return json(
+      return Response.json(
         accessRequestResponseSchema.parse({
           item: {
             id: data.id,

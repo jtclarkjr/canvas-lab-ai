@@ -5,11 +5,11 @@ import {
   type Canvas,
   type CanvasRow,
   type ListCanvasesResponse
-} from '$lib/canvas/schema'
-import type { CanvasRole, MemberRole } from '$lib/canvas/roles'
-import type { Database } from '$lib/server/database.types'
-import type { CanvasListData } from '$lib/server/types'
-import { withCanvasIconUrls } from '$lib/server/canvas-icons'
+} from '#lib/canvas/schema.js'
+import type { CanvasRole, MemberRole } from '#lib/canvas/roles.js'
+import type { Database } from '#lib/server/database.types.js'
+import type { CanvasListData } from '#lib/server/types.js'
+import { withCanvasIconUrls } from '#lib/server/canvas-icons.js'
 
 type CanvasMembership = Pick<
   Database['public']['Tables']['canvas_members']['Row'],

@@ -5,12 +5,12 @@
     CAPTION_TEXT_COLORS,
     CAPTION_TEXT_SIZES,
     captionTextColorValue
-  } from '$lib/conference/captions'
+  } from '#lib/conference/captions.js'
   import type {
     CaptionLanguageCode,
     CaptionTextSize
-  } from '$lib/conference/captions/types'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  } from '#lib/conference/captions/types.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
 

@@ -1,6 +1,6 @@
-import { supabase } from '$lib/auth/session-store'
-import { workflowRowToWorkflow } from '$lib/workflows/mapping'
-import { workflowRowSchema, type Workflow } from '$lib/workflows/schema'
+import { supabase } from '#lib/auth/session-store.js'
+import { workflowRowToWorkflow } from '#lib/workflows/mapping.js'
+import { workflowRowSchema, type Workflow } from '#lib/workflows/schema.js'
 import { z } from 'zod'
 
 const deletedWorkflowRowSchema = z.object({ id: z.string() })

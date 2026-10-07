@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getSupabaseAuthCookieName } from '$lib/auth/supabase-cookie'
+import { getSupabaseAuthCookieName } from '#lib/auth/supabase-cookie.js'
 
 const tokenArraySchema = z.array(z.string()).min(1)
 

@@ -1,10 +1,9 @@
 import { createClient, type User as SupabaseUser } from '@supabase/supabase-js'
-import { env as privateEnv } from '$env/dynamic/private'
-import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
-import { getSupabaseAuthCookieName } from '$lib/auth/supabase-cookie'
-import { getSupabaseTokensFromCookieHeader } from '$lib/server/supabase-auth-cookie'
-
-import type { RequestSession, RequestUser } from '$lib/server/types'
+import { SUPABASE_URL, SUPABASE_SECRET_KEY } from '$app/env/private'
+import { getUserAvatarUrl, getUserDisplayName } from '#lib/auth/user-profile.js'
+import { getSupabaseAuthCookieName } from '#lib/auth/supabase-cookie.js'
+import { getSupabaseTokensFromCookieHeader } from '#lib/server/supabase-auth-cookie.js'
+import type { RequestSession, RequestUser } from '#lib/server/types.js'
 
 function getBearerToken(authorizationHeader: string) {
   const [scheme, token] = authorizationHeader.split(/\s+/, 2)
@@ -28,8 +27,8 @@ export function requestUserFromSupabaseUser(user: SupabaseUser): RequestUser {
 export async function getRequestSession(
   request: Request
 ): Promise<RequestSession | null> {
-  const supabaseUrl = privateEnv.SUPABASE_URL
-  const supabaseSecretKey = privateEnv.SUPABASE_SECRET_KEY
+  const supabaseUrl = SUPABASE_URL
+  const supabaseSecretKey = SUPABASE_SECRET_KEY
 
   if (!supabaseUrl || !supabaseSecretKey) {
     return null

@@ -9,7 +9,7 @@
     Plus,
     Underline
   } from 'lucide-svelte'
-  import type { ListStyle } from '$lib/canvas/types'
+  import type { ListStyle } from '#lib/canvas/types.js'
 
   let {
     fontSize,

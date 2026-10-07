@@ -2,19 +2,19 @@
   import { Chat } from '@ai-sdk/svelte'
   import { DefaultChatTransport, type UIMessage } from 'ai'
   import { BookOpen, Globe, LoaderCircle } from 'lucide-svelte'
-  import { getApiHeaders } from '$lib/api-client'
-  import { defaultModelId } from '$lib/scenes/models'
+  import { getApiHeaders } from '#lib/api-client.js'
+  import { defaultModelId } from '#lib/scenes/models.js'
   import {
     asParts,
     isWebSearchPart,
     partText,
     readContextPart,
     sourceUrlPart
-  } from '$lib/scenes/chat-parts'
-  import { renderMarkdown } from '$lib/scenes/markdown'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  } from '#lib/scenes/chat-parts.js'
+  import { renderMarkdown } from '#lib/scenes/markdown.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import CanvasChatComposer from '#lib/components/canvas/chat/CanvasChatComposer.svelte'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
 
   let { canvasId, threadId, initialMessages } = $props<{
     canvasId: string

@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { getSceneType, isSceneTypeId, sceneTypes } from '$lib/scenes/registry'
+import {
+  getSceneType,
+  isSceneTypeId,
+  sceneTypes
+} from '#lib/scenes/registry.js'
 import {
   documentCategories,
   getDocumentCategory
-} from '$lib/scenes/document-categories'
+} from '#lib/scenes/document-categories.js'
 import {
   defaultModelId,
   getModelOption,
@@ -11,7 +15,7 @@ import {
   isPromptModelUnlimited,
   isKnownModelId,
   modelOptions
-} from '$lib/scenes/models'
+} from '#lib/scenes/models.js'
 
 describe('scene type registry', () => {
   it('registers unique scene types with sane defaults', () => {

@@ -1,11 +1,14 @@
-import { supabase } from '$lib/auth/session-store'
-import { sceneMessageRowToMessage, sceneRowToScene } from '$lib/scenes/mapping'
+import { supabase } from '#lib/auth/session-store.js'
+import {
+  sceneMessageRowToMessage,
+  sceneRowToScene
+} from '#lib/scenes/mapping.js'
 import {
   sceneMessageRowSchema,
   sceneRowSchema,
   type Scene,
   type SceneMessage
-} from '$lib/scenes/schema'
+} from '#lib/scenes/schema.js'
 import { z } from 'zod'
 
 const deletedSceneRowSchema = z.object({ id: z.string() })

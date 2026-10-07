@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import CanvasAssistantThread from '$lib/components/canvas/chat/CanvasAssistantThread.svelte'
-  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import CanvasAssistantThread from '#lib/components/canvas/chat/CanvasAssistantThread.svelte'
+  import { ChatLoadingSkeleton } from '#lib/components/shared/chat/index.js'
 
   let { canvasId } = $props<{ canvasId: string }>()
 

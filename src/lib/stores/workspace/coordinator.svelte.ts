@@ -1,4 +1,4 @@
-import type { CanvasWorkspaceStoreInput } from '$lib/workspace/types'
+import type { CanvasWorkspaceStoreInput } from '#lib/workspace/types.js'
 import { createWorkspaceCoordinatorActions } from './coordinator/actions.svelte'
 import type { WorkspaceCoordinatorActions } from './coordinator/actions/types'
 import { createWorkspaceChildStores } from './coordinator/child-stores.svelte'

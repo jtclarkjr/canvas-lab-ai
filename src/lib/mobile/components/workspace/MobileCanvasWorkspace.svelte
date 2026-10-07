@@ -1,16 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import type { CanvasRole } from '$lib/canvas/roles'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { CanvasElement } from '$lib/workspace/schema'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { Workflow } from '$lib/workflows/schema'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import { createCanvasWorkspaceStore } from '$lib/stores/workspace/index.svelte'
-  import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { provideCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import { useSceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
-  import MobileCanvasWorkspaceView from '$lib/mobile/components/workspace/MobileCanvasWorkspaceView.svelte'
+  import type { CanvasRole } from '#lib/canvas/roles.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { CanvasElement } from '#lib/workspace/schema.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { Workflow } from '#lib/workflows/schema.js'
+  import type { WorkspaceDeviceProfile } from '#lib/workspace/device-profile/types.js'
+  import { createCanvasWorkspaceStore } from '#lib/stores/workspace/index.svelte.js'
+  import { provideCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { provideCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import { useSceneDocumentsStore } from '#lib/stores/scenes/documents.svelte.js'
+  import MobileCanvasWorkspaceView from '#lib/mobile/components/workspace/MobileCanvasWorkspaceView.svelte'
 
   let {
     canvasId,

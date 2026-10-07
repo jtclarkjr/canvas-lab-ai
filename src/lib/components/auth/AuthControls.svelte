@@ -1,14 +1,17 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { getSignedInAccountUser } from '$lib/auth/account-user'
-  import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
-  import { signOut } from '$lib/auth/session-service'
-  import { Popover, SegmentedControl } from '$lib/components/ui'
-  import { Avatar } from '$lib/components/shared/identity'
-  import { labelForTheme, themeOptions } from '$lib/settings/theme-options'
-  import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { theme } from '$lib/stores/shared/theme.svelte'
+  import { getSignedInAccountUser } from '#lib/auth/account-user.js'
+  import {
+    getUserAvatarUrl,
+    getUserDisplayName
+  } from '#lib/auth/user-profile.js'
+  import { signOut } from '#lib/auth/session-service.js'
+  import { Popover, SegmentedControl } from '#lib/components/ui/index.js'
+  import { Avatar } from '#lib/components/shared/identity/index.js'
+  import { labelForTheme, themeOptions } from '#lib/settings/theme-options.js'
+  import { settingsDialog } from '#lib/stores/shared/settings-dialog.svelte.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
   import {
     CircleUserRound,
     LogOut,

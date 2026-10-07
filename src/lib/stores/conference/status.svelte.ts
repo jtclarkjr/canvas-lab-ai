@@ -1,7 +1,7 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
-import { supabase } from '$lib/auth/session-store'
-import { fetchConferenceStatus } from '$lib/conference/api'
-import { conferenceChannelName } from '$lib/conference/schema'
+import { supabase } from '#lib/auth/session-store.js'
+import { fetchConferenceStatus } from '#lib/conference/api.js'
+import { conferenceChannelName } from '#lib/conference/schema.js'
 
 type ConferenceStatusInput = {
   getCanvasId: () => string

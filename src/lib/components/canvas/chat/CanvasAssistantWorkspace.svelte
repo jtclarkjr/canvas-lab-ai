@@ -1,9 +1,9 @@
 <script lang="ts">
   import { PanelLeft } from 'lucide-svelte'
-  import { IconButton } from '$lib/components/ui'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import CanvasAssistantHistorySidebar from '$lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte'
-  import CanvasAssistantPanel from '$lib/components/canvas/chat/CanvasAssistantPanel.svelte'
+  import { IconButton } from '#lib/components/ui/index.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import CanvasAssistantHistorySidebar from '#lib/components/canvas/chat/CanvasAssistantHistorySidebar.svelte'
+  import CanvasAssistantPanel from '#lib/components/canvas/chat/CanvasAssistantPanel.svelte'
 
   let { canvasId } = $props<{ canvasId: string }>()
 

@@ -1,8 +1,15 @@
 <script lang="ts">
-  import type { Camera, EditingText, TextFormatting } from '$lib/canvas/types'
-  import { TEXT_LINE_HEIGHT } from '$lib/canvas/consts'
-  import { getTextEditorWidth, getTextLines } from '$lib/canvas/drawing-utils'
-  import { resolveCanvasDisplayColor } from '$lib/canvas/helpers/display-color'
+  import type {
+    Camera,
+    EditingText,
+    TextFormatting
+  } from '#lib/canvas/types.js'
+  import { TEXT_LINE_HEIGHT } from '#lib/canvas/consts.js'
+  import {
+    getTextEditorWidth,
+    getTextLines
+  } from '#lib/canvas/drawing-utils.js'
+  import { resolveCanvasDisplayColor } from '#lib/canvas/helpers/display-color.js'
 
   let {
     textInputEl = $bindable(null),

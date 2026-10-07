@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   workflowRowToWorkflow,
   workflowVersionRowToVersion
-} from '$lib/workflows/mapping'
+} from '#lib/workflows/mapping.js'
 import {
   listWorkflowVersionsResponseSchema,
   listWorkflowsResponseSchema,
@@ -14,8 +14,8 @@ import {
   type WorkflowRow,
   type WorkflowVersion,
   type WorkflowVersionRow
-} from '$lib/workflows/schema'
-import type { Database } from '$lib/server/database.types'
+} from '#lib/workflows/schema.js'
+import type { Database } from '#lib/server/database.types.js'
 
 export function toCanvasWorkflow(row: unknown): Workflow {
   return workflowRowToWorkflow(workflowRowSchema.parse(row))

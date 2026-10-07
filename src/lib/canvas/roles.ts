@@ -1,4 +1,4 @@
-import { ROLE_RANK } from '$lib/canvas/consts'
+import { ROLE_RANK } from '#lib/canvas/consts.js'
 
 export type CanvasRole = 'owner' | 'admin' | 'editor' | 'reader'
 export type MemberRole = Exclude<CanvasRole, 'owner'>

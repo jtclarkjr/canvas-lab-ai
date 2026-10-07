@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { CanvasRole } from '$lib/canvas/roles'
-import { forbidden, notFound } from '$lib/server/api-error'
-import type { Database } from '$lib/server/database.types'
+import type { CanvasRole } from '#lib/canvas/roles.js'
+import { forbidden, notFound } from '#lib/server/api-error.js'
+import type { Database } from '#lib/server/database.types.js'
 
 type WorkflowRow = Database['public']['Tables']['canvas_workflows']['Row']
 type WorkflowVersionRow =

@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/svelte'
-import type { WorkflowStepType } from '$lib/workflows/schema'
+import type { WorkflowStepType } from '#lib/workflows/schema.js'
 
 export type WorkflowNodeData = {
   label: string

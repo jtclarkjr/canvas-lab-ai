@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BookMarked, FilePen, Plus, Trash2 } from 'lucide-svelte'
-  import { IconButton } from '$lib/components/ui'
-  import type { SceneDocumentListItem } from '$lib/scenes/schema'
+  import { IconButton } from '#lib/components/ui/index.js'
+  import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
 
   let {
     documents,

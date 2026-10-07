@@ -1,9 +1,9 @@
 <script lang="ts">
   import { MessageSquare, Sparkles } from 'lucide-svelte'
-  import { BottomSheet, SegmentedControl } from '$lib/components/ui'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import MobileCanvasAssistantPanel from '$lib/mobile/components/chat/MobileCanvasAssistantPanel.svelte'
-  import MobileCanvasChatRoomPanel from '$lib/mobile/components/chat/MobileCanvasChatRoomPanel.svelte'
+  import { BottomSheet, SegmentedControl } from '#lib/components/ui/index.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import MobileCanvasAssistantPanel from '#lib/mobile/components/chat/MobileCanvasAssistantPanel.svelte'
+  import MobileCanvasChatRoomPanel from '#lib/mobile/components/chat/MobileCanvasChatRoomPanel.svelte'
 
   let { canvasId, userId } = $props<{
     canvasId: string

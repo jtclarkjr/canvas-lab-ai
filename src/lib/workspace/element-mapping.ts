@@ -11,15 +11,15 @@ import type {
   ShapeKind,
   StrokeStyle,
   TextElement
-} from '$lib/canvas/types'
-import type { CanvasElement } from '$lib/workspace/schema'
-import type { RealtimeCanvasElementRow } from '$lib/workspace/types'
-import { applyLegacyListStyle } from '$lib/canvas/text-lists'
+} from '#lib/canvas/types.js'
+import type { CanvasElement } from '#lib/workspace/schema.js'
+import type { RealtimeCanvasElementRow } from '#lib/workspace/types.js'
+import { applyLegacyListStyle } from '#lib/canvas/text-lists.js'
 import {
   normalizeConnectorKind,
   normalizeShapeKind,
   normalizeStrokeStyle
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 
 const pointSchema = z.object({ x: z.number(), y: z.number() })
 const strokeStyleSchema = z

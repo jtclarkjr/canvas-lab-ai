@@ -1,19 +1,19 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { roleAtLeast } from '$lib/canvas/roles'
-import { getCallSessionResponseSchema } from '$lib/conference/schema'
+import type { RequestHandler } from '@sveltejs/kit'
+import { roleAtLeast } from '#lib/canvas/roles.js'
+import { getCallSessionResponseSchema } from '#lib/conference/schema.js'
 import {
   handleApiError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   getCallSessionWithSegments,
   reconcileCallTranscriptSession,
   requireCallSessionParticipant
-} from '$lib/server/call-sessions'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/call-sessions.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const POST: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -44,7 +44,7 @@ export const POST: RequestHandler = async (event) =>
 
       await reconcileCallTranscriptSession(supabase, sessionId)
 
-      return json(
+      return Response.json(
         getCallSessionResponseSchema.parse(
           await getCallSessionWithSegments(
             supabase,

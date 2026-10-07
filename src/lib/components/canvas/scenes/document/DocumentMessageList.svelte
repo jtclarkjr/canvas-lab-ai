@@ -6,8 +6,8 @@
     LoaderCircle,
     Sparkles
   } from 'lucide-svelte'
-  import { colorFromId } from '$lib/canvas/helpers/color-from-id'
-  import { getModelOption } from '$lib/scenes/models'
+  import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
+  import { getModelOption } from '#lib/scenes/models.js'
   import {
     asParts,
     isWebSearchPart,
@@ -17,9 +17,9 @@
     readContextPart,
     sourceUrlPart,
     writeDocumentPart
-  } from '$lib/scenes/chat-parts'
-  import type { DisplayMessage } from '$lib/scenes/types'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  } from '#lib/scenes/chat-parts.js'
+  import type { DisplayMessage } from '#lib/scenes/types.js'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
 
   let {
     messages,

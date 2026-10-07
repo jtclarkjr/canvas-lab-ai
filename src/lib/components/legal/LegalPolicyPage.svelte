@@ -4,7 +4,7 @@
   import type {
     LegalPolicy,
     LegalPolicySection
-  } from '$lib/legal/policies/types'
+  } from '#lib/legal/policies/types.js'
 
   let { policy } = $props<{
     policy: LegalPolicy

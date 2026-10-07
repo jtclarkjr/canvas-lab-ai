@@ -12,9 +12,9 @@
     Users,
     Volume2
   } from 'lucide-svelte'
-  import type { ConferenceLayoutMode } from '$lib/conference/types'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import type { ConferenceLayoutMode } from '#lib/conference/types.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
   import ConferenceMicButton from './ConferenceMicButton.svelte'
   import ConferenceCamButton from './ConferenceCamButton.svelte'
   import ConferenceCCButton from './ConferenceCCButton.svelte'

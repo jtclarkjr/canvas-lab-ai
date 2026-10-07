@@ -6,12 +6,12 @@
     NotebookPen,
     Sparkles
   } from 'lucide-svelte'
-  import type { Camera } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneActivity } from '$lib/scenes/types'
-  import { getSceneType } from '$lib/scenes/registry'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import { Card } from '$lib/components/ui'
+  import type { Camera } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneActivity } from '#lib/scenes/types.js'
+  import { getSceneType } from '#lib/scenes/registry.js'
+  import type { WorkspaceDeviceProfile } from '#lib/workspace/device-profile/types.js'
+  import { Card } from '#lib/components/ui/index.js'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void

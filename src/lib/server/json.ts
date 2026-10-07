@@ -1,4 +1,4 @@
-import type { Json } from '$lib/server/database.types'
+import type { Json } from '#lib/server/database.types.js'
 
 export function toDbJson(value: unknown): Json {
   const serialized = JSON.stringify(value)

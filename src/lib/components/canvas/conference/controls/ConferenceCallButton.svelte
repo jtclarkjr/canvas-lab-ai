@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Phone, PhoneOff } from 'lucide-svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
 </script>

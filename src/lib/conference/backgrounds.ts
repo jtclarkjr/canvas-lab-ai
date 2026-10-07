@@ -1,4 +1,4 @@
-import type { BgPreset } from '$lib/conference/types'
+import type { BgPreset } from '#lib/conference/types.js'
 
 function bucketUrl(filename: string) {
   const base = import.meta.env.VITE_SUPABASE_URL as string

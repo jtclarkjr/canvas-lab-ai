@@ -1,5 +1,5 @@
-import type { Command } from '$lib/canvas/commands/types'
-import type { ResizeHandle } from '$lib/canvas/types'
+import type { Command } from '#lib/canvas/commands/types.js'
+import type { ResizeHandle } from '#lib/canvas/types.js'
 import type {
   Arrowhead,
   CanvasDrawableElement,
@@ -16,10 +16,10 @@ import type {
   StrokeStyle,
   TextElement,
   Tool
-} from '$lib/canvas/types'
-import type { Scene } from '$lib/scenes/schema'
-import type { UpsertElementInput } from '$lib/workspace/schema'
-import type { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
+} from '#lib/canvas/types.js'
+import type { Scene } from '#lib/scenes/schema.js'
+import type { UpsertElementInput } from '#lib/workspace/schema.js'
+import type { createWorkspaceFormattingStore } from '#lib/stores/workspace/formatting.svelte.js'
 
 export type {
   Arrowhead,

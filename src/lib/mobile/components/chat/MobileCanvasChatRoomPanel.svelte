@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { colorFromId } from '$lib/canvas/helpers/color-from-id'
-  import { segmentMentions } from '$lib/chat/mentions'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
-  import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
-  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
+  import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
+  import { segmentMentions } from '#lib/chat/mentions.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import type { ChatEntry } from '#lib/stores/chat/canvas-chat/types.js'
+  import MobileCanvasChatComposer from '#lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
+  import { ChatLoadingSkeleton } from '#lib/components/shared/chat/index.js'
 
   let { userId, alwaysVisible = false } = $props<{
     userId: string

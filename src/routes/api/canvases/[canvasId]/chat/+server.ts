@@ -1,12 +1,12 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   chatMessageResponseSchema,
   chatMessageRowSchema,
   chatMessageRowToMessage,
   listChatMessagesResponseSchema,
   sendChatMessageInputSchema
-} from '$lib/chat/schema'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+} from '#lib/chat/schema.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   AppError,
   handleApiError,
@@ -14,10 +14,10 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { toDbJson } from '#lib/server/json.js'
 
 // Older history is out of scope: the chatroom loads the latest window only.
 const MESSAGE_LIMIT = 200
@@ -70,7 +70,7 @@ export const GET: RequestHandler = async (event) =>
         }
       }
 
-      return json(
+      return Response.json(
         listChatMessagesResponseSchema.parse({
           items: rows.map((row) =>
             chatMessageRowToMessage(
@@ -131,7 +131,7 @@ export const POST: RequestHandler = async (event) =>
             .maybeSingle()
 
           if (existing && existing.created_by === user.id) {
-            return json(
+            return Response.json(
               chatMessageResponseSchema.parse({
                 item: chatMessageRowToMessage(
                   chatMessageRowSchema.parse(existing)
@@ -149,7 +149,7 @@ export const POST: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         chatMessageResponseSchema.parse({
           item: chatMessageRowToMessage(chatMessageRowSchema.parse(data))
         })

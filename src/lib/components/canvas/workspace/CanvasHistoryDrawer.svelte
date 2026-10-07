@@ -9,15 +9,15 @@
     Trash2,
     Undo2
   } from 'lucide-svelte'
-  import { supabase } from '$lib/auth/session-store'
-  import { listCanvasHistory } from '$lib/workspace/api'
+  import { supabase } from '#lib/auth/session-store.js'
+  import { listCanvasHistory } from '#lib/workspace/api.js'
   import {
     getCanvasHistoryActionLabel,
     toCanvasHistoryEntry
-  } from '$lib/workspace/canvas-history'
-  import type { CanvasHistoryEntry } from '$lib/workspace/schema'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
-  import { Drawer, IconButton, Skeleton } from '$lib/components/ui'
+  } from '#lib/workspace/canvas-history.js'
+  import type { CanvasHistoryEntry } from '#lib/workspace/schema.js'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
+  import { Drawer, IconButton, Skeleton } from '#lib/components/ui/index.js'
 
   const PAGE_SIZE = 50
 

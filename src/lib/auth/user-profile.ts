@@ -1,4 +1,4 @@
-import type { User } from '$lib/auth/types'
+import type { User } from '#lib/auth/types.js'
 
 type LooseRecord = Record<string, unknown>
 type DisplayUser = User | LooseRecord

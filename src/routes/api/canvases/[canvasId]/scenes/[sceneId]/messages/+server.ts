@@ -1,18 +1,18 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   listSceneMessagesResponseSchema,
   sceneMessageRowSchema
-} from '$lib/scenes/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { requireScene } from '$lib/server/scene-access'
-import { sceneMessageRowToMessage } from '$lib/scenes/mapping'
+} from '#lib/scenes/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { requireScene } from '#lib/server/scene-access.js'
+import { sceneMessageRowToMessage } from '#lib/scenes/mapping.js'
 import {
   handleApiError,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // Chat history is read-only over HTTP: messages are persisted server-side
 // by the AI chat route when a generation finishes.
@@ -77,7 +77,7 @@ export const GET: RequestHandler = async (event) =>
         }
       }
 
-      return json(
+      return Response.json(
         listSceneMessagesResponseSchema.parse({
           items: rows.map((row) => {
             const message = sceneMessageRowToMessage(row)

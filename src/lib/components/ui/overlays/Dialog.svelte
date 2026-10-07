@@ -23,7 +23,7 @@
 <script lang="ts">
   import { Dialog as BitsDialog } from 'bits-ui'
   import { X } from 'lucide-svelte'
-  import { cn } from '$lib/utils'
+  import { cn } from '#lib/utils.js'
   import IconButton from '../actions/IconButton.svelte'
 
   let {

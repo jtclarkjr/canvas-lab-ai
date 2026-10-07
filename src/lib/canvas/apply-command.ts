@@ -5,14 +5,14 @@ import type {
   DiagramShape,
   Path,
   TextElement
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import type {
   ApplyCommandOptions,
   Command,
   CommandAudit
-} from '$lib/canvas/commands/types'
-import { textElementToData } from '$lib/canvas/drawing-utils'
-import { connectorToData, shapeToData } from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/commands/types.js'
+import { textElementToData } from '#lib/canvas/drawing-utils.js'
+import { connectorToData, shapeToData } from '#lib/canvas/diagram-utils.js'
 
 const isPath = (element: CanvasDrawableElement): element is Path =>
   'points' in element

@@ -3,7 +3,7 @@ import {
   canvasHistoryRowSchema,
   type CanvasHistoryCommandType,
   type CanvasHistoryEntry
-} from '$lib/workspace/schema'
+} from '#lib/workspace/schema.js'
 
 export function toCanvasHistoryEntry(row: unknown): CanvasHistoryEntry {
   const history = canvasHistoryRowSchema.parse(row)

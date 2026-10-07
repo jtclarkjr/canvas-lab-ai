@@ -1,7 +1,7 @@
 <script lang="ts">
   import { MessageCircle } from 'lucide-svelte'
-  import { IconButton } from '$lib/components/ui'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
+  import { IconButton } from '#lib/components/ui/index.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
 
   let { buttonEl = $bindable(null) } = $props<{
     buttonEl?: HTMLButtonElement | null

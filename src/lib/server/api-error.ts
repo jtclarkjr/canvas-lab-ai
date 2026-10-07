@@ -1,7 +1,7 @@
 import { ZodType } from 'zod'
-import { isAnonymousUser } from '$lib/auth/anonymous'
-import { logServerError } from '$lib/server/logger'
-import type { ApiErrorIssues, ErrorLogger } from '$lib/server/types'
+import { isAnonymousUser } from '#lib/auth/anonymous.js'
+import { logServerError } from '#lib/server/logger.js'
+import type { ApiErrorIssues, ErrorLogger } from '#lib/server/types.js'
 
 type AppErrorOptions = {
   status: number

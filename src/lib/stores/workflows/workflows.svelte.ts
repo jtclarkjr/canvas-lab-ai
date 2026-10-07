@@ -3,19 +3,19 @@ import {
   deleteWorkflow as deleteWorkflowApi,
   listWorkflows,
   updateWorkflow as updateWorkflowApi
-} from '$lib/workflows/api'
+} from '#lib/workflows/api.js'
 import {
   workflowDefinitionFromYaml,
   workflowDefinitionToYaml
-} from '$lib/workflows/definition'
+} from '#lib/workflows/definition.js'
 import type {
   UpdateWorkflowInput,
   Workflow,
   WorkflowDefinition,
   WorkflowFlowType,
   WorkflowSettings
-} from '$lib/workflows/schema'
-import type { CanvasRole } from '$lib/canvas/roles'
+} from '#lib/workflows/schema.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
 
 const DRAG_THRESHOLD_PX = 5
 const MIN_WORKFLOW_WIDTH = 360

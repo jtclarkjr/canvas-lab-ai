@@ -1,11 +1,11 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   deleteElementInputSchema,
   deleteElementResponseSchema
-} from '$lib/workspace/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { toCanvasElement } from '$lib/server/canvas-elements'
-import { recordCanvasHistory } from '$lib/server/canvas-history'
+} from '#lib/workspace/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { toCanvasElement } from '#lib/server/canvas-elements.js'
+import { recordCanvasHistory } from '#lib/server/canvas-history.js'
 import {
   badRequest,
   handleApiError,
@@ -13,9 +13,9 @@ import {
   parseInput,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 async function parseOptionalDeleteInput(request: Request) {
   const text = await request.text()
@@ -97,7 +97,7 @@ export const DELETE: RequestHandler = async (event) =>
         actor: user
       })
 
-      return json(
+      return Response.json(
         deleteElementResponseSchema.parse({
           item: toCanvasElement(data)
         })

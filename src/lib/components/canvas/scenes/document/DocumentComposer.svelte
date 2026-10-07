@@ -1,10 +1,10 @@
 <script lang="ts">
   import { ArrowUp, Globe } from 'lucide-svelte'
-  import { Button, IconButton, Textarea } from '$lib/components/ui'
+  import { Button, IconButton, Textarea } from '#lib/components/ui/index.js'
 
-  import type { SceneDocumentListItem } from '$lib/scenes/schema'
-  import ContextPicker from '$lib/components/canvas/scenes/document/ContextPicker.svelte'
-  import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
+  import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
+  import ContextPicker from '#lib/components/canvas/scenes/document/ContextPicker.svelte'
+  import ModelPicker from '#lib/components/canvas/scenes/document/ModelPicker.svelte'
 
   let {
     disabled = false,

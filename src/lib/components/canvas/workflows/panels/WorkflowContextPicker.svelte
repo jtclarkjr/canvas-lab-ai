@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Check, ClipboardList } from 'lucide-svelte'
-  import { Popover } from '$lib/components/ui'
-  import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
+  import { Popover } from '#lib/components/ui/index.js'
+  import type { Scene, SceneDocumentListItem } from '#lib/scenes/schema.js'
 
   let {
     scenes,

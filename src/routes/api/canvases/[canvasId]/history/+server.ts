@@ -1,18 +1,18 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { listCanvasHistoryResponseSchema } from '$lib/workspace/schema'
+import type { RequestHandler } from '@sveltejs/kit'
+import { listCanvasHistoryResponseSchema } from '#lib/workspace/schema.js'
 import {
   getCanvasHistoryNextBefore,
   toCanvasHistoryEntry
-} from '$lib/workspace/canvas-history'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/workspace/canvas-history.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 const DEFAULT_LIMIT = 50
 const MAX_LIMIT = 100
@@ -79,7 +79,7 @@ export const GET: RequestHandler = async (event) =>
 
       const items = (data ?? []).map(toCanvasHistoryEntry)
 
-      return json(
+      return Response.json(
         listCanvasHistoryResponseSchema.parse({
           items,
           nextBefore: getCanvasHistoryNextBefore(items, limit)

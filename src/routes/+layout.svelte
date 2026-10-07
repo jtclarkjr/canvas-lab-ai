@@ -1,17 +1,32 @@
 <script lang="ts">
   import '../app.css'
-  import favicon from '$lib/assets/favicon.svg'
-  import { dev } from '$app/environment'
-  import { injectAnalytics } from '@vercel/analytics/sveltekit'
-  import AuthControls from '$lib/components/auth/AuthControls.svelte'
-  import SettingsDialog from '$lib/components/settings/SettingsDialog.svelte'
-  import { ToastViewport } from '$lib/components/shared/feedback'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { theme } from '$lib/stores/shared/theme.svelte'
+  import favicon from '#lib/assets/favicon.svg'
+  import { dev } from '$app/env'
+  import { afterNavigate } from '$app/navigation'
+  import { inject, pageview } from '@vercel/analytics'
+  import AuthControls from '#lib/components/auth/AuthControls.svelte'
+  import SettingsDialog from '#lib/components/settings/SettingsDialog.svelte'
+  import { ToastViewport } from '#lib/components/shared/feedback/index.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
   import { page } from '$app/state'
   import { onMount } from 'svelte'
 
-  injectAnalytics({ mode: dev ? 'development' : 'production' })
+  inject(
+    {
+      mode: dev ? 'development' : 'production',
+      framework: 'sveltekit',
+      disableAutoTrack: true,
+      basePath: import.meta.env.VITE_VERCEL_OBSERVABILITY_BASEPATH
+    },
+    import.meta.env.VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG
+  )
+
+  afterNavigate(() => {
+    if (page.route.id) {
+      pageview({ route: page.route.id, path: page.url.pathname })
+    }
+  })
 
   let { children } = $props<{
     children: () => unknown
@@ -23,6 +38,7 @@
     '/usage-policy',
     '/privacy-policy'
   ]
+
   const hideHeader = $derived(
     headerlessRoutes.includes(page.url.pathname) ||
       page.url.pathname.startsWith('/canvas/')

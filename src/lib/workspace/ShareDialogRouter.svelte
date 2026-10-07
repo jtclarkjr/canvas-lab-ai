@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { AccessRequest, CanvasVisibility } from '$lib/canvas/schema'
-  import type { CanvasRole } from '$lib/canvas/roles'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import ShareDialog from '$lib/components/canvas/workspace/ShareDialog.svelte'
-  import MobileShareDialog from '$lib/mobile/components/share/MobileShareDialog.svelte'
+  import type { AccessRequest, CanvasVisibility } from '#lib/canvas/schema.js'
+  import type { CanvasRole } from '#lib/canvas/roles.js'
+  import type { WorkspaceDeviceProfile } from '#lib/workspace/device-profile/types.js'
+  import ShareDialog from '#lib/components/canvas/workspace/ShareDialog.svelte'
+  import MobileShareDialog from '#lib/mobile/components/share/MobileShareDialog.svelte'
 
   let {
     open = $bindable(false),

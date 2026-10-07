@@ -1,15 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import CanvasWorkspaceRouter from '$lib/workspace/CanvasWorkspaceRouter.svelte'
-  import RequestAccessScreen from '$lib/components/canvas/RequestAccessScreen.svelte'
-  import type { CanvasRole } from '$lib/canvas/roles'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { CanvasElement } from '$lib/workspace/schema'
-  import { provideSceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
-  import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
-  import type { Workflow } from '$lib/workflows/schema'
-  import { sleep } from '$lib/utils'
+  import CanvasWorkspaceRouter from '#lib/workspace/CanvasWorkspaceRouter.svelte'
+  import RequestAccessScreen from '#lib/components/canvas/RequestAccessScreen.svelte'
+  import type { CanvasRole } from '#lib/canvas/roles.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { CanvasElement } from '#lib/workspace/schema.js'
+  import { provideSceneDocumentsStore } from '#lib/stores/scenes/documents.svelte.js'
+  import type { Scene, SceneDocumentListItem } from '#lib/scenes/schema.js'
+  import type { Workflow } from '#lib/workflows/schema.js'
+  import { sleep } from '#lib/utils.js'
 
   const CANVAS_ENTRY_TRANSITION_HOLD_MS = 80
 

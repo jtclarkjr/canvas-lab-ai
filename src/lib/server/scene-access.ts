@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { forbidden, notFound } from '$lib/server/api-error'
-import type { Database } from '$lib/server/database.types'
-import type { CanvasRole } from '$lib/canvas/roles'
+import { forbidden, notFound } from '#lib/server/api-error.js'
+import type { Database } from '#lib/server/database.types.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
 
 type SceneRow = Database['public']['Tables']['canvas_scenes']['Row']
 type SceneDocumentRow =

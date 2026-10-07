@@ -1,12 +1,13 @@
-import { browser } from '$app/environment'
-import { ensureSessionInitialized } from '$lib/auth/session-store'
+import { browser } from '$app/env'
+import { ensureSessionInitialized } from '#lib/auth/session-store.js'
 import {
   getCurrentSession,
   getLastSessionError,
   hasSupabaseConfig,
   subscribeToSessionChanges
-} from '$lib/auth/session-store'
-import type { Session, User } from '$lib/auth/types'
+} from '#lib/auth/session-store.js'
+
+import type { Session, User } from '#lib/auth/types.js'
 
 type SessionState = {
   session: Session | null

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { themeOptions } from '$lib/settings/theme-options'
-  import { Select } from '$lib/components/ui'
-  import { theme } from '$lib/stores/shared/theme.svelte'
-  import type { Theme } from '$lib/stores/shared/types'
-  import { Avatar } from '$lib/components/shared/identity'
+  import { themeOptions } from '#lib/settings/theme-options.js'
+  import { Select } from '#lib/components/ui/index.js'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
+  import type { Theme } from '#lib/stores/shared/types.js'
+  import { Avatar } from '#lib/components/shared/identity/index.js'
 
   let { id, labelledby, displayName, email, avatarUrl, initial } = $props<{
     id: string

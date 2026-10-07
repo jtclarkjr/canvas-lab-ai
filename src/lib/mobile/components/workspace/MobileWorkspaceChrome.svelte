@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { CanvasWorkspaceStore } from '$lib/mobile/types'
-  import MobileActionToolbar from '$lib/mobile/components/toolbars/MobileActionToolbar.svelte'
-  import MobileDiagramToolbar from '$lib/mobile/components/toolbars/MobileDiagramToolbar.svelte'
-  import MobileDrawingToolbar from '$lib/mobile/components/toolbars/MobileDrawingToolbar.svelte'
-  import MobileTextFormattingToolbar from '$lib/mobile/components/toolbars/MobileTextFormattingToolbar.svelte'
-  import MobileToolDock from '$lib/mobile/components/toolbars/MobileToolDock.svelte'
-  import MobileTopMenu from '$lib/mobile/components/navigation/MobileTopMenu.svelte'
+  import type { CanvasWorkspaceStore } from '#lib/mobile/types.js'
+  import MobileActionToolbar from '#lib/mobile/components/toolbars/MobileActionToolbar.svelte'
+  import MobileDiagramToolbar from '#lib/mobile/components/toolbars/MobileDiagramToolbar.svelte'
+  import MobileDrawingToolbar from '#lib/mobile/components/toolbars/MobileDrawingToolbar.svelte'
+  import MobileTextFormattingToolbar from '#lib/mobile/components/toolbars/MobileTextFormattingToolbar.svelte'
+  import MobileToolDock from '#lib/mobile/components/toolbars/MobileToolDock.svelte'
+  import MobileTopMenu from '#lib/mobile/components/navigation/MobileTopMenu.svelte'
 
   let { workspace } = $props<{
     workspace: CanvasWorkspaceStore

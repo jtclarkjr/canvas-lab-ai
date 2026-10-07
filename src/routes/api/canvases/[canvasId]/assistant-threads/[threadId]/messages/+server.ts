@@ -1,14 +1,14 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { listAssistantMessagesResponseSchema } from '$lib/chat/schema'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import { listAssistantMessagesResponseSchema } from '#lib/chat/schema.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   handleApiError,
   notFound,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -58,7 +58,7 @@ export const GET: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         listAssistantMessagesResponseSchema.parse({
           items: (data ?? []).map((row) => ({
             id: row.id,

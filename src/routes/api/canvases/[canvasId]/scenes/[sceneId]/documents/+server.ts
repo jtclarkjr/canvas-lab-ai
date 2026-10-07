@@ -1,25 +1,25 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   createSceneDocumentInputSchema,
   listSceneDocumentsResponseSchema,
   sceneDocumentResponseSchema,
   sceneDocumentRowSchema,
   sceneDocumentStatusSchema
-} from '$lib/scenes/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { assertSceneModify, requireScene } from '$lib/server/scene-access'
-import { sceneDocumentRowToDocument } from '$lib/scenes/mapping'
+} from '#lib/scenes/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { assertSceneModify, requireScene } from '#lib/server/scene-access.js'
+import { sceneDocumentRowToDocument } from '#lib/scenes/mapping.js'
 import {
   handleApiError,
   parseInput,
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { listSceneDocumentItemsForScene } from '$lib/server/scene-documents'
-import { getSupabase } from '$lib/server/supabase'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { listSceneDocumentItemsForScene } from '#lib/server/scene-documents.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { toDbJson } from '#lib/server/json.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -47,7 +47,7 @@ export const GET: RequestHandler = async (event) =>
       const metadataOnly = event.url.searchParams.get('metadata') === '1'
 
       if (metadataOnly) {
-        return json(
+        return Response.json(
           await listSceneDocumentItemsForScene(
             supabase,
             sceneId,
@@ -72,7 +72,7 @@ export const GET: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         listSceneDocumentsResponseSchema.parse({
           items: (data ?? []).map((row) =>
             sceneDocumentRowToDocument(sceneDocumentRowSchema.parse(row))
@@ -131,7 +131,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create scene document')
       }
 
-      return json(
+      return Response.json(
         sceneDocumentResponseSchema.parse({
           item: sceneDocumentRowToDocument(sceneDocumentRowSchema.parse(data))
         }),

@@ -1,25 +1,25 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   canvasRowSchema,
   uploadCanvasIconResponseSchema
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 import {
   badRequest,
   handleApiError,
   notFound,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   buildCanvasIconPath,
   CANVAS_ICON_BUCKET,
   removeCanvasIconObject,
   validateCanvasIconFile,
   withCanvasIconUrl
-} from '$lib/server/canvas-icons'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { toCanvas } from '$lib/server/canvas-list'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/canvas-icons.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { toCanvas } from '#lib/server/canvas-list.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 async function parseIconFile(request: Request) {
   let formData: FormData
@@ -103,7 +103,7 @@ export const POST: RequestHandler = async (event) =>
         toCanvas(canvasRowSchema.parse(data), role)
       )
 
-      return json(uploadCanvasIconResponseSchema.parse({ item }))
+      return Response.json(uploadCanvasIconResponseSchema.parse({ item }))
     } catch (error) {
       return handleApiError(error, event.request)
     }
@@ -145,7 +145,7 @@ export const DELETE: RequestHandler = async (event) =>
         toCanvas(canvasRowSchema.parse(data), role)
       )
 
-      return json(uploadCanvasIconResponseSchema.parse({ item }))
+      return Response.json(uploadCanvasIconResponseSchema.parse({ item }))
     } catch (error) {
       return handleApiError(error, event.request)
     }

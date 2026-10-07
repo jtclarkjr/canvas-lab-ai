@@ -1,9 +1,9 @@
 import {
   defaultWorkflowDefinition,
   workflowDefinitionToYaml
-} from '$lib/workflows/definition'
-import { createDefaultDefinitionForFlowType } from '$lib/workflows/flow-types'
-import type { Workflow } from '$lib/workflows/schema'
+} from '#lib/workflows/definition.js'
+import { createDefaultDefinitionForFlowType } from '#lib/workflows/flow-types.js'
+import type { Workflow } from '#lib/workflows/schema.js'
 
 const createdAt = '2026-08-19T10:00:00.000Z'
 

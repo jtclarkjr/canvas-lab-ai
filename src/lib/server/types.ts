@@ -1,7 +1,7 @@
-import type { Database } from '$lib/server/database.types'
-import type { CanvasRole } from '$lib/canvas/roles'
-import type { ListCanvasesResponse } from '$lib/canvas/schema'
-import type { SceneDocumentListItem } from '$lib/scenes/schema'
+import type { Database } from '#lib/server/database.types.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
+import type { ListCanvasesResponse } from '#lib/canvas/schema.js'
+import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
 
 export type RequestUser = {
   id: string

@@ -1,8 +1,8 @@
 import {
   cloneCanvasElement,
   createUpdateMultipleCommand
-} from '$lib/canvas/commands'
-import { cloneConnector, cloneShape } from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/commands.js'
+import { cloneConnector, cloneShape } from '#lib/canvas/diagram-utils.js'
 import type {
   Arrowhead,
   ArrangementAction,

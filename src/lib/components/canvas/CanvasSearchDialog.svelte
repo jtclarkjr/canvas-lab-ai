@@ -1,10 +1,10 @@
 <script lang="ts">
   import { FileText, LoaderCircle, Search } from 'lucide-svelte'
-  import { DEFAULT_CANVAS_SEARCH_LIMIT } from '$lib/canvas/consts'
-  import { getCanvasSearchResults, getCanvasTitle } from '$lib/canvas/search'
-  import type { Canvas } from '$lib/canvas/schema'
-  import { RoleBadge } from '$lib/components/shared/canvas'
-  import { Dialog } from '$lib/components/ui'
+  import { DEFAULT_CANVAS_SEARCH_LIMIT } from '#lib/canvas/consts.js'
+  import { getCanvasSearchResults, getCanvasTitle } from '#lib/canvas/search.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import { RoleBadge } from '#lib/components/shared/canvas/index.js'
+  import { Dialog } from '#lib/components/ui/index.js'
 
   let {
     open = $bindable(false),

@@ -6,9 +6,9 @@ import {
   getApiHeaders,
   isSchemaError,
   parseResponse
-} from '$lib/api-client'
-import { setCurrentSession } from '$lib/auth/session-store'
-import type { Session } from '$lib/auth/types'
+} from '#lib/api-client.js'
+import { setCurrentSession } from '#lib/auth/session-store.js'
+import type { Session } from '#lib/auth/types.js'
 
 function jsonResponse(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {

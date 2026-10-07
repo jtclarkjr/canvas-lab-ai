@@ -1,4 +1,4 @@
-import { getApiHeaders, parseResponse } from '$lib/api-client'
+import { getApiHeaders, parseResponse } from '#lib/api-client.js'
 import {
   createSceneDocumentInputSchema,
   createSceneInputSchema,
@@ -21,7 +21,7 @@ import {
   type SceneResponse,
   type UpdateSceneDocumentInput,
   type UpdateSceneInput
-} from '$lib/scenes/schema'
+} from '#lib/scenes/schema.js'
 
 const jsonHeaders = {
   accept: 'application/json',

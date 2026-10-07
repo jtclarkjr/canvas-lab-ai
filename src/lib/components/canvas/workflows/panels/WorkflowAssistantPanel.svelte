@@ -8,23 +8,23 @@
     MessageSquare,
     Minus
   } from 'lucide-svelte'
-  import { defaultModelId } from '$lib/scenes/models'
-  import type { Scene, SceneDocumentListItem } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-  import { requestWorkflowAssistant } from '$lib/workflows/api'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
-  import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
-  import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
-  import WorkflowContextPicker from '$lib/components/canvas/workflows/panels/WorkflowContextPicker.svelte'
-  import WorkflowDraggablePanel from '$lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  import { defaultModelId } from '#lib/scenes/models.js'
+  import type { Scene, SceneDocumentListItem } from '#lib/scenes/schema.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+  import { requestWorkflowAssistant } from '#lib/workflows/api.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
+  import { getWorkflowFlowTypeDefinition } from '#lib/workflows/flow-types.js'
+  import ModelPicker from '#lib/components/canvas/scenes/document/ModelPicker.svelte'
+  import WorkflowContextPicker from '#lib/components/canvas/workflows/panels/WorkflowContextPicker.svelte'
+  import WorkflowDraggablePanel from '#lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
   import type {
     UpdateWorkflowInput,
     Workflow,
     WorkflowContextSettings,
     WorkflowProposal,
     WorkflowSettings
-  } from '$lib/workflows/schema'
+  } from '#lib/workflows/schema.js'
 
   type ChatEntry = {
     id: string

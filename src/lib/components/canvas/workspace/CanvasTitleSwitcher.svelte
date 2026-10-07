@@ -2,9 +2,9 @@
   import { goto } from '$app/navigation'
   import { ChevronDown, House } from 'lucide-svelte'
   import { onMount } from 'svelte'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { Tool } from '$lib/canvas/types'
-  import CanvasToolbar from '$lib/components/canvas/workspace/CanvasToolbar.svelte'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { Tool } from '#lib/canvas/types.js'
+  import CanvasToolbar from '#lib/components/canvas/workspace/CanvasToolbar.svelte'
 
   let {
     canvases,

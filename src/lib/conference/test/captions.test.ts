@@ -9,7 +9,7 @@ import {
   captionLanguageLabel,
   captionTextColorValue,
   loadCaptionPrefs
-} from '$lib/conference/captions'
+} from '#lib/conference/captions.js'
 
 describe('caption languages', () => {
   it('puts English first and Japanese second', () => {

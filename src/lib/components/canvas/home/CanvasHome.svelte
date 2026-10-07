@@ -13,24 +13,27 @@
   import { goto, invalidate } from '$app/navigation'
   import { page } from '$app/state'
   import { fade, scale } from 'svelte/transition'
-  import { createCanvas, deleteCanvas, listCanvases } from '$lib/canvas/api'
-  import { CANVASES_DEPENDENCY } from '$lib/canvas/consts'
+  import { createCanvas, deleteCanvas, listCanvases } from '#lib/canvas/api.js'
+  import { CANVASES_DEPENDENCY } from '#lib/canvas/consts.js'
   import {
     CANVAS_SORT_OPTIONS,
     getNextCanvasSortState,
     parseCanvasSort,
     sortCanvases
-  } from '$lib/canvas/sort'
-  import type { CanvasSortKey, CanvasSortState } from '$lib/canvas/sort/types'
-  import { isAnonymousUser } from '$lib/auth/anonymous'
-  import CanvasDeleteDialog from '$lib/components/canvas/home/CanvasDeleteDialog.svelte'
-  import CanvasHomeOwnedTile from '$lib/components/canvas/home/CanvasHomeOwnedTile.svelte'
-  import CanvasHomeSharedTile from '$lib/components/canvas/home/CanvasHomeSharedTile.svelte'
-  import CanvasIconUploadDialog from '$lib/components/canvas/home/CanvasIconUploadDialog.svelte'
-  import CanvasSearchDialog from '$lib/components/canvas/CanvasSearchDialog.svelte'
-  import type { Canvas } from '$lib/canvas/schema'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { updateCanvas } from '$lib/workspace/api'
+  } from '#lib/canvas/sort.js'
+  import type {
+    CanvasSortKey,
+    CanvasSortState
+  } from '#lib/canvas/sort/types.js'
+  import { isAnonymousUser } from '#lib/auth/anonymous.js'
+  import CanvasDeleteDialog from '#lib/components/canvas/home/CanvasDeleteDialog.svelte'
+  import CanvasHomeOwnedTile from '#lib/components/canvas/home/CanvasHomeOwnedTile.svelte'
+  import CanvasHomeSharedTile from '#lib/components/canvas/home/CanvasHomeSharedTile.svelte'
+  import CanvasIconUploadDialog from '#lib/components/canvas/home/CanvasIconUploadDialog.svelte'
+  import CanvasSearchDialog from '#lib/components/canvas/CanvasSearchDialog.svelte'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { updateCanvas } from '#lib/workspace/api.js'
 
   let {
     initialCanvases = [],
@@ -109,7 +112,7 @@
   }
 
   function getCanvasSortUrl(sort: CanvasSortState): string {
-    const url = new URL(page.url)
+    const url = new URL(page.url.href)
     url.searchParams.set('sort', sort.key)
     url.searchParams.set('dir', sort.dir)
     return `${url.pathname}${url.search}${url.hash}`
@@ -117,9 +120,8 @@
 
   async function setCanvasSort(key: CanvasSortKey) {
     await goto(getCanvasSortUrl(getNextCanvasSortState(currentSort, key)), {
-      replaceState: true,
-      keepFocus: true,
-      noScroll: true
+      replace: true,
+      reset: false
     })
   }
 

@@ -1,14 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sceneDocumentRowToListItem } from '$lib/scenes/mapping'
+import { sceneDocumentRowToListItem } from '#lib/scenes/mapping.js'
 import {
   listSceneDocumentItemsResponseSchema,
   sceneDocumentListItemRowSchema,
   type ListSceneDocumentItemsResponse,
   type SceneDocumentListItem,
   type SceneDocumentStatus
-} from '$lib/scenes/schema'
-import type { Database } from '$lib/server/database.types'
-import type { SceneDocumentListsBySceneId } from '$lib/server/types'
+} from '#lib/scenes/schema.js'
+import type { Database } from '#lib/server/database.types.js'
+import type { SceneDocumentListsBySceneId } from '#lib/server/types.js'
 
 export const SCENE_DOCUMENT_LIST_COLUMNS =
   'id, scene_id, canvas_id, kind, status, title, created_by, updated_by, created_at, updated_at'

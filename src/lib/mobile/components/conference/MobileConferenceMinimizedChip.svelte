@@ -2,7 +2,7 @@
   import { cubicOut } from 'svelte/easing'
   import { scale } from 'svelte/transition'
   import { LoaderCircle, Maximize2, Phone } from 'lucide-svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
 

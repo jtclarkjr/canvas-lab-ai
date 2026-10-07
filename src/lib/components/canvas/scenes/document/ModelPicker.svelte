@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Cpu } from 'lucide-svelte'
-  import { Popover } from '$lib/components/ui'
-  import { getModelOption, modelOptions } from '$lib/scenes/models'
+  import { Popover } from '#lib/components/ui/index.js'
+  import { getModelOption, modelOptions } from '#lib/scenes/models.js'
 
   let {
     modelId,

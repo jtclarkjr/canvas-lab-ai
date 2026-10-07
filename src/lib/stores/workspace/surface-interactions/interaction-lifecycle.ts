@@ -2,7 +2,7 @@ import {
   createCreateConnectorCommand,
   createCreateShapeCommand,
   createUpdateMultipleCommand
-} from '$lib/canvas/commands'
+} from '#lib/canvas/commands.js'
 import {
   makeConnector,
   makeShapeFromBounds,
@@ -11,13 +11,13 @@ import {
   resolveEndpoint,
   rotateAnchorTargetTowardPoint,
   rotateShapeTowardPoint
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 import {
   resizePathFromHandle,
   resizeTextFromHandle,
   rotatePathTowardPoint,
   rotateTextTowardPoint
-} from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/drawing-utils.js'
 import type { Point } from './types'
 import { MAX_SCENE_SIZE, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH } from './types'
 import type { SurfaceCtx } from './context/types'

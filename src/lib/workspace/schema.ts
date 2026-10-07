@@ -7,7 +7,7 @@ import {
   memberRoleSchema,
   roleSchema,
   userSearchResultSchema
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 
 export const canvasElementRowSchema = z.object({
   id: z.string(),

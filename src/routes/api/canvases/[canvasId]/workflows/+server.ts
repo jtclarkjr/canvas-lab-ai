@@ -1,9 +1,9 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   listCanvasWorkflowsForCanvas,
   toCanvasWorkflow
-} from '$lib/server/canvas-workflows'
+} from '#lib/server/canvas-workflows.js'
 import {
   badRequest,
   handleApiError,
@@ -11,25 +11,25 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { requireWorkflowsEnabled } from '$lib/server/features'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { requireWorkflowsEnabled } from '#lib/server/features.js'
+import { toDbJson } from '#lib/server/json.js'
 import {
   createDefaultDefinitionForFlowType,
   getWorkflowFlowTypeDefinition
-} from '$lib/workflows/flow-types'
+} from '#lib/workflows/flow-types.js'
 import {
   workflowDefinitionFromYaml,
   workflowDefinitionToYaml
-} from '$lib/workflows/definition'
+} from '#lib/workflows/definition.js'
 import {
   createWorkflowInputSchema,
   workflowResponseSchema,
   type WorkflowDefinition
-} from '$lib/workflows/schema'
-import { getNextWorkflowTitle } from '$lib/workflows/titles'
+} from '#lib/workflows/schema.js'
+import { getNextWorkflowTitle } from '#lib/workflows/titles.js'
 
 const DEFAULT_WORKFLOW_SIZE = { width: 760, height: 500 }
 
@@ -60,7 +60,9 @@ export const GET: RequestHandler = async (event) =>
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
-      return json(await listCanvasWorkflowsForCanvas(supabase, canvasId))
+      return Response.json(
+        await listCanvasWorkflowsForCanvas(supabase, canvasId)
+      )
     } catch (error) {
       return handleApiError(error, event.request)
     }
@@ -139,7 +141,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create workflow')
       }
 
-      return json(
+      return Response.json(
         workflowResponseSchema.parse({ item: toCanvasWorkflow(data) }),
         {
           status: 201

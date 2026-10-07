@@ -1,9 +1,9 @@
 <script lang="ts">
   import { ImageOff, Upload } from 'lucide-svelte'
-  import { removeCanvasIcon, uploadCanvasIcon } from '$lib/canvas/api'
-  import { Button, Dialog as Modal } from '$lib/components/ui'
+  import { removeCanvasIcon, uploadCanvasIcon } from '#lib/canvas/api.js'
+  import { Button, Dialog as Modal } from '#lib/components/ui/index.js'
 
-  import type { Canvas } from '$lib/canvas/schema'
+  import type { Canvas } from '#lib/canvas/schema.js'
 
   let {
     open = $bindable(false),

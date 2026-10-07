@@ -4,7 +4,7 @@ import type {
   ConferenceLayoutMode,
   ConferenceViewMode,
   Corner
-} from '$lib/conference/types'
+} from '#lib/conference/types.js'
 
 // UI placement state for the call surfaces. Lives outside the components so
 // it survives the PiP/fullscreen unmounting between mode switches.

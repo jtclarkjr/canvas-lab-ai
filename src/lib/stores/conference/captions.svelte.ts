@@ -1,5 +1,5 @@
-import { ApiClientError } from '$lib/api-client'
-import { fetchCaptionsToken, translateCaption } from '$lib/conference/api'
+import { ApiClientError } from '#lib/api-client.js'
+import { fetchCaptionsToken, translateCaption } from '#lib/conference/api.js'
 import {
   CAPTIONS_DATA_TOPIC,
   captionDataSchema,
@@ -8,17 +8,17 @@ import {
   DEFAULT_CAPTION_TEXT_SIZE,
   loadCaptionPrefs,
   saveCaptionPrefs
-} from '$lib/conference/captions'
+} from '#lib/conference/captions.js'
 import type {
   CaptionLanguageCode,
   CaptionTextColor,
   CaptionTextSize
-} from '$lib/conference/captions/types'
-import { OPENAI_REALTIME_CALLS_URL } from '$lib/conference/openai-realtime'
-import type { CaptionSegment } from '$lib/conference/types'
-import { toast } from '$lib/stores/shared/toast.svelte'
-import type { ConferenceDevicesStore } from '$lib/stores/conference/devices/types'
-import type { ConferenceRoomStore } from '$lib/stores/conference/room/types'
+} from '#lib/conference/captions/types.js'
+import { OPENAI_REALTIME_CALLS_URL } from '#lib/conference/openai-realtime.js'
+import type { CaptionSegment } from '#lib/conference/types.js'
+import { toast } from '#lib/stores/shared/toast.svelte.js'
+import type { ConferenceDevicesStore } from '#lib/stores/conference/devices/types.js'
+import type { ConferenceRoomStore } from '#lib/stores/conference/room/types.js'
 
 type ConferenceCaptionsInput = {
   getCanvasId: () => string

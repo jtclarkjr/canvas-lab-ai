@@ -1,9 +1,9 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   memberResponseSchema,
   updateMemberRoleInputSchema
-} from '$lib/workspace/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/workspace/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   forbidden,
@@ -12,10 +12,10 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { roleAtLeast } from '$lib/canvas/roles'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { roleAtLeast } from '#lib/canvas/roles.js'
 
 export const PATCH: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -62,7 +62,7 @@ export const PATCH: RequestHandler = async (event) =>
         .eq('id', targetUserId)
         .maybeSingle()
 
-      return json(
+      return Response.json(
         memberResponseSchema.parse({
           item: {
             userId: data.user_id,
@@ -123,7 +123,7 @@ export const DELETE: RequestHandler = async (event) =>
         })
       }
 
-      return json({ item: { userId: data.user_id, role: data.role } })
+      return Response.json({ item: { userId: data.user_id, role: data.role } })
     } catch (error) {
       return handleApiError(error, event.request)
     }

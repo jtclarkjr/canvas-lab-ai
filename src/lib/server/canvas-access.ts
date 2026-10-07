@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { forbidden, notFound } from '$lib/server/api-error'
-import type { Database } from '$lib/server/database.types'
-import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
-import type { CanvasAccess } from '$lib/server/types'
+import { forbidden, notFound } from '#lib/server/api-error.js'
+import type { Database } from '#lib/server/database.types.js'
+import { roleAtLeast, type CanvasRole } from '#lib/canvas/roles.js'
+import type { CanvasAccess } from '#lib/server/types.js'
 
 type CanvasRow = Database['public']['Tables']['canvases']['Row']
 

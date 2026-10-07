@@ -1,14 +1,14 @@
 <script lang="ts">
   import { slide } from 'svelte/transition'
-  import { PlatformIcons } from '$lib/components/shared/branding'
-  import { Button, Input, SegmentedControl } from '$lib/components/ui'
+  import { PlatformIcons } from '#lib/components/shared/branding/index.js'
+  import { Button, Input, SegmentedControl } from '#lib/components/ui/index.js'
 
   import {
     signInWithEmail,
     signInWithOAuth,
     signUpWithEmail
-  } from '$lib/auth/session-service'
-  import type { AuthConfig } from '$lib/server/types'
+  } from '#lib/auth/session-service.js'
+  import type { AuthConfig } from '#lib/server/types.js'
 
   type AuthMode = 'sign-in' | 'sign-up'
 

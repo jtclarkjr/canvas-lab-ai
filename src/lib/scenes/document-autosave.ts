@@ -1,4 +1,4 @@
-import type { DocumentSaveSnapshot } from '$lib/scenes/types'
+import type { DocumentSaveSnapshot } from '#lib/scenes/types.js'
 
 export function sameDocumentSaveSnapshot(
   first: DocumentSaveSnapshot | null,

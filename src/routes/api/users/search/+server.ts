@@ -1,8 +1,8 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { userSearchResponseSchema } from '$lib/workspace/schema'
-import { badRequest, handleApiError, withAuth } from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+import type { RequestHandler } from '@sveltejs/kit'
+import { userSearchResponseSchema } from '#lib/workspace/schema.js'
+import { badRequest, handleApiError, withAuth } from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -32,7 +32,7 @@ export const GET: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         userSearchResponseSchema.parse({
           items: (data ?? []).map((profile) => ({
             id: profile.id,

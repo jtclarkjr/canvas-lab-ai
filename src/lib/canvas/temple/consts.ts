@@ -2,7 +2,7 @@ import type {
   AnchorPosition,
   ConnectorKind,
   ShapeKind
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import type {
   DiagramTemplateConnectorSpec,
   DiagramTemplateDefinition,

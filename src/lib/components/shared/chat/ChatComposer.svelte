@@ -1,8 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { ArrowUp, Globe } from 'lucide-svelte'
-  import { IconButton, Textarea } from '$lib/components/ui'
-  import { cn } from '$lib/utils'
+  import { IconButton, Textarea } from '#lib/components/ui/index.js'
+  import { cn } from '#lib/utils.js'
   import type { ChatComposerProps, MentionMember } from './types'
 
   let {

@@ -1,4 +1,4 @@
-import type { ChatMessage } from '$lib/chat/schema'
+import type { ChatMessage } from '#lib/chat/schema.js'
 
 export type CanvasChatTab = 'chat' | 'assistant'
 

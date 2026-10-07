@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
-import { chatStoryHandlers } from '$lib/components/canvas/chat/stories/chat.msw'
+import { chatStoryHandlers } from '#lib/components/canvas/chat/stories/chat.msw.js'
 import MobileChatStoryHarness from './MobileChatStoryHarness.svelte'
 
 const meta = {

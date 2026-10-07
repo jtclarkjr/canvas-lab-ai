@@ -1,9 +1,9 @@
 <script lang="ts">
   import { MousePointer2, UserRound } from 'lucide-svelte'
-  import { canvasToScreen } from '$lib/canvas/drawing-utils'
-  import type { Camera, Point } from '$lib/canvas/types'
-  import type { CursorEventPayload } from '$lib/workspace/types'
-  import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
+  import { canvasToScreen } from '#lib/canvas/drawing-utils.js'
+  import type { Camera, Point } from '#lib/canvas/types.js'
+  import type { CursorEventPayload } from '#lib/workspace/types.js'
+  import { getWorkspaceAvatarInitials } from '#lib/workspace/presence-identity.js'
 
   let { cursors, camera } = $props<{
     cursors: Record<string, CursorEventPayload>

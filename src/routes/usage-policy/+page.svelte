@@ -1,6 +1,6 @@
 <script lang="ts">
-  import LegalPolicyPage from '$lib/components/legal/LegalPolicyPage.svelte'
-  import { legalPolicies } from '$lib/legal/policies'
+  import LegalPolicyPage from '#lib/components/legal/LegalPolicyPage.svelte'
+  import { legalPolicies } from '#lib/legal/policies.js'
 
   const policy = legalPolicies.usagePolicy
 </script>

@@ -23,7 +23,7 @@
 
 <script lang="ts">
   import { Dialog as BitsDialog } from 'bits-ui'
-  import { cn } from '$lib/utils'
+  import { cn } from '#lib/utils.js'
 
   let {
     open = $bindable(false),

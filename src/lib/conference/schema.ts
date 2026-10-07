@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CAPTION_LANGUAGE_CODES } from '$lib/conference/captions'
+import { CAPTION_LANGUAGE_CODES } from '#lib/conference/captions.js'
 
 // Room name doubles as the LiveKit agent dispatch target later, so keep it
 // predictable and derived only from the canvas id.

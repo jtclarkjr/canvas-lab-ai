@@ -1,12 +1,13 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import { generateText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { env as privateEnv } from '$env/dynamic/private'
-import { captionLanguageLabel } from '$lib/conference/captions'
+import { OPENAI_API_KEY } from '$app/env/private'
+import { captionLanguageLabel } from '#lib/conference/captions.js'
 import {
   translateCaptionInputSchema,
   translateCaptionResponseSchema
-} from '$lib/conference/schema'
+} from '#lib/conference/schema.js'
+
 import {
   handleApiError,
   internalServerError,
@@ -14,10 +15,11 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // Viewers translate one short segment per finished sentence, so this needs
 // more headroom than the default POST limit but far less than chat AI.
@@ -38,7 +40,7 @@ export const POST: RequestHandler = async (event) =>
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 
-      const apiKey = privateEnv.OPENAI_API_KEY
+      const apiKey = OPENAI_API_KEY
       if (!apiKey) {
         throw internalServerError(
           'Captions are not configured on this server.',
@@ -49,8 +51,8 @@ export const POST: RequestHandler = async (event) =>
       const payload = await parseJsonBody(event.request)
       const input = parseInput(translateCaptionInputSchema, payload)
       const label = captionLanguageLabel(input.language)
-
       const openai = createOpenAI({ apiKey })
+
       const { text } = await generateText({
         model: openai(TRANSLATE_MODEL),
         system:
@@ -62,7 +64,9 @@ export const POST: RequestHandler = async (event) =>
         maxOutputTokens: 400
       })
 
-      return json(translateCaptionResponseSchema.parse({ text: text.trim() }))
+      return Response.json(
+        translateCaptionResponseSchema.parse({ text: text.trim() })
+      )
     } catch (error) {
       return handleApiError(error, event.request)
     }

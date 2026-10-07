@@ -2,24 +2,24 @@ import type { RequestHandler } from '@sveltejs/kit'
 import {
   documentChatRequestSchema,
   markdownDocumentContentSchema
-} from '$lib/scenes/schema'
-import { getDocumentCategory } from '$lib/scenes/document-categories'
-import { getLinkedContextSceneIds } from '$lib/scenes/context-links'
-import { isKnownModelId } from '$lib/scenes/models'
-import { AiModelError, streamDocumentChat } from '$lib/server/ai'
-import type { ContextDocumentRef } from '$lib/server/ai/types'
-import { getAiRegistry } from '$lib/server/ai-runtime'
+} from '#lib/scenes/schema.js'
+import { getDocumentCategory } from '#lib/scenes/document-categories.js'
+import { getLinkedContextSceneIds } from '#lib/scenes/context-links.js'
+import { isKnownModelId } from '#lib/scenes/models.js'
+import { AiModelError, streamDocumentChat } from '#lib/server/ai/index.js'
+import type { ContextDocumentRef } from '#lib/server/ai/types.js'
+import { getAiRegistry } from '#lib/server/ai-runtime.js'
 import {
   assertPromptAiUsageAllowed,
   recordPromptAiUsage
-} from '$lib/server/ai-usage'
-import { persistDocumentChat } from '$lib/server/document-chat'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/server/ai-usage.js'
+import { persistDocumentChat } from '#lib/server/document-chat.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   assertSceneModify,
   requireScene,
   requireSceneDocument
-} from '$lib/server/scene-access'
+} from '#lib/server/scene-access.js'
 import {
   badRequest,
   handleApiError,
@@ -27,11 +27,11 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { logServerError } from '$lib/server/logger'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { canvasElementToConnector } from '$lib/workspace/element-mapping'
+} from '#lib/server/api-error.js'
+import { logServerError } from '#lib/server/logger.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { canvasElementToConnector } from '#lib/workspace/element-mapping.js'
 
 // AI generations are expensive: a much tighter limit than normal writes.
 const AI_RATE_LIMIT = { maxRequests: 10, windowMs: 60_000 }

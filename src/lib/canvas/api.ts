@@ -3,7 +3,7 @@ import {
   apiRequest,
   getApiHeaders,
   parseResponse
-} from '$lib/api-client'
+} from '#lib/api-client.js'
 import {
   accessRequestResponseSchema,
   createCanvasInputSchema,
@@ -22,7 +22,7 @@ import {
   type MemberRole,
   type MyAccessRequestResponse,
   type UploadCanvasIconResponse
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 export { ApiClientError }
 
 const jsonHeaders = {

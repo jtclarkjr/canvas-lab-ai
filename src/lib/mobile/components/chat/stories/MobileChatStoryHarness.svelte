@@ -7,11 +7,11 @@
   import MobileCanvasChatComposer from '../MobileCanvasChatComposer.svelte'
   import MobileCanvasChatRoomPanel from '../MobileCanvasChatRoomPanel.svelte'
   import MobileCanvasChatWindow from '../MobileCanvasChatWindow.svelte'
-  import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
+  import { provideCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
   import {
     storyThreadId,
     storyUserId
-  } from '$lib/components/canvas/chat/stories/chat.msw'
+  } from '#lib/components/canvas/chat/stories/chat.msw.js'
 
   type Target =
     | 'assistant-panel'

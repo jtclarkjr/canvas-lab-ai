@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { colorFromId } from '$lib/canvas/helpers/color-from-id'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import type { ChatEntry } from '$lib/stores/chat/canvas-chat/types'
-  import CanvasChatComposer from '$lib/components/canvas/chat/CanvasChatComposer.svelte'
-  import { segmentMentions } from '$lib/chat/mentions'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
-  import { ChatLoadingSkeleton } from '$lib/components/shared/chat'
+  import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import type { ChatEntry } from '#lib/stores/chat/canvas-chat/types.js'
+  import CanvasChatComposer from '#lib/components/canvas/chat/CanvasChatComposer.svelte'
+  import { segmentMentions } from '#lib/chat/mentions.js'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
+  import { ChatLoadingSkeleton } from '#lib/components/shared/chat/index.js'
 
   // alwaysVisible: hosts outside the chat window (the call's fullscreen
   // chat panel) control their own visibility, so the auto-scroll behavior

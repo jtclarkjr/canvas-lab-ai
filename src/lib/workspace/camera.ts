@@ -1,4 +1,4 @@
-import type { Camera, Point } from '$lib/canvas/types'
+import type { Camera, Point } from '#lib/canvas/types.js'
 
 type CameraViewport = {
   width: number

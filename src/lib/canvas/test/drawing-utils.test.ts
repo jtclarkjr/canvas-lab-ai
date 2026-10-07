@@ -18,8 +18,8 @@ import {
   resizeTextFromHandle,
   rotateTextTowardPoint,
   screenToCanvas
-} from '$lib/canvas/drawing-utils'
-import type { Path, TextElement } from '$lib/canvas/types'
+} from '#lib/canvas/drawing-utils.js'
+import type { Path, TextElement } from '#lib/canvas/types.js'
 
 function makeText(overrides: Partial<TextElement> = {}): TextElement {
   return {

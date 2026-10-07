@@ -2,7 +2,7 @@
   import {
     ChatComposer,
     type ChatComposerProps
-  } from '$lib/components/shared/chat'
+  } from '#lib/components/shared/chat/index.js'
 
   let props: Omit<ChatComposerProps, 'density'> = $props()
 </script>

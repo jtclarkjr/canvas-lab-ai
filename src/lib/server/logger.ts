@@ -1,5 +1,5 @@
-import { AppError } from '$lib/server/api-error'
-import type { ErrorLogger } from '$lib/server/types'
+import { AppError } from '#lib/server/api-error.js'
+import type { ErrorLogger } from '#lib/server/types.js'
 
 export const consoleErrorLogger: ErrorLogger = {
   log(event) {

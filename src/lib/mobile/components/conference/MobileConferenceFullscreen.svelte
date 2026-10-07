@@ -2,11 +2,11 @@
   import { cubicOut } from 'svelte/easing'
   import { scale } from 'svelte/transition'
   import { LoaderCircle, MessageSquare, Minimize2, Users } from 'lucide-svelte'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import MobileConferenceControls from '$lib/mobile/components/conference/MobileConferenceControls.svelte'
-  import MobileConferenceSheet from '$lib/mobile/components/conference/MobileConferenceSheet.svelte'
-  import MobileConferenceTileGrid from '$lib/mobile/components/conference/MobileConferenceTileGrid.svelte'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import MobileConferenceControls from '#lib/mobile/components/conference/MobileConferenceControls.svelte'
+  import MobileConferenceSheet from '#lib/mobile/components/conference/MobileConferenceSheet.svelte'
+  import MobileConferenceTileGrid from '#lib/mobile/components/conference/MobileConferenceTileGrid.svelte'
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()

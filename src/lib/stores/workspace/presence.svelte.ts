@@ -2,13 +2,16 @@ import {
   REALTIME_SUBSCRIBE_STATES,
   type RealtimeChannel
 } from '@supabase/supabase-js'
-import { supabase } from '$lib/auth/session-store'
-import { colorFromId } from '$lib/canvas/helpers/color-from-id'
-import { displayMembers as getDisplayMembers } from '$lib/workspace/display-members'
-import { getPresenceIdentity } from '$lib/workspace/presence-identity'
-import { createThrottledCursorSender } from '$lib/workspace/throttled-cursor-sender'
-import type { Point } from '$lib/canvas/types'
-import type { CursorEventPayload, WorkspaceMember } from '$lib/workspace/types'
+import { supabase } from '#lib/auth/session-store.js'
+import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
+import { displayMembers as getDisplayMembers } from '#lib/workspace/display-members.js'
+import { getPresenceIdentity } from '#lib/workspace/presence-identity.js'
+import { createThrottledCursorSender } from '#lib/workspace/throttled-cursor-sender.js'
+import type { Point } from '#lib/canvas/types.js'
+import type {
+  CursorEventPayload,
+  WorkspaceMember
+} from '#lib/workspace/types.js'
 
 type WorkspacePresenceInput = {
   getActiveCanvasId: () => string

@@ -1,21 +1,29 @@
-import { env as privateEnv } from '$env/dynamic/private'
-import type { AuthConfig } from '$lib/server/types'
+import {
+  SUPABASE_URL,
+  VITE_SUPABASE_URL,
+  VITE_SUPABASE_PUBLISHABLE_KEY,
+  ENABLE_GITHUB_AUTH,
+  ENABLE_GOOGLE_AUTH,
+  ENABLE_APPLE_AUTH
+} from '$app/env/private'
+
+import type { AuthConfig } from '#lib/server/types.js'
 
 const flag = (value: string | undefined): boolean =>
   !!value && value.toLowerCase() !== 'false' && value !== '0'
 
 export function getAuthConfig(): AuthConfig {
-  const hasUrl = !!privateEnv.SUPABASE_URL || !!privateEnv.VITE_SUPABASE_URL
-  const hasPublishableKey = !!privateEnv.VITE_SUPABASE_PUBLISHABLE_KEY
+  const hasUrl = !!SUPABASE_URL || !!VITE_SUPABASE_URL
+  const hasPublishableKey = !!VITE_SUPABASE_PUBLISHABLE_KEY
   const configured = hasUrl && hasPublishableKey
 
   return {
     configured,
     providers: {
       email: configured,
-      github: configured && flag(privateEnv.ENABLE_GITHUB_AUTH),
-      google: configured && flag(privateEnv.ENABLE_GOOGLE_AUTH),
-      apple: configured && flag(privateEnv.ENABLE_APPLE_AUTH)
+      github: configured && flag(ENABLE_GITHUB_AUTH),
+      google: configured && flag(ENABLE_GOOGLE_AUTH),
+      apple: configured && flag(ENABLE_APPLE_AUTH)
     }
   }
 }

@@ -1,5 +1,8 @@
 import type { UIMessage } from 'ai'
-import type { SceneDocument, SceneDocumentListItem } from '$lib/scenes/schema'
+import type {
+  SceneDocument,
+  SceneDocumentListItem
+} from '#lib/scenes/schema.js'
 
 const base = {
   sceneId: 'scene-story',

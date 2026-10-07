@@ -1,5 +1,5 @@
-import { isAccountUser } from '$lib/auth/anonymous'
-import type { User } from '$lib/auth/types'
+import { isAccountUser } from '#lib/auth/anonymous.js'
+import type { User } from '#lib/auth/types.js'
 
 type AccountUser = User | Record<string, unknown>
 

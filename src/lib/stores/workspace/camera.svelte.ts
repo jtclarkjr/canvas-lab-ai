@@ -1,12 +1,12 @@
-import type { Camera, Point, Tool } from '$lib/canvas/types'
-import { screenToCanvas } from '$lib/canvas/drawing-utils'
+import type { Camera, Point, Tool } from '#lib/canvas/types.js'
+import { screenToCanvas } from '#lib/canvas/drawing-utils.js'
 import {
   centerCameraOnCanvasPoint,
   constrainScale,
   resetCamera,
   zoomCamera
-} from '$lib/workspace/camera'
-import { getWorkspaceCursorStyle } from '$lib/workspace/cursor-style'
+} from '#lib/workspace/camera.js'
+import { getWorkspaceCursorStyle } from '#lib/workspace/cursor-style.js'
 
 type WorkspaceCameraInput = {
   getActiveCanvasId: () => string

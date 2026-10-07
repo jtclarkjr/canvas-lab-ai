@@ -1,14 +1,14 @@
-import { goto, invalidateAll } from '$app/navigation'
-import { listAccessRequests } from '$lib/workspace/api'
-import type { AccessRequest } from '$lib/canvas/schema'
-import type { CanvasRole } from '$lib/canvas/roles'
-import { ensureSessionInitialized, supabase } from '$lib/auth/session-store'
-import { toast } from '$lib/stores/shared/toast.svelte'
+import { goto, refreshAll } from '$app/navigation'
+import { listAccessRequests } from '#lib/workspace/api.js'
+import type { AccessRequest } from '#lib/canvas/schema.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
+import { ensureSessionInitialized, supabase } from '#lib/auth/session-store.js'
+import { toast } from '#lib/stores/shared/toast.svelte.js'
 import {
   CANVAS_VISIBILITY_CHANGED_EVENT,
   canvasVisibilityChannelName
-} from '$lib/workspace/canvas-visibility-realtime'
-import type { CanvasVisibilityChangedPayload } from '$lib/workspace/canvas-visibility-realtime/types'
+} from '#lib/workspace/canvas-visibility-realtime.js'
+import type { CanvasVisibilityChangedPayload } from '#lib/workspace/canvas-visibility-realtime/types.js'
 
 type WorkspaceAccessInput = {
   getActiveCanvasId: () => string
@@ -128,7 +128,7 @@ export function createWorkspaceAccessStore({
 
     function kickOut(message: string) {
       toast.show({ title: 'Access changed', description: message })
-      void invalidateAll()
+      void refreshAll()
     }
 
     const channel = client
@@ -230,12 +230,12 @@ export function createWorkspaceAccessStore({
 
       if (getIsAnonymousPublicViewer()) {
         void goto(`/login?redirect=${encodeURIComponent(`/canvas/${id}`)}`, {
-          replaceState: true
+          replace: true
         })
         return
       }
 
-      void invalidateAll()
+      void refreshAll()
     }
 
     const channel = client

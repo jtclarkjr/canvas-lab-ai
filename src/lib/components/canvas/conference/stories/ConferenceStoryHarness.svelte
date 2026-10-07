@@ -15,17 +15,17 @@
   import ConferenceParticipantTile from '../tiles/ConferenceParticipantTile.svelte'
   import ConferenceScreenTile from '../tiles/ConferenceScreenTile.svelte'
   import ConferenceTileGrid from '../tiles/ConferenceTileGrid.svelte'
-  import MobileCanvasConference from '$lib/mobile/components/conference/MobileCanvasConference.svelte'
-  import MobileConferenceControls from '$lib/mobile/components/conference/MobileConferenceControls.svelte'
-  import MobileConferenceFullscreen from '$lib/mobile/components/conference/MobileConferenceFullscreen.svelte'
-  import MobileConferenceMinimizedChip from '$lib/mobile/components/conference/MobileConferenceMinimizedChip.svelte'
-  import MobileConferenceSheet from '$lib/mobile/components/conference/MobileConferenceSheet.svelte'
-  import MobileConferenceTileGrid from '$lib/mobile/components/conference/MobileConferenceTileGrid.svelte'
-  import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
+  import MobileCanvasConference from '#lib/mobile/components/conference/MobileCanvasConference.svelte'
+  import MobileConferenceControls from '#lib/mobile/components/conference/MobileConferenceControls.svelte'
+  import MobileConferenceFullscreen from '#lib/mobile/components/conference/MobileConferenceFullscreen.svelte'
+  import MobileConferenceMinimizedChip from '#lib/mobile/components/conference/MobileConferenceMinimizedChip.svelte'
+  import MobileConferenceSheet from '#lib/mobile/components/conference/MobileConferenceSheet.svelte'
+  import MobileConferenceTileGrid from '#lib/mobile/components/conference/MobileConferenceTileGrid.svelte'
+  import { provideCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
   import {
     createCanvasConferenceStore,
     provideCanvasConferenceStoreInstance
-  } from '$lib/stores/conference/index.svelte'
+  } from '#lib/stores/conference/index.svelte.js'
   import type {
     ConferenceFullscreenChatTab,
     ConferenceFullscreenPanel as FullscreenPanel,
@@ -33,7 +33,7 @@
     ConferenceStatus,
     ConferenceViewMode,
     BgPreset
-  } from '$lib/conference/types'
+  } from '#lib/conference/types.js'
   import { conferenceChatEntries, conferenceParticipants } from './fixtures'
 
   type Target =

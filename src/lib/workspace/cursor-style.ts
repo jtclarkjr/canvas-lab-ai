@@ -1,4 +1,4 @@
-import type { Tool } from '$lib/canvas/types'
+import type { Tool } from '#lib/canvas/types.js'
 
 export function getWorkspaceCursorStyle(
   isViewportDragging: boolean,

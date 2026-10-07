@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import ToastViewport from '../../feedback/ToastViewport.svelte'
-  import { toast } from '$lib/stores/shared/toast.svelte'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
 
   let { variant = 'default', withAction = true } = $props<{
     variant?: 'default' | 'error'

@@ -2,8 +2,8 @@ import {
   REALTIME_SUBSCRIBE_STATES,
   type RealtimeChannel
 } from '@supabase/supabase-js'
-import { supabase } from '$lib/auth/session-store'
-import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
+import { supabase } from '#lib/auth/session-store.js'
+import type { SceneActivity, SceneActivityKind } from '#lib/scenes/types.js'
 
 const FLUSH_INTERVAL_MS = 150
 const STALE_ACTIVITY_MS = 10_000

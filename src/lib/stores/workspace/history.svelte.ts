@@ -1,5 +1,5 @@
-import { getInverseCommand } from '$lib/canvas/commands'
-import type { Command, CommandAudit } from '$lib/canvas/commands/types'
+import { getInverseCommand } from '#lib/canvas/commands.js'
+import type { Command, CommandAudit } from '#lib/canvas/commands/types.js'
 
 type WorkspaceHistoryInput = {
   getUserId: () => string

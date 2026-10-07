@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Database, Workflow } from 'lucide-svelte'
-  import type { Workflow as CanvasWorkflow } from '$lib/workflows/schema'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
-  import { Card } from '$lib/components/ui'
+  import type { Workflow as CanvasWorkflow } from '#lib/workflows/schema.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
+  import { Card } from '#lib/components/ui/index.js'
 
   let { workflow } = $props<{ workflow: CanvasWorkflow }>()
 </script>

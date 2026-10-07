@@ -1,7 +1,7 @@
 <script lang="ts">
   import { BookOpen, Check } from 'lucide-svelte'
-  import { Popover } from '$lib/components/ui'
-  import type { SceneDocumentListItem } from '$lib/scenes/schema'
+  import { Popover } from '#lib/components/ui/index.js'
+  import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
 
   let {
     savedDocuments,

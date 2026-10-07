@@ -3,12 +3,12 @@
   import {
     createDatabaseColumn,
     createDatabaseTable
-  } from '$lib/workflows/database/definition'
+  } from '#lib/workflows/database/definition.js'
   import type {
     DatabaseColumn,
     DatabaseFlowDefinition,
     DatabaseTable
-  } from '$lib/workflows/database/schema'
+  } from '#lib/workflows/database/schema.js'
 
   let { definition, canModify, onDefinitionChange } = $props<{
     definition: DatabaseFlowDefinition

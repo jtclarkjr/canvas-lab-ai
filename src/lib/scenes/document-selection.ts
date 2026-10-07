@@ -1,4 +1,4 @@
-import type { SceneDocumentListItem } from '$lib/scenes/schema'
+import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
 
 export function reconcileActiveDocumentId(
   activeDocumentId: string | null,

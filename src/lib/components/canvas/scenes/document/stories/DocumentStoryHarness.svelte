@@ -9,7 +9,7 @@
   import DocumentScenePanel from '../DocumentScenePanel.svelte'
   import ModelPicker from '../ModelPicker.svelte'
   import PresetPicker from '../PresetPicker.svelte'
-  import { defaultModelId } from '$lib/scenes/models'
+  import { defaultModelId } from '#lib/scenes/models.js'
   import { documentItems, documentMessages, draftDocument } from './fixtures'
 
   type Target =

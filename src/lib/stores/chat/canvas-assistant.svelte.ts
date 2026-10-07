@@ -1,13 +1,13 @@
 import type { UIMessage } from 'ai'
-import { ApiClientError } from '$lib/api-client'
-import { deriveAssistantThreadTitleFromText } from '$lib/chat/assistant-title'
+import { ApiClientError } from '#lib/api-client.js'
+import { deriveAssistantThreadTitleFromText } from '#lib/chat/assistant-title.js'
 import {
   deleteAssistantThread,
   listAssistantThreadMessages,
   listAssistantThreads,
   updateAssistantThread
-} from '$lib/chat/api'
-import { asParts, partText } from '$lib/scenes/chat-parts'
+} from '#lib/chat/api.js'
+import { asParts, partText } from '#lib/scenes/chat-parts.js'
 import type { AssistantThreadEntry } from './canvas-assistant/types'
 
 type CanvasAssistantStoreInput = {

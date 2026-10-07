@@ -1,12 +1,12 @@
 <script lang="ts">
   import { MousePointer2, UserRound } from 'lucide-svelte'
-  import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
-  import CanvasHistoryButton from '$lib/components/canvas/workspace/CanvasHistoryButton.svelte'
-  import CanvasOptionsButton from '$lib/components/canvas/workspace/CanvasOptionsButton.svelte'
-  import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
-  import { Popover } from '$lib/components/ui'
-  import { getWorkspaceAvatarInitials } from '$lib/workspace/presence-identity'
-  import type { DisplayMember } from '$lib/workspace/types'
+  import { roleAtLeast, type CanvasRole } from '#lib/canvas/roles.js'
+  import CanvasHistoryButton from '#lib/components/canvas/workspace/CanvasHistoryButton.svelte'
+  import CanvasOptionsButton from '#lib/components/canvas/workspace/CanvasOptionsButton.svelte'
+  import ConferenceCallButton from '#lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
+  import { Popover } from '#lib/components/ui/index.js'
+  import { getWorkspaceAvatarInitials } from '#lib/workspace/presence-identity.js'
+  import type { DisplayMember } from '#lib/workspace/types.js'
 
   let {
     canvasId,

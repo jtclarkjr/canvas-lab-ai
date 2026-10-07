@@ -1,3 +1,4 @@
+import adapter from '@sveltejs/adapter-vercel'
 import { sentrySvelteKit } from '@sentry/sveltekit/vite'
 import tailwindcss from '@tailwindcss/vite'
 import { sveltekit } from '@sveltejs/kit/vite'
@@ -23,7 +24,7 @@ export default defineConfig({
     proseWrap: 'always',
     svelte: true,
     sortPackageJson: false,
-    ignorePatterns: ['*.md']
+    ignorePatterns: ['*.md', 'storybook-static/**']
   },
   lint: {
     rules: {
@@ -41,6 +42,14 @@ export default defineConfig({
       telemetry: false
     }),
     tailwindcss(),
-    sveltekit()
+    sveltekit({
+      compilerOptions: {
+        // Force runes mode for the project, except for libraries. Can be removed in svelte 6.
+        runes: ({ filename }) =>
+          filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+      },
+      adapter: adapter({ runtime: 'nodejs24.x' }),
+      tracing: { server: true }
+    })
   ]
 })

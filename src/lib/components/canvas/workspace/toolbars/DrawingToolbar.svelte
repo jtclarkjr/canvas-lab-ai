@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Highlighter, Palette, Slash, Spline } from 'lucide-svelte'
-  import type { DrawStyle } from '$lib/canvas/types'
+  import type { DrawStyle } from '#lib/canvas/types.js'
 
   let {
     width,

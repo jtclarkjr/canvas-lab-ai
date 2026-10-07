@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import type { CanvasRole } from '$lib/canvas/roles'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { CanvasElement } from '$lib/workspace/schema'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { Workflow } from '$lib/workflows/schema'
-  import CanvasWorkspace from '$lib/components/canvas/workspace/CanvasWorkspace.svelte'
-  import MobileCanvasWorkspace from '$lib/mobile/components/workspace/MobileCanvasWorkspace.svelte'
-  import { createWorkspaceDeviceProfile } from '$lib/workspace/device-profile.svelte'
+  import type { CanvasRole } from '#lib/canvas/roles.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { CanvasElement } from '#lib/workspace/schema.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { Workflow } from '#lib/workflows/schema.js'
+  import CanvasWorkspace from '#lib/components/canvas/workspace/CanvasWorkspace.svelte'
+  import MobileCanvasWorkspace from '#lib/mobile/components/workspace/MobileCanvasWorkspace.svelte'
+  import { createWorkspaceDeviceProfile } from '#lib/workspace/device-profile.svelte.js'
 
   let {
     canvasId,

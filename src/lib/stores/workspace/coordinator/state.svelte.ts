@@ -1,4 +1,4 @@
-import type { CanvasRole } from '$lib/canvas/roles'
+import type { CanvasRole } from '#lib/canvas/roles.js'
 import type {
   DiagramConnector,
   DiagramShape,
@@ -7,10 +7,10 @@ import type {
   Point,
   TextElement,
   Tool
-} from '$lib/canvas/types'
-import type { SceneMessage } from '$lib/scenes/schema'
-import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
-import type { CanvasWorkspaceStoreInput } from '$lib/workspace/types'
+} from '#lib/canvas/types.js'
+import type { SceneMessage } from '#lib/scenes/schema.js'
+import { canvasElementsToDrawingState } from '#lib/workspace/element-mapping.js'
+import type { CanvasWorkspaceStoreInput } from '#lib/workspace/types.js'
 import type { WorkspaceElements } from './state/types'
 
 export class WorkspaceCoordinatorState {

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { badRequest } from '$lib/server/api-error'
-import type { Canvas } from '$lib/canvas/schema'
-import type { Database } from '$lib/server/database.types'
+import { badRequest } from '#lib/server/api-error.js'
+import type { Canvas } from '#lib/canvas/schema.js'
+import type { Database } from '#lib/server/database.types.js'
 
 export const CANVAS_ICON_BUCKET = 'canvas-icons'
 export const CANVAS_ICON_MAX_BYTES = 5 * 1024 * 1024

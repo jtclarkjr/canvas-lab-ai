@@ -5,11 +5,11 @@ import {
   canvasSchema,
   createCanvasInputSchema,
   requestAccessInputSchema
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 import {
   updateCanvasInputSchema,
   upsertElementInputSchema
-} from '$lib/workspace/schema'
+} from '#lib/workspace/schema.js'
 
 describe('canvas schema', () => {
   it('trims and validates canvas titles', () => {

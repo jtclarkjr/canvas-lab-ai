@@ -1,4 +1,4 @@
-import type { Scene } from '$lib/scenes/schema'
+import type { Scene } from '#lib/scenes/schema.js'
 
 export const sceneFixture: Scene = {
   id: 'scene-story',

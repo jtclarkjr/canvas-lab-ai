@@ -1,9 +1,9 @@
 <script lang="ts">
   import { ArrowUp, FileText, NotebookPen } from 'lucide-svelte'
-  import { documentCategories } from '$lib/scenes/document-categories'
-  import { defaultModelId } from '$lib/scenes/models'
-  import { sceneTypes } from '$lib/scenes/registry'
-  import type { SceneTypeId } from '$lib/scenes/types'
+  import { documentCategories } from '#lib/scenes/document-categories.js'
+  import { defaultModelId } from '#lib/scenes/models.js'
+  import { sceneTypes } from '#lib/scenes/registry.js'
+  import type { SceneTypeId } from '#lib/scenes/types.js'
 
   export type MobileSceneEntryStart = {
     type: SceneTypeId

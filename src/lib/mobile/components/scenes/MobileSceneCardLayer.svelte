@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { Camera } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneActivity, WorkspaceMode } from '$lib/scenes/types'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import MobileSceneCard from '$lib/mobile/components/scenes/MobileSceneCard.svelte'
+  import type { Camera } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneActivity, WorkspaceMode } from '#lib/scenes/types.js'
+  import type { WorkspaceDeviceProfile } from '#lib/workspace/device-profile/types.js'
+  import MobileSceneCard from '#lib/mobile/components/scenes/MobileSceneCard.svelte'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void

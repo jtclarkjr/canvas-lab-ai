@@ -7,10 +7,10 @@
     Minus,
     Sparkles
   } from 'lucide-svelte'
-  import { IconButton, SegmentedControl } from '$lib/components/ui'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import CanvasAssistantWorkspace from '$lib/components/canvas/chat/CanvasAssistantWorkspace.svelte'
-  import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
+  import { IconButton, SegmentedControl } from '#lib/components/ui/index.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import CanvasAssistantWorkspace from '#lib/components/canvas/chat/CanvasAssistantWorkspace.svelte'
+  import CanvasChatRoomPanel from '#lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
 
   let { canvasId, userId, getLauncherRect } = $props<{
     canvasId: string

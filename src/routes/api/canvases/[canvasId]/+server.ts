@@ -1,14 +1,14 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   canvasRowSchema,
   deleteCanvasResponseSchema,
   getCanvasResponseSchema
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 import {
   updateCanvasInputSchema,
   updateCanvasResponseSchema
-} from '$lib/workspace/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/workspace/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
@@ -16,14 +16,14 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   removeCanvasIconObject,
   withCanvasIconUrl
-} from '$lib/server/canvas-icons'
-import { toCanvas } from '$lib/server/canvas-list'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/canvas-icons.js'
+import { toCanvas } from '#lib/server/canvas-list.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -38,7 +38,7 @@ export const GET: RequestHandler = async (event) =>
         'reader'
       )
 
-      return json(
+      return Response.json(
         getCanvasResponseSchema.parse({
           item: await withCanvasIconUrl(
             supabase,
@@ -92,7 +92,7 @@ export const PATCH: RequestHandler = async (event) =>
         })
       }
 
-      return json(
+      return Response.json(
         updateCanvasResponseSchema.parse({
           item: await withCanvasIconUrl(
             supabase,
@@ -139,7 +139,7 @@ export const DELETE: RequestHandler = async (event) =>
         () => undefined
       )
 
-      return json(
+      return Response.json(
         deleteCanvasResponseSchema.parse({
           item: toCanvas(deletedCanvas)
         })

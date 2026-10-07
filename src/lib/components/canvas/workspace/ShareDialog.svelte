@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Check, Link, X } from 'lucide-svelte'
-  import { Dialog as Modal } from '$lib/components/ui'
-  import { RoleBadge } from '$lib/components/shared/canvas'
+  import { Dialog as Modal } from '#lib/components/ui/index.js'
+  import { RoleBadge } from '#lib/components/shared/canvas/index.js'
   import {
     addMember,
     listMembers,
@@ -9,17 +9,17 @@
     resolveAccessRequest,
     searchUsers,
     updateMemberRole
-  } from '$lib/workspace/api'
+  } from '#lib/workspace/api.js'
   import type {
     AccessRequest,
     CanvasVisibility,
     UserSearchResult
-  } from '$lib/canvas/schema'
-  import type { CanvasMember } from '$lib/workspace/schema'
-  import { MEMBER_ROLES, ROLE_LABELS } from '$lib/canvas/consts'
-  import { roleAtLeast } from '$lib/canvas/roles'
-  import type { CanvasRole, MemberRole } from '$lib/canvas/roles'
-  import { toast } from '$lib/stores/shared/toast.svelte'
+  } from '#lib/canvas/schema.js'
+  import type { CanvasMember } from '#lib/workspace/schema.js'
+  import { MEMBER_ROLES, ROLE_LABELS } from '#lib/canvas/consts.js'
+  import { roleAtLeast } from '#lib/canvas/roles.js'
+  import type { CanvasRole, MemberRole } from '#lib/canvas/roles.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
 
   let {
     open = $bindable(false),

@@ -3,15 +3,15 @@
   import {
     markdownDocumentContentSchema,
     type SceneDocument
-  } from '$lib/scenes/schema'
-  import type { SceneActivityKind } from '$lib/scenes/types'
-  import { getWorkspaceCursorStyle } from '$lib/workspace/cursor-style'
-  import { renderMarkdown } from '$lib/scenes/markdown'
-  import { exportAnnotatedNotesPdf } from '$lib/scenes/notes-pdf'
-  import { createNotesSceneStore } from '$lib/stores/scenes/notes.svelte'
-  import CanvasSurface from '$lib/components/canvas/CanvasSurface.svelte'
-  import { TextEditor } from '$lib/components/shared/editors'
-  import NotesToolbar from '$lib/components/canvas/scenes/notes/NotesToolbar.svelte'
+  } from '#lib/scenes/schema.js'
+  import type { SceneActivityKind } from '#lib/scenes/types.js'
+  import { getWorkspaceCursorStyle } from '#lib/workspace/cursor-style.js'
+  import { renderMarkdown } from '#lib/scenes/markdown.js'
+  import { exportAnnotatedNotesPdf } from '#lib/scenes/notes-pdf.js'
+  import { createNotesSceneStore } from '#lib/stores/scenes/notes.svelte.js'
+  import CanvasSurface from '#lib/components/canvas/CanvasSurface.svelte'
+  import { TextEditor } from '#lib/components/shared/editors/index.js'
+  import NotesToolbar from '#lib/components/canvas/scenes/notes/NotesToolbar.svelte'
 
   let {
     canvasId,

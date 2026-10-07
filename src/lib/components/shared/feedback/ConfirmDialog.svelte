@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Dialog } from '$lib/components/ui'
+  import { Button, Dialog } from '#lib/components/ui/index.js'
 
   let {
     open = $bindable(false),

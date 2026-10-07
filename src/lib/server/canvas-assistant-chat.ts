@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { UIMessage } from 'ai'
-import { deriveAssistantThreadTitle } from '$lib/chat/assistant-title'
-import type { Database } from '$lib/server/database.types'
-import { toDbJson } from '$lib/server/json'
+import { deriveAssistantThreadTitle } from '#lib/chat/assistant-title.js'
+import type { Database } from '#lib/server/database.types.js'
+import { toDbJson } from '#lib/server/json.js'
 
 type PersistCanvasAssistantChatInput = {
   supabase: SupabaseClient<Database>

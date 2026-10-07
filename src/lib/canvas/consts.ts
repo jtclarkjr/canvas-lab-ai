@@ -1,4 +1,4 @@
-import type { CanvasRole, MemberRole } from '$lib/canvas/roles'
+import type { CanvasRole, MemberRole } from '#lib/canvas/roles.js'
 
 // Canvas list search
 export const DEFAULT_CANVAS_SEARCH_LIMIT = 8

@@ -1,6 +1,6 @@
-import { createApplyCommand } from '$lib/canvas/apply-command'
-import type { Command } from '$lib/canvas/commands/types'
-import { screenToCanvas } from '$lib/canvas/drawing-utils'
+import { createApplyCommand } from '#lib/canvas/apply-command.js'
+import type { Command } from '#lib/canvas/commands/types.js'
+import { screenToCanvas } from '#lib/canvas/drawing-utils.js'
 import type {
   Camera,
   EditingText,
@@ -8,13 +8,13 @@ import type {
   Point,
   TextElement,
   Tool
-} from '$lib/canvas/types'
-import { getSceneDocument, updateSceneDocument } from '$lib/scenes/api'
-import { markdownDocumentContentSchema } from '$lib/scenes/schema'
-import { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
-import { createWorkspaceHistoryStore } from '$lib/stores/workspace/history.svelte'
-import { createWorkspaceSurfaceInteractionsStore } from '$lib/stores/workspace/surface-interactions/index.svelte'
-import { createWorkspaceTextEditorStore } from '$lib/stores/workspace/text-editor.svelte'
+} from '#lib/canvas/types.js'
+import { getSceneDocument, updateSceneDocument } from '#lib/scenes/api.js'
+import { markdownDocumentContentSchema } from '#lib/scenes/schema.js'
+import { createWorkspaceFormattingStore } from '#lib/stores/workspace/formatting.svelte.js'
+import { createWorkspaceHistoryStore } from '#lib/stores/workspace/history.svelte.js'
+import { createWorkspaceSurfaceInteractionsStore } from '#lib/stores/workspace/surface-interactions/index.svelte.js'
+import { createWorkspaceTextEditorStore } from '#lib/stores/workspace/text-editor.svelte.js'
 
 const SAVE_DEBOUNCE_MS = 800
 

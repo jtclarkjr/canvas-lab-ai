@@ -1,5 +1,5 @@
-import type { AuthConfig, RequestUser } from '$lib/server/types'
-import type { ListCanvasesResponse } from '$lib/canvas/schema'
+import type { AuthConfig, RequestUser } from '#lib/server/types.js'
+import type { ListCanvasesResponse } from '#lib/canvas/schema.js'
 
 declare global {
   namespace App {

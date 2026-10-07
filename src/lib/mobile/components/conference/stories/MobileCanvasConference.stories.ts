@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
-import ConferenceStoryHarness from '$lib/components/canvas/conference/stories/ConferenceStoryHarness.svelte'
+import ConferenceStoryHarness from '#lib/components/canvas/conference/stories/ConferenceStoryHarness.svelte'
 const meta = {
   title: 'Mobile/Canvas/Conference/MobileCanvasConference',
   component: ConferenceStoryHarness,

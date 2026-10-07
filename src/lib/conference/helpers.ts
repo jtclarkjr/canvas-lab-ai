@@ -1,5 +1,10 @@
-import type { Point } from '$lib/canvas/types'
-import type { BgPrefs, Corner, DevicePrefs, Size } from '$lib/conference/types'
+import type { Point } from '#lib/canvas/types.js'
+import type {
+  BgPrefs,
+  Corner,
+  DevicePrefs,
+  Size
+} from '#lib/conference/types.js'
 
 type RenderableVideoTrack = {
   mediaStreamTrack: Pick<MediaStreamTrack, 'readyState'>

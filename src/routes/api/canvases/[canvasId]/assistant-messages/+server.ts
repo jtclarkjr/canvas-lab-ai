@@ -1,13 +1,13 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { listAssistantMessagesResponseSchema } from '$lib/chat/schema'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import { listAssistantMessagesResponseSchema } from '#lib/chat/schema.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   handleApiError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // Assistant history is read-only over HTTP: messages are persisted
 // server-side by the canvas-assistant AI route when a generation finishes.
@@ -39,7 +39,9 @@ export const GET: RequestHandler = async (event) =>
       }
 
       if (!latestThread) {
-        return json(listAssistantMessagesResponseSchema.parse({ items: [] }))
+        return Response.json(
+          listAssistantMessagesResponseSchema.parse({ items: [] })
+        )
       }
 
       const { data, error } = await supabase
@@ -54,7 +56,7 @@ export const GET: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         listAssistantMessagesResponseSchema.parse({
           items: (data ?? []).map((row) => ({
             id: row.id,

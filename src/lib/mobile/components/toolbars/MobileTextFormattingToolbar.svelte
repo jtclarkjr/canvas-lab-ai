@@ -11,7 +11,7 @@
     Underline
   } from 'lucide-svelte'
   import { onMount } from 'svelte'
-  import type { ListStyle } from '$lib/canvas/types'
+  import type { ListStyle } from '#lib/canvas/types.js'
 
   let {
     fontSize,

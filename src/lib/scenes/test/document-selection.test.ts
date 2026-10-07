@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { reconcileActiveDocumentId } from '$lib/scenes/document-selection'
-import type { SceneDocumentListItem } from '$lib/scenes/schema'
+import { reconcileActiveDocumentId } from '#lib/scenes/document-selection.js'
+import type { SceneDocumentListItem } from '#lib/scenes/schema.js'
 
 const documentItem = (id: string): SceneDocumentListItem => ({
   id,

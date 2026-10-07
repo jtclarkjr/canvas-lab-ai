@@ -1,10 +1,10 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { isAnonymousUser } from '$lib/auth/anonymous'
-  import AuthForm from '$lib/components/auth/AuthForm.svelte'
-  import type { AuthConfig } from '$lib/server/types'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { sanitizeRedirectTarget } from '$lib/utils'
+  import { isAnonymousUser } from '#lib/auth/anonymous.js'
+  import AuthForm from '#lib/components/auth/AuthForm.svelte'
+  import type { AuthConfig } from '#lib/server/types.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { sanitizeRedirectTarget } from '#lib/utils.js'
 
   let { data } = $props<{
     data: {

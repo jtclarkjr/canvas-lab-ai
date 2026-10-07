@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui'
+  import { Button } from '#lib/components/ui/index.js'
   import ConfirmDialog from '../../feedback/ConfirmDialog.svelte'
 
   let { initialOpen = false, destructive = true } = $props<{

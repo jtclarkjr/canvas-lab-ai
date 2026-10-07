@@ -1,5 +1,5 @@
-import { apiRequest } from '$lib/api-client'
-import type { CaptionLanguageCode } from '$lib/conference/captions/types'
+import { apiRequest } from '#lib/api-client.js'
+import type { CaptionLanguageCode } from '#lib/conference/captions/types.js'
 import {
   captionsTokenResponseSchema,
   conferenceStatusResponseSchema,
@@ -15,7 +15,7 @@ import {
   type ConferenceTokenResponse,
   type StartCallTranscriptionResponse,
   type TranslateCaptionResponse
-} from '$lib/conference/schema'
+} from '#lib/conference/schema.js'
 
 const jsonHeaders = {
   accept: 'application/json',

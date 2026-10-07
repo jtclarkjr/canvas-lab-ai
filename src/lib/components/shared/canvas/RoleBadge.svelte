@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ROLE_LABELS } from '$lib/canvas/consts'
-  import type { CanvasRole } from '$lib/canvas/roles'
-  import { Badge } from '$lib/components/ui'
+  import { ROLE_LABELS } from '#lib/canvas/consts.js'
+  import type { CanvasRole } from '#lib/canvas/roles.js'
+  import { Badge } from '#lib/components/ui/index.js'
 
   let { role } = $props<{ role: CanvasRole }>()
   const safeRole = $derived(role as CanvasRole)

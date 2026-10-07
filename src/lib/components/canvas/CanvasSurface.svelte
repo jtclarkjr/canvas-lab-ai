@@ -9,7 +9,7 @@
     Point,
     TextElement,
     Tool
-  } from '$lib/canvas/types'
+  } from '#lib/canvas/types.js'
   import {
     getTextContentWidth,
     getTextCenter,
@@ -26,7 +26,7 @@
     getPathRotateHandle,
     pathToSvgPath,
     selectionRectFromPoints
-  } from '$lib/canvas/drawing-utils'
+  } from '#lib/canvas/drawing-utils.js'
   import {
     connectorToSvgPath,
     getArrowheadPoints,
@@ -45,12 +45,12 @@
     getStrokeDashArray,
     pointsToSvg,
     resolveEndpoint
-  } from '$lib/canvas/diagram-utils'
+  } from '#lib/canvas/diagram-utils.js'
   import {
     resolveCanvasDisplayColor,
     resolveTextColorOnFill
-  } from '$lib/canvas/helpers/display-color'
-  import type { Scene } from '$lib/scenes/schema'
+  } from '#lib/canvas/helpers/display-color.js'
+  import type { Scene } from '#lib/scenes/schema.js'
 
   type CanvasSurfaceElements = {
     paths: Path[]

@@ -2,12 +2,12 @@
   import { fly } from 'svelte/transition'
   import { cubicOut } from 'svelte/easing'
   import { Mic, MicOff, Minimize2, Pin } from 'lucide-svelte'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import CanvasChatRoomPanel from '$lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import CanvasChatRoomPanel from '#lib/components/canvas/chat/CanvasChatRoomPanel.svelte'
   import ConferenceCallChatPanel from '../ConferenceCallChatPanel.svelte'
-  import { SegmentedControl } from '$lib/components/ui'
-  import { Avatar } from '$lib/components/shared/identity'
+  import { SegmentedControl } from '#lib/components/ui/index.js'
+  import { Avatar } from '#lib/components/shared/identity/index.js'
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()

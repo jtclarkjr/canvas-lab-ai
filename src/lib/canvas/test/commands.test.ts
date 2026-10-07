@@ -8,8 +8,8 @@ import {
   createUpdateMultipleCommand,
   createUpdateTextCommand,
   getInverseCommand
-} from '$lib/canvas/commands'
-import type { DiagramShape, Path, TextElement } from '$lib/canvas/types'
+} from '#lib/canvas/commands.js'
+import type { DiagramShape, Path, TextElement } from '#lib/canvas/types.js'
 
 describe('canvas commands', () => {
   it('inverts create-path into delete-element', () => {

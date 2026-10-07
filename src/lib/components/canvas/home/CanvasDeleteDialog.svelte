@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { Dialog as Modal, Button } from '$lib/components/ui'
+  import { Dialog as Modal, Button } from '#lib/components/ui/index.js'
 
-  import type { Canvas } from '$lib/canvas/schema'
+  import type { Canvas } from '#lib/canvas/schema.js'
 
   let {
     open = $bindable(false),

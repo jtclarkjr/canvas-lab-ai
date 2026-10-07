@@ -8,27 +8,27 @@
     NotebookPen,
     Save
   } from 'lucide-svelte'
-  import { defaultModelId } from '$lib/scenes/models'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
+  import { defaultModelId } from '#lib/scenes/models.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
   import {
     createWorkflowVersion,
     listWorkflowVersions,
     requestWorkflowAssistant
-  } from '$lib/workflows/api'
+  } from '#lib/workflows/api.js'
   import {
     workflowDefinitionFromYaml,
     workflowDefinitionToYaml
-  } from '$lib/workflows/definition'
+  } from '#lib/workflows/definition.js'
   import type {
     UpdateWorkflowInput,
     Workflow,
     WorkflowProposal,
     WorkflowSettings,
     WorkflowVersion
-  } from '$lib/workflows/schema'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
-  import { BottomSheet, SegmentedControl } from '$lib/components/ui'
+  } from '#lib/workflows/schema.js'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
+  import { BottomSheet, SegmentedControl } from '#lib/components/ui/index.js'
 
   type SheetTab = 'overview' | 'code' | 'notes' | 'versions' | 'assistant'
   type ChatEntry = {

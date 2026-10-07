@@ -6,7 +6,7 @@ import type {
   Path,
   Point,
   TextElement
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 
 export type CommandType =
   | 'CREATE_PATH'

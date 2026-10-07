@@ -1,11 +1,14 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { createSceneInputSchema, sceneResponseSchema } from '$lib/scenes/schema'
-import { getSceneType } from '$lib/scenes/registry'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import {
+  createSceneInputSchema,
+  sceneResponseSchema
+} from '#lib/scenes/schema.js'
+import { getSceneType } from '#lib/scenes/registry.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   listCanvasScenesForCanvas,
   toCanvasScene
-} from '$lib/server/canvas-scenes'
+} from '#lib/server/canvas-scenes.js'
 import {
   badRequest,
   handleApiError,
@@ -13,10 +16,10 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { toDbJson } from '#lib/server/json.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -31,7 +34,7 @@ export const GET: RequestHandler = async (event) =>
 
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
 
-      return json(await listCanvasScenesForCanvas(supabase, canvasId))
+      return Response.json(await listCanvasScenesForCanvas(supabase, canvasId))
     } catch (error) {
       return handleApiError(error, event.request)
     }
@@ -83,9 +86,12 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create scene')
       }
 
-      return json(sceneResponseSchema.parse({ item: toCanvasScene(data) }), {
-        status: 201
-      })
+      return Response.json(
+        sceneResponseSchema.parse({ item: toCanvasScene(data) }),
+        {
+          status: 201
+        }
+      )
     } catch (error) {
       return handleApiError(error, event.request)
     }

@@ -1,17 +1,20 @@
 <script lang="ts">
   import { Chat } from '@ai-sdk/svelte'
   import { DefaultChatTransport, type UIMessage } from 'ai'
-  import { getApiHeaders } from '$lib/api-client'
-  import type { SceneDocumentListItem, SceneMessage } from '$lib/scenes/schema'
-  import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
+  import { getApiHeaders } from '#lib/api-client.js'
+  import type {
+    SceneDocumentListItem,
+    SceneMessage
+  } from '#lib/scenes/schema.js'
+  import type { SceneActivity, SceneActivityKind } from '#lib/scenes/types.js'
   import {
     asParts,
     messageText,
     writeDocumentPart
-  } from '$lib/scenes/chat-parts'
-  import type { DisplayMessage, DraftToolPart } from '$lib/scenes/types'
-  import DocumentComposer from '$lib/components/canvas/scenes/document/DocumentComposer.svelte'
-  import DocumentMessageList from '$lib/components/canvas/scenes/document/DocumentMessageList.svelte'
+  } from '#lib/scenes/chat-parts.js'
+  import type { DisplayMessage, DraftToolPart } from '#lib/scenes/types.js'
+  import DocumentComposer from '#lib/components/canvas/scenes/document/DocumentComposer.svelte'
+  import DocumentMessageList from '#lib/components/canvas/scenes/document/DocumentMessageList.svelte'
 
   let {
     initialMessages,

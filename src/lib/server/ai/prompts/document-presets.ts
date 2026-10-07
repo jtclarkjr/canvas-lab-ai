@@ -1,7 +1,7 @@
 import type { ActiveDocument, ContextDocumentRef } from '../types'
-import basePromptMarkdown from '$lib/ai/prompts/markdown/document/base.md?raw'
-import claudeSkillPromptMarkdown from '$lib/ai/prompts/markdown/document/categories/claude-skill.md?raw'
-import docMdPromptMarkdown from '$lib/ai/prompts/markdown/document/categories/doc-md.md?raw'
+import basePromptMarkdown from '#lib/ai/prompts/markdown/document/base.md?raw'
+import claudeSkillPromptMarkdown from '#lib/ai/prompts/markdown/document/categories/claude-skill.md?raw'
+import docMdPromptMarkdown from '#lib/ai/prompts/markdown/document/categories/doc-md.md?raw'
 
 const basePrompt = basePromptMarkdown.trim()
 

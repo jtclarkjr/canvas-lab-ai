@@ -1,18 +1,18 @@
-import { invalidateAll } from '$app/navigation'
-import { ApiClientError } from '$lib/canvas/api'
-import { createApplyCommand } from '$lib/canvas/apply-command'
-import type { Command, CommandAudit } from '$lib/canvas/commands/types'
+import { refreshAll } from '$app/navigation'
+import { ApiClientError } from '#lib/canvas/api.js'
+import { createApplyCommand } from '#lib/canvas/apply-command.js'
+import type { Command, CommandAudit } from '#lib/canvas/commands/types.js'
 import {
   deleteElement as deleteElementApi,
   listElements,
   upsertElement as upsertElementApi
-} from '$lib/workspace/api'
-import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
+} from '#lib/workspace/api.js'
+import { canvasElementsToDrawingState } from '#lib/workspace/element-mapping.js'
 import type {
   CanvasElement,
   CanvasMutationAuditInput,
   UpsertElementInput
-} from '$lib/workspace/schema'
+} from '#lib/workspace/schema.js'
 import type { WorkspaceCoordinatorState } from './state.svelte'
 
 type WorkspaceElementActionsInput = {
@@ -89,7 +89,7 @@ export function createWorkspaceElementActions({
         error.status === 403 &&
         error.code === 'canvas_access_denied'
       ) {
-        void invalidateAll()
+        void refreshAll()
         return
       }
       setCanvasesError(

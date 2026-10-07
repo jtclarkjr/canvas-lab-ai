@@ -1,5 +1,5 @@
-import { hasConnectorBindingToAnyScene } from '$lib/canvas/diagram-utils'
-import type { WorkflowFlowType } from '$lib/workflows/schema'
+import { hasConnectorBindingToAnyScene } from '#lib/canvas/diagram-utils.js'
+import type { WorkflowFlowType } from '#lib/workflows/schema.js'
 import type { WorkspaceCoordinatorActions } from './actions/types'
 import type { WorkspaceChildStores } from './child-stores/types'
 import type { WorkspaceCoordinatorState } from './state.svelte'

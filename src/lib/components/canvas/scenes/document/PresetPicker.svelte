@@ -2,7 +2,7 @@
   import {
     documentCategories,
     getDocumentCategory
-  } from '$lib/scenes/document-categories'
+  } from '#lib/scenes/document-categories.js'
 
   let {
     categoryId,

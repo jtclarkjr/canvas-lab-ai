@@ -14,12 +14,12 @@ import type {
   ShapeHandleHit,
   ShapeKind,
   StrokeStyle
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import {
   DEFAULT_SHAPE_HEIGHT,
   DEFAULT_SHAPE_WIDTH,
   MIN_SHAPE_SIZE
-} from '$lib/canvas/consts'
+} from '#lib/canvas/consts.js'
 
 const anchors: AnchorPosition[] = ['top', 'right', 'bottom', 'left']
 

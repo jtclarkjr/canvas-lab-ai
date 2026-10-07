@@ -1,7 +1,7 @@
 <script lang="ts">
-  import AuthForm from '$lib/components/auth/AuthForm.svelte'
-  import { Dialog as Modal } from '$lib/components/ui'
-  import type { AuthConfig } from '$lib/server/types'
+  import AuthForm from '#lib/components/auth/AuthForm.svelte'
+  import { Dialog as Modal } from '#lib/components/ui/index.js'
+  import type { AuthConfig } from '#lib/server/types.js'
 
   let {
     open = $bindable(false),

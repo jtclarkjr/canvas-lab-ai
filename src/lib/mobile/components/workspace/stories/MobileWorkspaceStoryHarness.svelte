@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Canvas } from '$lib/canvas/schema'
+  import type { Canvas } from '#lib/canvas/schema.js'
   import MobileCanvasWorkspace from '../MobileCanvasWorkspace.svelte'
   import MobileRequestEditAccessBanner from '../MobileRequestEditAccessBanner.svelte'
 

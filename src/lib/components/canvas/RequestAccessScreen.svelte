@@ -1,11 +1,18 @@
 <script lang="ts">
-  import { invalidateAll } from '$app/navigation'
+  import { refreshAll } from '$app/navigation'
   import { Lock } from 'lucide-svelte'
   import { untrack } from 'svelte'
-  import { supabase, ensureSessionInitialized } from '$lib/auth/session-store'
-  import { getCanvas, getMyAccessRequest, requestAccess } from '$lib/canvas/api'
-  import type { AccessRequest } from '$lib/canvas/schema'
-  import { Button } from '$lib/components/ui'
+  import {
+    supabase,
+    ensureSessionInitialized
+  } from '#lib/auth/session-store.js'
+  import {
+    getCanvas,
+    getMyAccessRequest,
+    requestAccess
+  } from '#lib/canvas/api.js'
+  import type { AccessRequest } from '#lib/canvas/schema.js'
+  import { Button } from '#lib/components/ui/index.js'
 
   let { canvasId } = $props<{ canvasId: string }>()
 
@@ -35,7 +42,7 @@
 
         if (hasAccess && !reloadRequested) {
           reloadRequested = true
-          void invalidateAll()
+          void refreshAll()
           return
         }
 
@@ -97,7 +104,7 @@
         (payload) => {
           const next = payload.new as { status?: string }
           if (next.status === 'approved') {
-            void invalidateAll()
+            void refreshAll()
           } else if (next.status === 'denied' && request) {
             request = { ...request, status: 'denied' }
           }
@@ -144,7 +151,7 @@
           const next = payload.new as { visibility?: string }
           if (next.visibility === 'public' && !reloadRequested) {
             reloadRequested = true
-            void invalidateAll()
+            void refreshAll()
           }
         }
       )

@@ -1,17 +1,17 @@
 <script lang="ts">
   import { Workflow as WorkflowIcon } from 'lucide-svelte'
-  import type { Camera } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-  import type { WorkspaceMode } from '$lib/scenes/types'
+  import type { Camera } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+  import type { WorkspaceMode } from '#lib/scenes/types.js'
   import type {
     UpdateWorkflowInput,
     Workflow,
     WorkflowDefinition,
     WorkflowSettings
-  } from '$lib/workflows/schema'
-  import MobileWorkflowCard from '$lib/mobile/components/workflows/MobileWorkflowCard.svelte'
-  import MobileWorkflowFullscreen from '$lib/mobile/components/workflows/MobileWorkflowFullscreen.svelte'
+  } from '#lib/workflows/schema.js'
+  import MobileWorkflowCard from '#lib/mobile/components/workflows/MobileWorkflowCard.svelte'
+  import MobileWorkflowFullscreen from '#lib/mobile/components/workflows/MobileWorkflowFullscreen.svelte'
 
   type FrameHandlers = {
     pointerDown: (event: PointerEvent, workflowId: string) => void

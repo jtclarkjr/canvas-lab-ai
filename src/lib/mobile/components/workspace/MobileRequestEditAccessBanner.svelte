@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { invalidateAll } from '$app/navigation'
+  import { refreshAll } from '$app/navigation'
   import { Eye } from 'lucide-svelte'
   import { untrack } from 'svelte'
-  import { supabase, ensureSessionInitialized } from '$lib/auth/session-store'
-  import { getMyAccessRequest, requestAccess } from '$lib/canvas/api'
-  import type { AccessRequest } from '$lib/canvas/schema'
-  import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
-  import { toast } from '$lib/stores/shared/toast.svelte'
+  import {
+    supabase,
+    ensureSessionInitialized
+  } from '#lib/auth/session-store.js'
+  import { getMyAccessRequest, requestAccess } from '#lib/canvas/api.js'
+  import type { AccessRequest } from '#lib/canvas/schema.js'
+  import { roleAtLeast, type CanvasRole } from '#lib/canvas/roles.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
 
   let {
     canvasId,
@@ -138,7 +141,7 @@
                 description: 'Your access request was approved.'
               })
             }
-            void invalidateAll()
+            void refreshAll()
           } else if (next.status === 'denied' && request) {
             request = { ...request, status: 'denied' }
           }

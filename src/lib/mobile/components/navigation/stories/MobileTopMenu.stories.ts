@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
 import { userEvent, within } from 'storybook/test'
-import WorkspaceStoryHarness from '$lib/components/canvas/workspace/stories/WorkspaceStoryHarness.svelte'
+import WorkspaceStoryHarness from '#lib/components/canvas/workspace/stories/WorkspaceStoryHarness.svelte'
 const meta = {
   title: 'Mobile/Canvas/Navigation/MobileTopMenu',
   component: WorkspaceStoryHarness,

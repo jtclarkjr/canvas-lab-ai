@@ -1,10 +1,10 @@
 <script lang="ts">
   import { Plus } from 'lucide-svelte'
-  import { Button } from '$lib/components/ui'
-  import type { Camera, Tool } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneActivity, WorkspaceMode } from '$lib/scenes/types'
-  import SceneCard from '$lib/components/canvas/scenes/SceneCard.svelte'
+  import { Button } from '#lib/components/ui/index.js'
+  import type { Camera, Tool } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneActivity, WorkspaceMode } from '#lib/scenes/types.js'
+  import SceneCard from '#lib/components/canvas/scenes/SceneCard.svelte'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void

@@ -3,10 +3,10 @@ import {
   deleteScene as deleteSceneApi,
   listScenes,
   updateScene as updateSceneApi
-} from '$lib/scenes/api'
-import { getSceneType } from '$lib/scenes/registry'
-import type { Scene, UpdateSceneInput } from '$lib/scenes/schema'
-import type { CanvasRole } from '$lib/canvas/roles'
+} from '#lib/scenes/api.js'
+import { getSceneType } from '#lib/scenes/registry.js'
+import type { Scene, UpdateSceneInput } from '#lib/scenes/schema.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
 
 const DRAG_THRESHOLD_PX = 5
 const MIN_SCENE_WIDTH = 160

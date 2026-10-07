@@ -1,4 +1,4 @@
-import { supabase } from '$lib/auth/session-store'
+import { supabase } from '#lib/auth/session-store.js'
 import {
   deletedRowSchema,
   realtimeRowToConnector,
@@ -6,13 +6,13 @@ import {
   realtimeRowToPath,
   realtimeRowToShape,
   realtimeRowToText
-} from '$lib/workspace/element-mapping'
+} from '#lib/workspace/element-mapping.js'
 import type {
   DiagramConnector,
   DiagramShape,
   Path,
   TextElement
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 
 type ElementSetter<T> = (next: T[] | ((previous: T[]) => T[])) => void
 
