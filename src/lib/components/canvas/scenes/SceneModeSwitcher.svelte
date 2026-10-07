@@ -1,7 +1,7 @@
 <script lang="ts">
   import { LayoutGrid, PenLine, Workflow as WorkflowIcon } from 'lucide-svelte'
-  import type { WorkspaceMode } from '$lib/scenes/types'
-  import { SegmentedControl } from '$lib/components/ui'
+  import type { WorkspaceMode } from '#lib/scenes/types.js'
+  import { SegmentedControl } from '#lib/components/ui/index.js'
 
   let {
     mode,

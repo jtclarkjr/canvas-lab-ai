@@ -6,18 +6,18 @@ import type {
   ResizeHandle,
   TextElement,
   TextHandleHit
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import {
   TEXT_BOUNDS_PADDING,
   TEXT_EDITOR_MIN_WIDTH,
   TEXT_EDITOR_WIDTH_PADDING,
   TEXT_LINE_HEIGHT
-} from '$lib/canvas/consts'
+} from '#lib/canvas/consts.js'
 import {
   getShapeResizeCursor,
   rotatePoint,
   unrotatePoint
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 
 const TEXT_ROTATE_HANDLE_LENGTH = 32
 const PATH_ROTATE_HANDLE_LENGTH = 32

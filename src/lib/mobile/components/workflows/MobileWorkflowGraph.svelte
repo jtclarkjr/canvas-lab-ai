@@ -10,21 +10,24 @@
   } from '@xyflow/svelte'
   import '@xyflow/svelte/dist/style.css'
   import { GitBranch, ListPlus, Plus, Split } from 'lucide-svelte'
-  import DeletableSmoothStepEdge from '$lib/components/canvas/workflows/DeletableSmoothStepEdge.svelte'
-  import GraphInteractivityStatus from '$lib/components/canvas/workflows/GraphInteractivityStatus.svelte'
-  import MobileWorkflowNode from '$lib/mobile/components/workflows/MobileWorkflowNode.svelte'
-  import { theme } from '$lib/stores/shared/theme.svelte'
+  import DeletableSmoothStepEdge from '#lib/components/canvas/workflows/DeletableSmoothStepEdge.svelte'
+  import GraphInteractivityStatus from '#lib/components/canvas/workflows/GraphInteractivityStatus.svelte'
+  import MobileWorkflowNode from '#lib/mobile/components/workflows/MobileWorkflowNode.svelte'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
   import {
     createWorkflowStep,
     workflowDefinitionFromFlow,
     workflowDefinitionToFlow
-  } from '$lib/workflows/definition'
+  } from '#lib/workflows/definition.js'
   import type {
     Workflow,
     WorkflowDefinition,
     WorkflowStepType
-  } from '$lib/workflows/schema'
-  import type { WorkflowFlowEdge, WorkflowFlowNode } from '$lib/workflows/types'
+  } from '#lib/workflows/schema.js'
+  import type {
+    WorkflowFlowEdge,
+    WorkflowFlowNode
+  } from '#lib/workflows/types.js'
 
   let { workflow, canEdit, lockedLabel, onDefinitionChange } = $props<{
     workflow: Workflow

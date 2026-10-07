@@ -13,24 +13,24 @@
     deleteSceneDocument,
     listSceneMessages,
     updateSceneDocument
-  } from '$lib/scenes/api'
+  } from '#lib/scenes/api.js'
   import {
     markdownDocumentContentSchema,
     type Scene,
     type SceneDocument,
     type SceneDocumentListItem,
     type SceneMessage
-  } from '$lib/scenes/schema'
-  import { defaultModelId, isKnownModelId } from '$lib/scenes/models'
+  } from '#lib/scenes/schema.js'
+  import { defaultModelId, isKnownModelId } from '#lib/scenes/models.js'
   import type {
     DraftToolPart,
     SceneActivity,
     SceneActivityKind
-  } from '$lib/scenes/types'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import MobileDocumentChatPanel from '$lib/mobile/components/scenes/MobileDocumentChatPanel.svelte'
+  } from '#lib/scenes/types.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import MobileCanvasChatComposer from '#lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
+  import MobileDocumentChatPanel from '#lib/mobile/components/scenes/MobileDocumentChatPanel.svelte'
 
   type PanelView = 'chat' | 'library' | 'editor'
 

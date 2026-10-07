@@ -1,23 +1,23 @@
 import type { PageServerLoad } from './$types'
 import { redirect } from '@sveltejs/kit'
-import { sceneDocumentsDependency } from '$lib/canvas/dependencies'
-import { AppError } from '$lib/server/api-error'
-import { createAnonymousRequestSession } from '$lib/server/anonymous-session'
-import { resolveCanvasAccess } from '$lib/server/canvas-access'
-import { listCanvasElementsForCanvas } from '$lib/server/canvas-elements'
-import { listCanvasScenesForCanvas } from '$lib/server/canvas-scenes'
-import { listCanvasWorkflowsForCanvas } from '$lib/server/canvas-workflows'
-import { workflowsEnabled } from '$lib/server/features'
+import { sceneDocumentsDependency } from '#lib/canvas/dependencies.js'
+import { AppError } from '#lib/server/api-error.js'
+import { createAnonymousRequestSession } from '#lib/server/anonymous-session.js'
+import { resolveCanvasAccess } from '#lib/server/canvas-access.js'
+import { listCanvasElementsForCanvas } from '#lib/server/canvas-elements.js'
+import { listCanvasScenesForCanvas } from '#lib/server/canvas-scenes.js'
+import { listCanvasWorkflowsForCanvas } from '#lib/server/canvas-workflows.js'
+import { workflowsEnabled } from '#lib/server/features.js'
 import {
   groupSceneDocumentItemsBySceneId,
   listSceneDocumentItemsForCanvas
-} from '$lib/server/scene-documents'
-import type { SceneDocumentListsBySceneId } from '$lib/server/types'
-import { getSupabase } from '$lib/server/supabase'
-import type { CanvasElement } from '$lib/workspace/schema'
-import type { CanvasRole } from '$lib/canvas/roles'
-import type { Scene } from '$lib/scenes/schema'
-import type { Workflow } from '$lib/workflows/schema'
+} from '#lib/server/scene-documents.js'
+import type { SceneDocumentListsBySceneId } from '#lib/server/types.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import type { CanvasElement } from '#lib/workspace/schema.js'
+import type { CanvasRole } from '#lib/canvas/roles.js'
+import type { Scene } from '#lib/scenes/schema.js'
+import type { Workflow } from '#lib/workflows/schema.js'
 
 type CanvasPageAccess =
   | { state: 'member'; role: CanvasRole; canvasTitle: string }

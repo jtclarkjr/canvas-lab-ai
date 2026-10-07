@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
   import ConferenceTileGrid from '../tiles/ConferenceTileGrid.svelte'
   import ConferenceFullscreenPanel from './ConferenceFullscreenPanel.svelte'
   import ConferenceControls from '../controls/ConferenceControls.svelte'

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { FileText } from 'lucide-svelte'
-  import type { Canvas } from '$lib/canvas/schema'
+  import type { Canvas } from '#lib/canvas/schema.js'
 
   let { canvas } = $props<{
     canvas: Canvas

@@ -1,10 +1,10 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   addMemberInputSchema,
   listMembersResponseSchema,
   memberResponseSchema
-} from '$lib/workspace/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/workspace/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
@@ -12,10 +12,10 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import type { Database } from '$lib/server/database.types'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import type { Database } from '#lib/server/database.types.js'
 
 type ProfileRow = Pick<
   Database['public']['Tables']['profiles']['Row'],
@@ -78,7 +78,7 @@ export const GET: RequestHandler = async (event) =>
         (profiles ?? []).map((profile) => [profile.id, profile])
       )
 
-      return json(
+      return Response.json(
         listMembersResponseSchema.parse({
           items: [
             toMember(
@@ -173,7 +173,7 @@ export const POST: RequestHandler = async (event) =>
         .eq('requester_id', input.userId)
         .eq('status', 'pending')
 
-      return json(
+      return Response.json(
         memberResponseSchema.parse({
           item: toMember(
             member.user_id,

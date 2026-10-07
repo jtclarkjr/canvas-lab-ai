@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EditingText } from '$lib/canvas/types'
+  import type { EditingText } from '#lib/canvas/types.js'
   import TextEditor from '../../editors/TextEditor.svelte'
 
   let editingText = $state<EditingText>({

@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
-import { env as privateEnv } from '$env/dynamic/private'
-import { internalServerError } from '$lib/server/api-error'
-import type { Database } from '$lib/server/database.types'
+import { SUPABASE_URL, SUPABASE_SECRET_KEY } from '$app/env/private'
+import { internalServerError } from '#lib/server/api-error.js'
+import type { Database } from '#lib/server/database.types.js'
 
 export function getSupabase() {
-  const supabaseUrl = privateEnv.SUPABASE_URL
-  const supabaseSecretKey = privateEnv.SUPABASE_SECRET_KEY
+  const supabaseUrl = SUPABASE_URL
+  const supabaseSecretKey = SUPABASE_SECRET_KEY
 
   if (!supabaseUrl || !supabaseSecretKey) {
     throw internalServerError(

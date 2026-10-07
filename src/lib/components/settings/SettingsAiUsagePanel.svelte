@@ -1,10 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { ChevronDown, RefreshCw } from 'lucide-svelte'
-  import { IconButton, Skeleton } from '$lib/components/ui'
-  import { promptAiUsageResponseSchema } from '$lib/ai/usage'
-  import { apiRequest } from '$lib/api-client'
-  import type { PromptAiUsageLimit, PromptAiUsageResponse } from '$lib/ai/usage'
+  import { IconButton, Skeleton } from '#lib/components/ui/index.js'
+  import { promptAiUsageResponseSchema } from '#lib/ai/usage.js'
+  import { apiRequest } from '#lib/api-client.js'
+  import type {
+    PromptAiUsageLimit,
+    PromptAiUsageResponse
+  } from '#lib/ai/usage.js'
 
   type ExpandableListKey =
     | 'limited-features'

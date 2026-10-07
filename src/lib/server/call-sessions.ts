@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { internalServerError, notFound } from '$lib/server/api-error'
-import type { Database, Json } from '$lib/server/database.types'
+import { internalServerError, notFound } from '#lib/server/api-error.js'
+import type { Database, Json } from '#lib/server/database.types.js'
 import {
   loadCallTranscriptSession,
   loadTranscriptProgress,
@@ -8,13 +8,13 @@ import {
   STARTING_RECONCILIATION_MS,
   transcriptFailureMessage,
   transitionCallTranscript
-} from '$lib/server/call-transcript-state'
+} from '#lib/server/call-transcript-state.js'
 import {
   callSummarySchema,
   type CallArtifact,
   type CallSession,
   type CallTranscriptSegment
-} from '$lib/conference/schema'
+} from '#lib/conference/schema.js'
 
 type Supabase = SupabaseClient<Database>
 type CallSessionRow =

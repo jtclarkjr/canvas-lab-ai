@@ -1,4 +1,4 @@
-import { createDeleteElementCommand } from '$lib/canvas/commands'
+import { createDeleteElementCommand } from '#lib/canvas/commands.js'
 import {
   cloneConnector,
   cloneShape,
@@ -6,13 +6,13 @@ import {
   findConnectorEndpointAtPoint,
   findShapeAtPoint,
   findShapeHandleAtPoint
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 import {
   clonePath,
   findPathHandleAtPoint,
   findTextAtPoint,
   findTextHandleAtPoint
-} from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/drawing-utils.js'
 import type { SurfaceCtx } from './context/types'
 import {
   checkDoubleClick,

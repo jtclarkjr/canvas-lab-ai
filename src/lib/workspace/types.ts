@@ -1,10 +1,10 @@
-import type { CanvasRole } from '$lib/canvas/roles'
-import type { Canvas } from '$lib/canvas/schema'
-import type { CanvasElement } from '$lib/workspace/schema'
-import type { Point } from '$lib/canvas/types'
-import type { Scene } from '$lib/scenes/schema'
-import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-import type { Workflow } from '$lib/workflows/schema'
+import type { CanvasRole } from '#lib/canvas/roles.js'
+import type { Canvas } from '#lib/canvas/schema.js'
+import type { CanvasElement } from '#lib/workspace/schema.js'
+import type { Point } from '#lib/canvas/types.js'
+import type { Scene } from '#lib/scenes/schema.js'
+import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+import type { Workflow } from '#lib/workflows/schema.js'
 
 export type CursorCoordinateSpace = 'canvas' | 'viewport'
 

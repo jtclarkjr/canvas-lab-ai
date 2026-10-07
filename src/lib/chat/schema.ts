@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { UIMessage } from 'ai'
-import { messageAuthorSchema, uiMessageSchema } from '$lib/scenes/schema'
+import { messageAuthorSchema, uiMessageSchema } from '#lib/scenes/schema.js'
 
 // canvas chat messages (member chatroom)
 

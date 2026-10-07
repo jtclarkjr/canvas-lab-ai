@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { deriveAssistantThreadTitleFromText } from '$lib/chat/assistant-title'
+import { deriveAssistantThreadTitleFromText } from '#lib/chat/assistant-title.js'
 
 describe('assistant title helpers', () => {
   it('normalizes markdown-ish first messages into compact thread titles', () => {

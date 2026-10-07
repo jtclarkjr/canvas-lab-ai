@@ -1,4 +1,4 @@
-import type { EditingText, Tool } from '$lib/canvas/types'
+import type { EditingText, Tool } from '#lib/canvas/types.js'
 
 type WorkspaceKeyboardInput = {
   getEditingText: () => EditingText | null

@@ -1,5 +1,8 @@
-import type { Database } from '$lib/server/database.types'
-import type { CallSession, CallTranscriptStatus } from '$lib/conference/schema'
+import type { Database } from '#lib/server/database.types.js'
+import type {
+  CallSession,
+  CallTranscriptStatus
+} from '#lib/conference/schema.js'
 
 export type CallSessionRealtimeRow =
   Database['public']['Tables']['canvas_call_sessions']['Row']

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import ConferenceSettingsDialog from '$lib/components/canvas/conference/ConferenceSettingsDialog.svelte'
-  import { attachTrack } from '$lib/components/canvas/conference/media-actions'
-  import MobileConferenceFullscreen from '$lib/mobile/components/conference/MobileConferenceFullscreen.svelte'
-  import MobileConferenceMinimizedChip from '$lib/mobile/components/conference/MobileConferenceMinimizedChip.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import ConferenceSettingsDialog from '#lib/components/canvas/conference/ConferenceSettingsDialog.svelte'
+  import { attachTrack } from '#lib/components/canvas/conference/media-actions.js'
+  import MobileConferenceFullscreen from '#lib/mobile/components/conference/MobileConferenceFullscreen.svelte'
+  import MobileConferenceMinimizedChip from '#lib/mobile/components/conference/MobileConferenceMinimizedChip.svelte'
 
   const store = useCanvasConferenceStore()
 

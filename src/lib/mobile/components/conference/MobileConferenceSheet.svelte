@@ -1,11 +1,11 @@
 <script lang="ts">
   import { MessageSquare, Mic, MicOff, Pin, Users } from 'lucide-svelte'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import ConferenceCallChatPanel from '$lib/components/canvas/conference/ConferenceCallChatPanel.svelte'
-  import MobileCanvasChatRoomPanel from '$lib/mobile/components/chat/MobileCanvasChatRoomPanel.svelte'
-  import { BottomSheet, SegmentedControl } from '$lib/components/ui'
-  import { Avatar } from '$lib/components/shared/identity'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import ConferenceCallChatPanel from '#lib/components/canvas/conference/ConferenceCallChatPanel.svelte'
+  import MobileCanvasChatRoomPanel from '#lib/mobile/components/chat/MobileCanvasChatRoomPanel.svelte'
+  import { BottomSheet, SegmentedControl } from '#lib/components/ui/index.js'
+  import { Avatar } from '#lib/components/shared/identity/index.js'
 
   const store = useCanvasConferenceStore()
   const chatStore = useCanvasChatStore()

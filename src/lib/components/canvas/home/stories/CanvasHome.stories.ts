@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
 import { HttpResponse, http } from 'msw'
-import { expect, within } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import CanvasHome from '../CanvasHome.svelte'
 import { ownerCanvas, sharedCanvas } from './fixtures'
 
 const canvases = [ownerCanvas, sharedCanvas]
+const navigate = fn()
+const sortingUrl = new URL('https://example.test/home?filter=owned#canvases')
 
 const meta = {
   title: 'Desktop/Canvas/Home/CanvasHome',
@@ -18,7 +20,7 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     sveltekit_experimental: {
-      stores: {
+      state: {
         page: {
           data: {},
           url: new URL('https://example.test/home')
@@ -41,6 +43,31 @@ export const Default: Story = {
     const canvas = within(canvasElement)
     await expect(await canvas.findByText('Product discovery')).toBeVisible()
     await expect(canvas.getByText('Research synthesis')).toBeVisible()
+  }
+}
+
+export const Sorting: Story = {
+  tags: ['!visual'],
+  beforeEach: () => {
+    navigate.mockClear()
+  },
+  parameters: {
+    sveltekit_experimental: {
+      state: { page: { url: sortingUrl } },
+      navigation: { goto: navigate }
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const sorting = within(canvas.getByRole('group', { name: 'Sort canvases' }))
+    const title = sorting.getByRole('button', { name: 'Title' })
+    await userEvent.click(title)
+    await expect(navigate).toHaveBeenCalledWith(
+      '/home?filter=owned&sort=title&dir=asc#canvases',
+      { replace: true, reset: false }
+    )
+    await expect(title).toHaveFocus()
+    await expect(sortingUrl.searchParams.has('sort')).toBe(false)
   }
 }
 

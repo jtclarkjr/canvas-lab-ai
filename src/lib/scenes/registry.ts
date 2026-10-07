@@ -1,4 +1,4 @@
-import type { SceneTypeDefinition, SceneTypeId } from '$lib/scenes/types'
+import type { SceneTypeDefinition, SceneTypeId } from '#lib/scenes/types.js'
 
 // Scene-type registry. Adding a scene type is additive: append an entry
 // here and register its view component in SceneDialog's component map.

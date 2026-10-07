@@ -6,9 +6,9 @@
     Trash2,
     Workflow
   } from 'lucide-svelte'
-  import type { Camera } from '$lib/canvas/types'
-  import type { Workflow as CanvasWorkflow } from '$lib/workflows/schema'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
+  import type { Camera } from '#lib/canvas/types.js'
+  import type { Workflow as CanvasWorkflow } from '#lib/workflows/schema.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
 
   type FrameHandlers = {
     pointerDown: (event: PointerEvent, workflowId: string) => void

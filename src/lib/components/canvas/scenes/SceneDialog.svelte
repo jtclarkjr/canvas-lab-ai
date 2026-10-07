@@ -1,19 +1,19 @@
 <script lang="ts">
   import { Minimize2, Trash2 } from 'lucide-svelte'
-  import { IconButton } from '$lib/components/ui'
+  import { IconButton } from '#lib/components/ui/index.js'
   import type {
     Scene,
     SceneMessage,
     UpdateSceneInput
-  } from '$lib/scenes/schema'
-  import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
-  import { getSceneType } from '$lib/scenes/registry'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import { ConfirmDialog } from '$lib/components/shared/feedback'
+  } from '#lib/scenes/schema.js'
+  import type { SceneActivity, SceneActivityKind } from '#lib/scenes/types.js'
+  import { getSceneType } from '#lib/scenes/registry.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import { ConfirmDialog } from '#lib/components/shared/feedback/index.js'
   import SceneEntry, {
     type SceneEntryStart
-  } from '$lib/components/canvas/scenes/SceneEntry.svelte'
-  import DocumentScenePanel from '$lib/components/canvas/scenes/document/DocumentScenePanel.svelte'
+  } from '#lib/components/canvas/scenes/SceneEntry.svelte'
+  import DocumentScenePanel from '#lib/components/canvas/scenes/document/DocumentScenePanel.svelte'
 
   let {
     canvasId,

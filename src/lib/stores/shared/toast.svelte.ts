@@ -1,4 +1,4 @@
-import type { Toast } from '$lib/stores/shared/types'
+import type { Toast } from '#lib/stores/shared/types.js'
 
 const DEFAULT_DURATION = 5000
 

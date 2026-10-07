@@ -2,7 +2,7 @@
   import { createVirtualizer } from '@tanstack/svelte-virtual'
   import type { Snippet } from 'svelte'
   import { get } from 'svelte/store'
-  import { cn } from '$lib/utils'
+  import { cn } from '#lib/utils.js'
 
   type ScrollAnchor = 'start' | 'end'
   type FollowMode = 'none' | 'when-at-end' | 'always'

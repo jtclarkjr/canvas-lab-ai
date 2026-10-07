@@ -6,7 +6,7 @@ import {
   listSceneDocumentItemsResponseSchema,
   updateSceneDocumentInputSchema,
   updateSceneInputSchema
-} from '$lib/scenes/schema'
+} from '#lib/scenes/schema.js'
 
 describe('scenes schema', () => {
   it('applies scene defaults and validates size bounds', () => {

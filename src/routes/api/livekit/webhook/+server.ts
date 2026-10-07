@@ -1,10 +1,10 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   endCallSessionForRoom,
   recordCallSessionParticipantForRoom
-} from '$lib/server/call-sessions'
-import { getLiveKitWebhookReceiver } from '$lib/server/livekit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/call-sessions.js'
+import { getLiveKitWebhookReceiver } from '#lib/server/livekit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 function webhookTimestamp(value: bigint) {
   const seconds = Number(value)
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request }) => {
       authorization ?? undefined
     )
   } catch {
-    return json(
+    return Response.json(
       { error: 'Invalid LiveKit webhook signature.' },
       { status: 401 }
     )
@@ -38,7 +38,10 @@ export const POST: RequestHandler = async ({ request }) => {
     (event.event === 'room_finished' || event.event === 'participant_joined') &&
     !room?.name
   ) {
-    return json({ error: 'LiveKit room data is missing.' }, { status: 400 })
+    return Response.json(
+      { error: 'LiveKit room data is missing.' },
+      { status: 400 }
+    )
   }
 
   if (event.event === 'participant_joined' && room) {
@@ -53,11 +56,11 @@ export const POST: RequestHandler = async ({ request }) => {
         participantSid: participant.sid || null
       })
     }
-    return json({ ok: true })
+    return Response.json({ ok: true })
   }
 
   if (event.event !== 'room_finished' || !room) {
-    return json({ ok: true, ignored: true })
+    return Response.json({ ok: true, ignored: true })
   }
 
   await endCallSessionForRoom({
@@ -67,5 +70,5 @@ export const POST: RequestHandler = async ({ request }) => {
     endedAt: webhookTimestamp(event.createdAt)
   })
 
-  return json({ ok: true })
+  return Response.json({ ok: true })
 }

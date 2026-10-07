@@ -1,4 +1,4 @@
-import type { WorkspaceMode } from '$lib/scenes/types'
+import type { WorkspaceMode } from '#lib/scenes/types.js'
 
 type WorkspaceModeInput = {
   getActiveCanvasId: () => string

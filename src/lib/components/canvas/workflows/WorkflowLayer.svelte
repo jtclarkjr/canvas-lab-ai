@@ -5,22 +5,22 @@
     Plus,
     Workflow as WorkflowIcon
   } from 'lucide-svelte'
-  import type { Camera, Tool } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-  import type { WorkspaceMode } from '$lib/scenes/types'
+  import type { Camera, Tool } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+  import type { WorkspaceMode } from '#lib/scenes/types.js'
   import type {
     UpdateWorkflowInput,
     Workflow,
     WorkflowDefinition,
     WorkflowFlowType,
     WorkflowSettings
-  } from '$lib/workflows/schema'
-  import { workflowFlowTypeOptions } from '$lib/workflows/flow-types'
-  import { ConfirmDialog } from '$lib/components/shared/feedback'
-  import WorkflowBuilderPanels from '$lib/components/canvas/workflows/WorkflowBuilderPanels.svelte'
-  import WorkflowFrame from '$lib/components/canvas/workflows/WorkflowFrame.svelte'
-  import WorkflowFullscreenView from '$lib/components/canvas/workflows/WorkflowFullscreenView.svelte'
+  } from '#lib/workflows/schema.js'
+  import { workflowFlowTypeOptions } from '#lib/workflows/flow-types.js'
+  import { ConfirmDialog } from '#lib/components/shared/feedback/index.js'
+  import WorkflowBuilderPanels from '#lib/components/canvas/workflows/WorkflowBuilderPanels.svelte'
+  import WorkflowFrame from '#lib/components/canvas/workflows/WorkflowFrame.svelte'
+  import WorkflowFullscreenView from '#lib/components/canvas/workflows/WorkflowFullscreenView.svelte'
 
   type FrameHandlers = {
     pointerDown: (event: PointerEvent, workflowId: string) => void

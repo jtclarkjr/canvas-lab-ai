@@ -1,4 +1,4 @@
-import { dev } from '$app/environment'
+import { dev } from '$app/env'
 import { handleErrorWithSentry, init } from '@sentry/sveltekit'
 
 const dsn = import.meta.env.VITE_SENTRY_DSN

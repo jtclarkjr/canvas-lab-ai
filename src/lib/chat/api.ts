@@ -1,4 +1,4 @@
-import { apiRequest } from '$lib/api-client'
+import { apiRequest } from '#lib/api-client.js'
 import {
   assistantThreadResponseSchema,
   chatMessageResponseSchema,
@@ -16,7 +16,7 @@ import {
   type ListChatMessagesResponse,
   type SendChatMessageInput,
   type UpdateAssistantThreadInput
-} from '$lib/chat/schema'
+} from '#lib/chat/schema.js'
 
 const jsonHeaders = {
   accept: 'application/json',

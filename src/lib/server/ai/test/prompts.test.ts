@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { buildCanvasAssistantPrompt } from '$lib/server/ai/prompts/canvas-assistant'
-import { buildDocumentSystemPrompt } from '$lib/server/ai/prompts/document-presets'
-import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
+import { buildCanvasAssistantPrompt } from '#lib/server/ai/prompts/canvas-assistant.js'
+import { buildDocumentSystemPrompt } from '#lib/server/ai/prompts/document-presets.js'
+import { getWorkflowFlowTypeDefinition } from '#lib/workflows/flow-types.js'
 
 describe('AI prompt composition', () => {
   it('builds the canvas assistant prompt from markdown and context titles', () => {

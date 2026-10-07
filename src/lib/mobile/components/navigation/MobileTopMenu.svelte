@@ -14,11 +14,11 @@
   import { onMount } from 'svelte'
   import { cubicOut } from 'svelte/easing'
   import { fade, fly, slide } from 'svelte/transition'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { WorkspaceMode } from '$lib/scenes/types'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import { useCanvasChatStoreOptional } from '$lib/stores/chat/canvas-chat.svelte'
-  import ConferenceCallButton from '$lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { WorkspaceMode } from '#lib/scenes/types.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import { useCanvasChatStoreOptional } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import ConferenceCallButton from '#lib/components/canvas/conference/controls/ConferenceCallButton.svelte'
 
   let {
     canvases,

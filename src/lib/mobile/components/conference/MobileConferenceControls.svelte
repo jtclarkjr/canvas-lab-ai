@@ -7,8 +7,8 @@
     VideoOff,
     Volume2
   } from 'lucide-svelte'
-  import ConferenceMeetingToolsButton from '$lib/components/canvas/conference/controls/ConferenceMeetingToolsButton.svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import ConferenceMeetingToolsButton from '#lib/components/canvas/conference/controls/ConferenceMeetingToolsButton.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
 </script>

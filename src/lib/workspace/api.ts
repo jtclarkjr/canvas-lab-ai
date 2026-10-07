@@ -1,4 +1,4 @@
-import { getApiHeaders, parseResponse } from '$lib/api-client'
+import { getApiHeaders, parseResponse } from '#lib/api-client.js'
 import {
   addMemberInputSchema,
   deleteElementResponseSchema,
@@ -28,13 +28,13 @@ import {
   type UpsertElementInput,
   type UpsertElementResponse,
   type UserSearchResponse
-} from '$lib/workspace/schema'
+} from '#lib/workspace/schema.js'
 import {
   accessRequestResponseSchema,
   type AccessRequestResponse,
   type AccessRequestStatus,
   type MemberRole
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 
 export async function updateCanvas(
   id: string,

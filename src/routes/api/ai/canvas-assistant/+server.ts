@@ -1,15 +1,15 @@
 import type { RequestHandler } from '@sveltejs/kit'
-import { canvasAssistantRequestSchema } from '$lib/chat/schema'
-import { markdownDocumentContentSchema } from '$lib/scenes/schema'
-import { isKnownModelId } from '$lib/scenes/models'
-import { AiModelError, streamCanvasAssistant } from '$lib/server/ai'
-import { getAiRegistry } from '$lib/server/ai-runtime'
+import { canvasAssistantRequestSchema } from '#lib/chat/schema.js'
+import { markdownDocumentContentSchema } from '#lib/scenes/schema.js'
+import { isKnownModelId } from '#lib/scenes/models.js'
+import { AiModelError, streamCanvasAssistant } from '#lib/server/ai/index.js'
+import { getAiRegistry } from '#lib/server/ai-runtime.js'
 import {
   assertPromptAiUsageAllowed,
   recordPromptAiUsage
-} from '$lib/server/ai-usage'
-import { persistCanvasAssistantChat } from '$lib/server/canvas-assistant-chat'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+} from '#lib/server/ai-usage.js'
+import { persistCanvasAssistantChat } from '#lib/server/canvas-assistant-chat.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
@@ -17,10 +17,10 @@ import {
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { logServerError } from '$lib/server/logger'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { logServerError } from '#lib/server/logger.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // AI generations are expensive: a much tighter limit than normal writes.
 const AI_RATE_LIMIT = { maxRequests: 10, windowMs: 60_000 }

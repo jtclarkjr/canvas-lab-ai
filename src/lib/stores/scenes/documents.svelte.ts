@@ -1,10 +1,13 @@
-import { browser } from '$app/environment'
+import { browser } from '$app/env'
 import { invalidate } from '$app/navigation'
 import { getContext, setContext } from 'svelte'
-import { sceneDocumentsDependency } from '$lib/canvas/dependencies'
-import { getSceneDocument, listSceneDocumentItems } from '$lib/scenes/api'
-import { sceneDocumentToListItem } from '$lib/scenes/mapping'
-import type { SceneDocument, SceneDocumentListItem } from '$lib/scenes/schema'
+import { sceneDocumentsDependency } from '#lib/canvas/dependencies.js'
+import { getSceneDocument, listSceneDocumentItems } from '#lib/scenes/api.js'
+import { sceneDocumentToListItem } from '#lib/scenes/mapping.js'
+import type {
+  SceneDocument,
+  SceneDocumentListItem
+} from '#lib/scenes/schema.js'
 
 const SCENE_DOCUMENTS_CONTEXT = Symbol('scene-documents-store')
 const REVALIDATE_DEBOUNCE_MS = 250
@@ -49,6 +52,7 @@ function createSceneDocumentsStore({
     nextItemsBySceneId: SceneDocumentListsBySceneId = {}
   ) {
     const canvasChanged = canvasId !== nextCanvasId
+
     canvasId = nextCanvasId
     itemsBySceneId = normalizeItemsBySceneId(nextItemsBySceneId)
 

@@ -3,7 +3,7 @@ import {
   createCreatePathCommand,
   createDeleteMultipleCommand,
   createUpdateMultipleCommand
-} from '$lib/canvas/commands'
+} from '#lib/canvas/commands.js'
 import {
   cloneConnector,
   cloneEndpoint,
@@ -12,8 +12,8 @@ import {
   isAnchorTargetInSelection,
   isDiagramElementInSelection,
   resolveEndpoint
-} from '$lib/canvas/diagram-utils'
-import { isElementInSelection } from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/diagram-utils.js'
+import { isElementInSelection } from '#lib/canvas/drawing-utils.js'
 import type {
   CanvasDrawableElement,
   CanvasElementType,

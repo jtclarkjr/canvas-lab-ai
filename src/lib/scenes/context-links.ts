@@ -1,9 +1,9 @@
-import { normalizeAnchorBinding } from '$lib/canvas/diagram-utils'
+import { normalizeAnchorBinding } from '#lib/canvas/diagram-utils.js'
 import type {
   Arrowhead,
   DiagramConnector,
   DiagramEndpoint
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 
 type SceneConnector = Pick<
   DiagramConnector,

@@ -1,4 +1,4 @@
-import type { Canvas } from '$lib/canvas/schema'
+import type { Canvas } from '#lib/canvas/schema.js'
 import type {
   CanvasSortKey,
   CanvasSortDir,
@@ -51,7 +51,7 @@ export function getDefaultCanvasSortDir(key: CanvasSortKey): CanvasSortDir {
 }
 
 export function parseCanvasSort(
-  searchParams: URLSearchParams
+  searchParams: Pick<URLSearchParams, 'get'>
 ): CanvasSortState {
   const keyParam = searchParams.get('sort')
   const key = isCanvasSortKey(keyParam) ? keyParam : DEFAULT_CANVAS_SORT.key

@@ -8,7 +8,7 @@ import type {
   DiagramShape,
   Point,
   ShapeKind
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 
 export type DiagramTemplateId =
   | 'basic-flow'

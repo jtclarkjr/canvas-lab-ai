@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { Pencil } from 'lucide-svelte'
-  import { IconButton, Input } from '$lib/components/ui'
+  import { IconButton, Input } from '#lib/components/ui/index.js'
 
   let {
     title,

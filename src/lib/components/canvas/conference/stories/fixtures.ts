@@ -1,7 +1,7 @@
 import type {
   ConferenceCallChatEntry,
   ConferenceParticipant
-} from '$lib/conference/types'
+} from '#lib/conference/types.js'
 
 const mockVideoTrack = {
   attach: () => undefined,

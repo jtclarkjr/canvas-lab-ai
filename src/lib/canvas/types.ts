@@ -1,4 +1,4 @@
-import type { Canvas } from '$lib/canvas/schema'
+import type { Canvas } from '#lib/canvas/schema.js'
 
 export type Tool =
   | 'select'

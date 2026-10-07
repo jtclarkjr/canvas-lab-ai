@@ -1,9 +1,9 @@
 import { invalidate } from '$app/navigation'
-import { listCanvases } from '$lib/canvas/api'
-import { updateCanvas } from '$lib/workspace/api'
-import { CANVASES_DEPENDENCY } from '$lib/canvas/consts'
-import { broadcastCanvasVisibilityChange } from '$lib/workspace/canvas-visibility-realtime'
-import type { Canvas, CanvasVisibility } from '$lib/canvas/schema'
+import { listCanvases } from '#lib/canvas/api.js'
+import { updateCanvas } from '#lib/workspace/api.js'
+import { CANVASES_DEPENDENCY } from '#lib/canvas/consts.js'
+import { broadcastCanvasVisibilityChange } from '#lib/workspace/canvas-visibility-realtime.js'
+import type { Canvas, CanvasVisibility } from '#lib/canvas/schema.js'
 
 type WorkspaceCanvasesInput = {
   getActiveCanvasId: () => string

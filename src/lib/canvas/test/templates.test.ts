@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vite-plus/test'
 import {
   connectorToSvgPath,
   getConnectorRoutePoints
-} from '$lib/canvas/diagram-utils'
-import { buildDiagramTemplate } from '$lib/canvas/temple'
-import { diagramTemplates } from '$lib/canvas/temple/consts'
-import type { DiagramTemplateId } from '$lib/canvas/temple/types'
-import type { DiagramFormatting } from '$lib/canvas/types'
+} from '#lib/canvas/diagram-utils.js'
+import { buildDiagramTemplate } from '#lib/canvas/temple/index.js'
+import { diagramTemplates } from '#lib/canvas/temple/consts.js'
+import type { DiagramTemplateId } from '#lib/canvas/temple/types.js'
+import type { DiagramFormatting } from '#lib/canvas/types.js'
 
 const formatting: DiagramFormatting = {
   shapeKind: 'rectangle',

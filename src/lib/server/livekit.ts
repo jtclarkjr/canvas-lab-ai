@@ -3,8 +3,16 @@ import {
   RoomServiceClient,
   WebhookReceiver
 } from 'livekit-server-sdk'
-import { env as privateEnv } from '$env/dynamic/private'
-import { internalServerError } from '$lib/server/api-error'
+
+import {
+  LIVEKIT_URL,
+  LIVEKIT_API_KEY,
+  LIVEKIT_API_SECRET,
+  LIVEKIT_TRANSCRIPTION_MODEL,
+  LIVEKIT_TRANSCRIPTION_LANGUAGE
+} from '$app/env/private'
+
+import { internalServerError } from '#lib/server/api-error.js'
 
 const DEFAULT_TRANSCRIBER_AGENT_NAME = 'canvas-transcriber'
 const DEFAULT_TRANSCRIPTION_MODEL = 'deepgram/nova-3'
@@ -15,9 +23,9 @@ function liveKitRestUrl(url: string) {
 }
 
 export function getLiveKitConfig() {
-  const url = privateEnv.LIVEKIT_URL
-  const apiKey = privateEnv.LIVEKIT_API_KEY
-  const apiSecret = privateEnv.LIVEKIT_API_SECRET
+  const url = LIVEKIT_URL
+  const apiKey = LIVEKIT_API_KEY
+  const apiSecret = LIVEKIT_API_SECRET
 
   if (!url || !apiKey || !apiSecret) {
     throw internalServerError(
@@ -54,10 +62,7 @@ export function getLiveKitWebhookReceiver() {
 export function getLiveKitTranscriptionConfig() {
   return {
     agentName: getTranscriberAgentName(),
-    model:
-      privateEnv.LIVEKIT_TRANSCRIPTION_MODEL || DEFAULT_TRANSCRIPTION_MODEL,
-    language:
-      privateEnv.LIVEKIT_TRANSCRIPTION_LANGUAGE ||
-      DEFAULT_TRANSCRIPTION_LANGUAGE
+    model: LIVEKIT_TRANSCRIPTION_MODEL || DEFAULT_TRANSCRIPTION_MODEL,
+    language: LIVEKIT_TRANSCRIPTION_LANGUAGE || DEFAULT_TRANSCRIPTION_LANGUAGE
   }
 }

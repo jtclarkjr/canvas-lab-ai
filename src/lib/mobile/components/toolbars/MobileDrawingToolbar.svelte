@@ -7,7 +7,7 @@
     Spline
   } from 'lucide-svelte'
   import { onMount } from 'svelte'
-  import type { DrawStyle } from '$lib/canvas/types'
+  import type { DrawStyle } from '#lib/canvas/types.js'
 
   let {
     width,

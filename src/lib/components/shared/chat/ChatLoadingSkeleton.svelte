@@ -8,8 +8,8 @@
 </script>
 
 <script lang="ts">
-  import { Skeleton } from '$lib/components/ui'
-  import { cn } from '$lib/utils'
+  import { Skeleton } from '#lib/components/ui/index.js'
+  import { cn } from '#lib/utils.js'
 
   let {
     rows = 4,

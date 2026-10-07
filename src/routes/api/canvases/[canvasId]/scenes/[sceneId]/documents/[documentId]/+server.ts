@@ -1,26 +1,26 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   sceneDocumentResponseSchema,
   sceneDocumentRowSchema,
   updateSceneDocumentInputSchema
-} from '$lib/scenes/schema'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+} from '#lib/scenes/schema.js'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   assertSceneModify,
   requireScene,
   requireSceneDocument
-} from '$lib/server/scene-access'
-import { sceneDocumentRowToDocument } from '$lib/scenes/mapping'
+} from '#lib/server/scene-access.js'
+import { sceneDocumentRowToDocument } from '#lib/scenes/mapping.js'
 import {
   handleApiError,
   parseInput,
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { toDbJson } from '#lib/server/json.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -47,7 +47,7 @@ export const GET: RequestHandler = async (event) =>
       await requireScene(supabase, canvasId, sceneId)
       const document = await requireSceneDocument(supabase, sceneId, documentId)
 
-      return json(
+      return Response.json(
         sceneDocumentResponseSchema.parse({
           item: sceneDocumentRowToDocument(
             sceneDocumentRowSchema.parse(document)
@@ -111,7 +111,7 @@ export const PATCH: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to update scene document')
       }
 
-      return json(
+      return Response.json(
         sceneDocumentResponseSchema.parse({
           item: sceneDocumentRowToDocument(sceneDocumentRowSchema.parse(data))
         })
@@ -161,7 +161,7 @@ export const DELETE: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         sceneDocumentResponseSchema.parse({
           item: sceneDocumentRowToDocument(
             sceneDocumentRowSchema.parse(document)

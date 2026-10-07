@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
-import SceneStoryHarness from '$lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
+import SceneStoryHarness from '#lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
 const meta = {
   title: 'Mobile/Canvas/Scenes/MobileSceneCard',
   component: SceneStoryHarness,

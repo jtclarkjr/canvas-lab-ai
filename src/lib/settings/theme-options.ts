@@ -1,4 +1,4 @@
-import type { Theme } from '$lib/stores/shared/types'
+import type { Theme } from '#lib/stores/shared/types.js'
 
 export const themeOptions = [
   { value: 'light', label: 'Light' },

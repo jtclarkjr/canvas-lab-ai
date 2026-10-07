@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Check, Mic, MicOff } from 'lucide-svelte'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
 

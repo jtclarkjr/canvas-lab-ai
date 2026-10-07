@@ -1,18 +1,18 @@
 import { z } from 'zod'
-import { databaseFlowDefinitionSchema } from '$lib/workflows/database/schema'
+import { databaseFlowDefinitionSchema } from '#lib/workflows/database/schema.js'
 
 export {
   databaseColumnSchema,
   databaseFlowDefinitionSchema,
   databaseRelationSchema,
   databaseTableSchema
-} from '$lib/workflows/database/schema'
+} from '#lib/workflows/database/schema.js'
 export type {
   DatabaseColumn,
   DatabaseFlowDefinition,
   DatabaseRelation,
   DatabaseTable
-} from '$lib/workflows/database/schema'
+} from '#lib/workflows/database/schema.js'
 
 export const workflowFlowTypeSchema = z.enum(['workflow', 'database'])
 

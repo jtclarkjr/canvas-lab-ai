@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { UIMessage } from 'ai'
-import type { Path, TextElement } from '$lib/canvas/types'
+import type { Path, TextElement } from '#lib/canvas/types.js'
 
 // scenes
 

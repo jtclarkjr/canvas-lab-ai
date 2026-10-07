@@ -1,25 +1,25 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   accessRequestResponseSchema,
   accessRequestStatusSchema,
   requestAccessInputSchema
-} from '$lib/canvas/schema'
-import { listAccessRequestsResponseSchema } from '$lib/workspace/schema'
+} from '#lib/canvas/schema.js'
+import { listAccessRequestsResponseSchema } from '#lib/workspace/schema.js'
 import {
   requireCanvasRole,
   resolveCanvasAccess
-} from '$lib/server/canvas-access'
+} from '#lib/server/canvas-access.js'
 import {
   badRequest,
   handleApiError,
   parseInput,
   parseJsonBody,
   withAccountAuth
-} from '$lib/server/api-error'
-import { roleAtLeast } from '$lib/canvas/roles'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import type { Database } from '$lib/server/database.types'
+} from '#lib/server/api-error.js'
+import { roleAtLeast } from '#lib/canvas/roles.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import type { Database } from '#lib/server/database.types.js'
 
 type AccessRequestRow =
   Database['public']['Tables']['canvas_access_requests']['Row']
@@ -95,7 +95,7 @@ export const GET: RequestHandler = async (event) =>
         (profiles ?? []).map((profile) => [profile.id, profile])
       )
 
-      return json(
+      return Response.json(
         listAccessRequestsResponseSchema.parse({
           items: (requests ?? []).map((row) =>
             toAccessRequest(row, profileById.get(row.requester_id))
@@ -164,14 +164,14 @@ export const POST: RequestHandler = async (event) =>
             throw updateError ?? new Error('Failed to update access request')
           }
 
-          return json(
+          return Response.json(
             accessRequestResponseSchema.parse({
               item: toAccessRequest(updated)
             })
           )
         }
 
-        return json(
+        return Response.json(
           accessRequestResponseSchema.parse({ item: toAccessRequest(pending) })
         )
       }
@@ -190,7 +190,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create access request')
       }
 
-      return json(
+      return Response.json(
         accessRequestResponseSchema.parse({ item: toAccessRequest(data) }),
         { status: 201 }
       )

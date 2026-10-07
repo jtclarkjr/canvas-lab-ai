@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui'
+  import { Button } from '#lib/components/ui/index.js'
   import CanvasSearchDialog from '../CanvasSearchDialog.svelte'
   import { ownerCanvas, sharedCanvas } from '../home/stories/fixtures'
 

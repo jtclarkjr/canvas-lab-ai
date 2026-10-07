@@ -1,10 +1,10 @@
 <script lang="ts">
   import { LoaderCircle } from 'lucide-svelte'
   import { fade, scale } from 'svelte/transition'
-  import CanvasTilePreview from '$lib/components/canvas/home/CanvasTilePreview.svelte'
-  import { RoleBadge } from '$lib/components/shared/canvas'
-  import { Card } from '$lib/components/ui'
-  import type { Canvas } from '$lib/canvas/schema'
+  import CanvasTilePreview from '#lib/components/canvas/home/CanvasTilePreview.svelte'
+  import { RoleBadge } from '#lib/components/shared/canvas/index.js'
+  import { Card } from '#lib/components/ui/index.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
 
   let { canvas, isOpening, isDimmed, dateLabel, dateValue, onNavigate } =
     $props<{

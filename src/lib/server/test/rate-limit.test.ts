@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test'
-import { withRateLimit } from '$lib/server/rate-limit'
+import { withRateLimit } from '#lib/server/rate-limit.js'
 
 function request(path: string, ip: string) {
   return new Request(`https://canvas.example${path}`, {

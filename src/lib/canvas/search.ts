@@ -1,6 +1,6 @@
-import { DEFAULT_CANVAS_SEARCH_LIMIT } from '$lib/canvas/consts'
-import type { Canvas } from '$lib/canvas/schema'
-import type { CanvasSearchResult } from '$lib/canvas/types'
+import { DEFAULT_CANVAS_SEARCH_LIMIT } from '#lib/canvas/consts.js'
+import type { Canvas } from '#lib/canvas/schema.js'
+import type { CanvasSearchResult } from '#lib/canvas/types.js'
 
 function normalizeSearchText(value: string): string {
   return value.trim().toLocaleLowerCase()

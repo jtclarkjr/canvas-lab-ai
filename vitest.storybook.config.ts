@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
-import { sveltekit } from '@sveltejs/kit/vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
 import { defineConfig } from 'vite-plus'
 import { playwright } from 'vite-plus/test/browser-playwright'
@@ -15,7 +15,16 @@ export default defineConfig({
         extends: true,
         plugins: [
           tailwindcss(),
-          sveltekit(),
+          // Component tests need the compiler, without SvelteKit's SSR server.
+          svelte({
+            configFile: false,
+            compilerOptions: {
+              runes: ({ filename }) =>
+                filename.split(/[/\\]/).includes('node_modules')
+                  ? undefined
+                  : true
+            }
+          }),
           storybookTest({ configDir: path.join(dirname, '.storybook') })
         ],
         test: {

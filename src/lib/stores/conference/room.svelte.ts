@@ -3,24 +3,24 @@ import type { AudioTrack, Room, VideoTrack } from 'livekit-client'
 import type {
   BackgroundEffect,
   ConferenceTextStream
-} from '$lib/conference/types'
-import { ApiClientError } from '$lib/api-client'
-import { colorFromId } from '$lib/canvas/helpers/color-from-id'
-import { fetchConferenceToken } from '$lib/conference/api'
-import type { CallSession } from '$lib/conference/schema'
+} from '#lib/conference/types.js'
+import { ApiClientError } from '#lib/api-client.js'
+import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
+import { fetchConferenceToken } from '#lib/conference/api.js'
+import type { CallSession } from '#lib/conference/schema.js'
 import {
   isRenderableVideoTrack,
   loadBgPrefs,
   pickFeatured,
   saveBgPrefs
-} from '$lib/conference/helpers'
+} from '#lib/conference/helpers.js'
 import type {
   ConferenceParticipant,
   ConferenceStatus,
   DeviceKind
-} from '$lib/conference/types'
-import { toast } from '$lib/stores/shared/toast.svelte'
-import type { ConferenceDevicesStore } from '$lib/stores/conference/devices/types'
+} from '#lib/conference/types.js'
+import { toast } from '#lib/stores/shared/toast.svelte.js'
+import type { ConferenceDevicesStore } from '#lib/stores/conference/devices/types.js'
 
 type ConferenceRoomInput = {
   getCanvasId: () => string

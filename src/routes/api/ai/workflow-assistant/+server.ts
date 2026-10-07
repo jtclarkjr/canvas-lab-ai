@@ -1,37 +1,37 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import { generateObject } from 'ai'
-import { getLinkedContextSceneIds } from '$lib/scenes/context-links'
-import { markdownDocumentContentSchema } from '$lib/scenes/schema'
-import { isKnownModelId } from '$lib/scenes/models'
-import { AiModelError } from '$lib/server/ai'
-import { getAiRegistry } from '$lib/server/ai-runtime'
+import { getLinkedContextSceneIds } from '#lib/scenes/context-links.js'
+import { markdownDocumentContentSchema } from '#lib/scenes/schema.js'
+import { isKnownModelId } from '#lib/scenes/models.js'
+import { AiModelError } from '#lib/server/ai/index.js'
+import { getAiRegistry } from '#lib/server/ai-runtime.js'
 import {
   assertPromptAiUsageAllowed,
   recordPromptAiUsage
-} from '$lib/server/ai-usage'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { listCanvasElementsForCanvas } from '$lib/server/canvas-elements'
-import { listCanvasScenesForCanvas } from '$lib/server/canvas-scenes'
-import { requireWorkflowsEnabled } from '$lib/server/features'
-import { requireWorkflow } from '$lib/server/workflow-access'
+} from '#lib/server/ai-usage.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { listCanvasElementsForCanvas } from '#lib/server/canvas-elements.js'
+import { listCanvasScenesForCanvas } from '#lib/server/canvas-scenes.js'
+import { requireWorkflowsEnabled } from '#lib/server/features.js'
+import { requireWorkflow } from '#lib/server/workflow-access.js'
 import {
   badRequest,
   handleApiError,
   parseInput,
   parseJsonBody,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { canvasElementsToDrawingState } from '$lib/workspace/element-mapping'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { canvasElementsToDrawingState } from '#lib/workspace/element-mapping.js'
 import {
   workflowAssistantRequestSchema,
   workflowAssistantResponseSchema,
   getWorkflowProposalSchema,
   workflowProposalSchema
-} from '$lib/workflows/schema'
-import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
-import { workflowDefinitionToYaml as definitionToYaml } from '$lib/workflows/definition'
+} from '#lib/workflows/schema.js'
+import { getWorkflowFlowTypeDefinition } from '#lib/workflows/flow-types.js'
+import { workflowDefinitionToYaml as definitionToYaml } from '#lib/workflows/definition.js'
 
 const AI_RATE_LIMIT = { maxRequests: 10, windowMs: 60_000 }
 const CONTEXT_DOCUMENT_LIMIT = 12
@@ -169,7 +169,7 @@ export const POST: RequestHandler = async (event) =>
         configYaml: definitionToYaml(generatedProposal.definition)
       })
 
-      return json(
+      return Response.json(
         workflowAssistantResponseSchema.parse({
           message: proposal.summary,
           proposal

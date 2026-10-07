@@ -1,40 +1,40 @@
 import { tick } from 'svelte'
-import type { Command } from '$lib/canvas/commands/types'
+import type { Command } from '#lib/canvas/commands/types.js'
 import {
   createCreateTextCommand,
   createDeleteElementCommand,
   createUpdateMultipleCommand,
   createUpdateTextCommand
-} from '$lib/canvas/commands'
+} from '#lib/canvas/commands.js'
 import {
   getTextContentWidth,
   getTextLineHeight,
   getTextLines,
   textElementToData
-} from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/drawing-utils.js'
 import {
   cloneConnector,
   connectorToData,
   getConnectorLabelPoint,
   shapeToData
-} from '$lib/canvas/diagram-utils'
-import type { UpsertElementInput } from '$lib/workspace/schema'
-import type { Scene } from '$lib/scenes/schema'
+} from '#lib/canvas/diagram-utils.js'
+import type { UpsertElementInput } from '#lib/workspace/schema.js'
+import type { Scene } from '#lib/scenes/schema.js'
 import type {
   DiagramConnector,
   DiagramShape,
   EditingText,
   ListStyle,
   TextElement
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import {
   continueListOnEnter,
   getSelectionListStyle,
   listStartValue,
   normalizeListText,
   toggleListStyle
-} from '$lib/canvas/text-lists'
-import type { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
+} from '#lib/canvas/text-lists.js'
+import type { createWorkspaceFormattingStore } from '#lib/stores/workspace/formatting.svelte.js'
 
 type ElementSetter<T> = (next: T[] | ((previous: T[]) => T[])) => void
 

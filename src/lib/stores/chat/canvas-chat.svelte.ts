@@ -1,18 +1,18 @@
 import { getContext, setContext } from 'svelte'
-import { ApiClientError } from '$lib/api-client'
-import { supabase } from '$lib/auth/session-store'
+import { ApiClientError } from '#lib/api-client.js'
+import { supabase } from '#lib/auth/session-store.js'
 import {
   listChatMembers,
   listChatMessages,
   sendChatMessage
-} from '$lib/chat/api'
-import type { MessageAuthor } from '$lib/scenes/schema'
+} from '#lib/chat/api.js'
+import type { MessageAuthor } from '#lib/scenes/schema.js'
 import {
   chatMessageRowSchema,
   chatMessageRowToMessage,
   type ChatMessage
-} from '$lib/chat/schema'
-import { createCanvasAssistantStore } from '$lib/stores/chat/canvas-assistant.svelte'
+} from '#lib/chat/schema.js'
+import { createCanvasAssistantStore } from '#lib/stores/chat/canvas-assistant.svelte.js'
 import type {
   CanvasChatTab,
   CanvasChatDisplayMode,

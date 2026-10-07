@@ -1,28 +1,28 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { requireCanvasRole } from '$lib/server/canvas-access'
+import type { RequestHandler } from '@sveltejs/kit'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
 import {
   listCanvasWorkflowVersions,
   toCanvasWorkflowVersion
-} from '$lib/server/canvas-workflows'
+} from '#lib/server/canvas-workflows.js'
 import {
   assertWorkflowModify,
   requireWorkflow
-} from '$lib/server/workflow-access'
+} from '#lib/server/workflow-access.js'
 import {
   handleApiError,
   parseInput,
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { requireWorkflowsEnabled } from '$lib/server/features'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { requireWorkflowsEnabled } from '#lib/server/features.js'
+import { toDbJson } from '#lib/server/json.js'
 import {
   createWorkflowVersionInputSchema,
   workflowVersionResponseSchema
-} from '$lib/workflows/schema'
+} from '#lib/workflows/schema.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -44,7 +44,9 @@ export const GET: RequestHandler = async (event) =>
       await requireCanvasRole(supabase, canvasId, user.id, 'reader')
       const workflow = await requireWorkflow(supabase, canvasId, workflowId)
 
-      return json(await listCanvasWorkflowVersions(supabase, workflow.id))
+      return Response.json(
+        await listCanvasWorkflowVersions(supabase, workflow.id)
+      )
     } catch (error) {
       return handleApiError(error, event.request)
     }
@@ -97,7 +99,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create workflow version')
       }
 
-      return json(
+      return Response.json(
         workflowVersionResponseSchema.parse({
           item: toCanvasWorkflowVersion(data)
         }),

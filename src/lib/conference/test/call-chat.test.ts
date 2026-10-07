@@ -5,7 +5,7 @@ import {
   CALL_CHAT_VERSION,
   callChatAttributesSchema,
   callChatContentSchema
-} from '$lib/conference/call-chat'
+} from '#lib/conference/call-chat.js'
 
 describe('call chat wire format', () => {
   it('trims valid message content', () => {

@@ -4,14 +4,14 @@ import {
   callChatAttributesSchema,
   callChatContentSchema,
   type CallChatAttributes
-} from '$lib/conference/call-chat'
+} from '#lib/conference/call-chat.js'
 import type {
   ConferenceCallChatAuthor,
   ConferenceCallChatEntry,
   ConferenceCallChatMessage,
   ConferenceTextStream
-} from '$lib/conference/types'
-import type { ConferenceRoomStore } from '$lib/stores/conference/room/types'
+} from '#lib/conference/types.js'
+import type { ConferenceRoomStore } from '#lib/stores/conference/room/types.js'
 
 type ConferenceCallChatInput = {
   getUserId: () => string

@@ -3,9 +3,9 @@ import {
   isTerminalTranscriptStatus,
   mergeCallSessionRealtimeRow,
   transcriptReconciliationDelay
-} from '$lib/conference/call-session-realtime'
-import type { CallSession } from '$lib/conference/schema'
-import type { CallSessionRealtimeRow } from '$lib/conference/call-session-realtime'
+} from '#lib/conference/call-session-realtime.js'
+import type { CallSession } from '#lib/conference/schema.js'
+import type { CallSessionRealtimeRow } from '#lib/conference/call-session-realtime.js'
 
 const startedAt = '2026-07-11T00:00:00.000Z'
 

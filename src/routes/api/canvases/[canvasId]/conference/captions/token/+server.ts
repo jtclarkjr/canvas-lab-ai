@@ -1,20 +1,22 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { env as privateEnv } from '$env/dynamic/private'
+import type { RequestHandler } from '@sveltejs/kit'
+import { OPENAI_API_KEY } from '$app/env/private'
 import {
   CAPTIONS_TRANSCRIBE_MODELS,
   captionsSessionConfig
-} from '$lib/conference/captions'
-import { OPENAI_REALTIME_CLIENT_SECRETS_URL } from '$lib/conference/openai-realtime'
-import { captionsTokenResponseSchema } from '$lib/conference/schema'
+} from '#lib/conference/captions.js'
+import { OPENAI_REALTIME_CLIENT_SECRETS_URL } from '#lib/conference/openai-realtime.js'
+import { captionsTokenResponseSchema } from '#lib/conference/schema.js'
+
 import {
   handleApiError,
   internalServerError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // The secret only needs to cover the WebRTC handshake; the session itself
 // outlives it.
@@ -71,7 +73,7 @@ export const POST: RequestHandler = async (event) =>
 
       await requireCanvasMember(supabase, canvasId, user.id, 'reader')
 
-      const apiKey = privateEnv.OPENAI_API_KEY
+      const apiKey = OPENAI_API_KEY
       if (!apiKey) {
         throw internalServerError(
           'Captions need OPENAI_API_KEY to be set on the server.',
@@ -87,7 +89,7 @@ export const POST: RequestHandler = async (event) =>
       for (const model of CAPTIONS_TRANSCRIBE_MODELS) {
         const result = await mintClientSecret(apiKey, model)
         if ('clientSecret' in result) {
-          return json(
+          return Response.json(
             captionsTokenResponseSchema.parse({
               clientSecret: result.clientSecret,
               expiresAt: result.expiresAt,

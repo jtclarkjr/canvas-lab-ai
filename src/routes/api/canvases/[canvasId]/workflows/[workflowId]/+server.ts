@@ -1,11 +1,11 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { toCanvasWorkflow } from '$lib/server/canvas-workflows'
-import type { Database } from '$lib/server/database.types'
+import type { RequestHandler } from '@sveltejs/kit'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { toCanvasWorkflow } from '#lib/server/canvas-workflows.js'
+import type { Database } from '#lib/server/database.types.js'
 import {
   assertWorkflowModify,
   requireWorkflow
-} from '$lib/server/workflow-access'
+} from '#lib/server/workflow-access.js'
 import {
   badRequest,
   handleApiError,
@@ -13,20 +13,20 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { requireWorkflowsEnabled } from '$lib/server/features'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { requireWorkflowsEnabled } from '#lib/server/features.js'
+import { toDbJson } from '#lib/server/json.js'
 import {
   workflowDefinitionFromYaml,
   workflowDefinitionToYaml
-} from '$lib/workflows/definition'
+} from '#lib/workflows/definition.js'
 import {
   updateWorkflowInputSchema,
   workflowResponseSchema,
   type WorkflowDefinition
-} from '$lib/workflows/schema'
+} from '#lib/workflows/schema.js'
 
 type WorkflowUpdate = Database['public']['Tables']['canvas_workflows']['Update']
 
@@ -103,7 +103,7 @@ export const PATCH: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to update workflow')
       }
 
-      return json(
+      return Response.json(
         workflowResponseSchema.parse({ item: toCanvasWorkflow(data) })
       )
     } catch (error) {
@@ -146,7 +146,7 @@ export const DELETE: RequestHandler = async (event) =>
         throw error
       }
 
-      return json(
+      return Response.json(
         workflowResponseSchema.parse({ item: toCanvasWorkflow(workflow) })
       )
     } catch (error) {

@@ -1,9 +1,9 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import { z } from 'zod'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { handleApiError, withAuth } from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { handleApiError, withAuth } from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // Strip HTML tags, control characters, and normalize whitespace before the
 // name leaves the server. This is the primary sanitization boundary.
@@ -62,7 +62,7 @@ export const GET: RequestHandler = async (event) =>
         }))
         .filter((item) => item.name.length > 0)
 
-      return json(responseSchema.parse({ items }))
+      return Response.json(responseSchema.parse({ items }))
     } catch (error) {
       return handleApiError(error, event.request)
     }

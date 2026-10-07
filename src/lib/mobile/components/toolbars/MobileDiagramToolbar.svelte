@@ -14,7 +14,7 @@
     Workflow
   } from 'lucide-svelte'
   import { onMount } from 'svelte'
-  import type { DiagramTemplateId } from '$lib/canvas/temple/types'
+  import type { DiagramTemplateId } from '#lib/canvas/temple/types.js'
   import type {
     Arrowhead,
     ConnectorKind,
@@ -22,8 +22,8 @@
     ShapeKind,
     StrokeStyle,
     Tool
-  } from '$lib/canvas/types'
-  import DiagramTemplateMenu from '$lib/components/canvas/workspace/DiagramTemplateMenu.svelte'
+  } from '#lib/canvas/types.js'
+  import DiagramTemplateMenu from '#lib/components/canvas/workspace/DiagramTemplateMenu.svelte'
 
   let {
     formatting,

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { ArrowUp } from 'lucide-svelte'
-  import { IconButton, Textarea } from '$lib/components/ui'
+  import { IconButton, Textarea } from '#lib/components/ui/index.js'
 
-  import { documentCategories } from '$lib/scenes/document-categories'
-  import { defaultModelId } from '$lib/scenes/models'
-  import { sceneTypes } from '$lib/scenes/registry'
-  import type { SceneTypeId } from '$lib/scenes/types'
-  import ModelPicker from '$lib/components/canvas/scenes/document/ModelPicker.svelte'
-  import PresetPicker from '$lib/components/canvas/scenes/document/PresetPicker.svelte'
+  import { documentCategories } from '#lib/scenes/document-categories.js'
+  import { defaultModelId } from '#lib/scenes/models.js'
+  import { sceneTypes } from '#lib/scenes/registry.js'
+  import type { SceneTypeId } from '#lib/scenes/types.js'
+  import ModelPicker from '#lib/components/canvas/scenes/document/ModelPicker.svelte'
+  import PresetPicker from '#lib/components/canvas/scenes/document/PresetPicker.svelte'
 
   export type SceneEntryStart = {
     type: SceneTypeId

@@ -6,11 +6,11 @@ import {
   setCurrentSession,
   setLastSessionError,
   supabase
-} from '$lib/auth/session-store'
-import { isAnonymousUser } from '$lib/auth/anonymous'
-import type { Session } from '$lib/auth/types'
-import { bestEffort, sanitizeRedirectTarget } from '$lib/utils'
-export { getUserDisplayName } from '$lib/auth/user-profile'
+} from '#lib/auth/session-store.js'
+import { isAnonymousUser } from '#lib/auth/anonymous.js'
+import type { Session } from '#lib/auth/types.js'
+import { bestEffort, sanitizeRedirectTarget } from '#lib/utils.js'
+export { getUserDisplayName } from '#lib/auth/user-profile.js'
 
 export async function getAccessToken() {
   const session = getCurrentSession() ?? (await ensureSessionInitialized())

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
-import { legalPolicies } from '$lib/legal/policies'
+import { legalPolicies } from '#lib/legal/policies.js'
 import LegalPolicyPage from '../LegalPolicyPage.svelte'
 
 const meta = {

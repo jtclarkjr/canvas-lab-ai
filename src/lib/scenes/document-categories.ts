@@ -1,4 +1,4 @@
-import type { DocumentCategory } from '$lib/scenes/types'
+import type { DocumentCategory } from '#lib/scenes/types.js'
 
 // Document workflow categories. Adding a category is additive: append an
 // entry here and add its system prompt in

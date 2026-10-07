@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import { useCanvasConferenceStoreOptional } from '$lib/stores/conference/index.svelte'
-  import MobileCanvasChatWindow from '$lib/mobile/components/chat/MobileCanvasChatWindow.svelte'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import { useCanvasConferenceStoreOptional } from '#lib/stores/conference/index.svelte.js'
+  import MobileCanvasChatWindow from '#lib/mobile/components/chat/MobileCanvasChatWindow.svelte'
 
   let { canvasId, userId } = $props<{
     canvasId: string

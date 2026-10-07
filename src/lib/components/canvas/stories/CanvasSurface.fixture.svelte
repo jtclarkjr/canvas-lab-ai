@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DiagramShape } from '$lib/canvas/types'
+  import type { DiagramShape } from '#lib/canvas/types.js'
   import CanvasSurface from '../CanvasSurface.svelte'
 
   const shape: DiagramShape = {

@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte'
   import { BookMarked, Download, MessageSquare, Save } from 'lucide-svelte'
-  import { Button, Input, Textarea } from '$lib/components/ui'
+  import { Button, Input, Textarea } from '#lib/components/ui/index.js'
 
   import {
     markdownDocumentContentSchema,
     type SceneDocument
-  } from '$lib/scenes/schema'
+  } from '#lib/scenes/schema.js'
   import {
     sameDocumentSaveSnapshot,
     shouldAttemptAutosave
-  } from '$lib/scenes/document-autosave'
-  import type { DocumentSaveSnapshot } from '$lib/scenes/types'
-  import { downloadMarkdown } from '$lib/scenes/download'
+  } from '#lib/scenes/document-autosave.js'
+  import type { DocumentSaveSnapshot } from '#lib/scenes/types.js'
+  import { downloadMarkdown } from '#lib/scenes/download.js'
 
   const AUTO_SAVE_DEBOUNCE_MS = 1200
 

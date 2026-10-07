@@ -1,4 +1,4 @@
-import { getApiHeaders, parseResponse } from '$lib/api-client'
+import { getApiHeaders, parseResponse } from '#lib/api-client.js'
 import {
   createWorkflowInputSchema,
   createWorkflowVersionInputSchema,
@@ -18,7 +18,7 @@ import {
   type WorkflowAssistantResponse,
   type WorkflowResponse,
   type WorkflowVersionResponse
-} from '$lib/workflows/schema'
+} from '#lib/workflows/schema.js'
 
 const jsonHeaders = {
   accept: 'application/json',

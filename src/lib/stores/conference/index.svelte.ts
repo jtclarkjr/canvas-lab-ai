@@ -1,23 +1,23 @@
 import { getContext, setContext } from 'svelte'
-import { supabase } from '$lib/auth/session-store'
+import { supabase } from '#lib/auth/session-store.js'
 import type {
   CaptionLanguageCode,
   CaptionTextColor,
   CaptionTextSize
-} from '$lib/conference/captions/types'
-import { CALL_CHAT_TEXT_TOPIC } from '$lib/conference/call-chat'
+} from '#lib/conference/captions/types.js'
+import { CALL_CHAT_TEXT_TOPIC } from '#lib/conference/call-chat.js'
 import {
   getCallSession,
   reconcileCallSession,
   startCallTranscription
-} from '$lib/conference/api'
+} from '#lib/conference/api.js'
 import {
   isTerminalTranscriptStatus,
   mergeCallSessionRealtimeRow,
   transcriptReconciliationDelay,
   transcriptWatchdogKey,
   type CallSessionRealtimeRow
-} from '$lib/conference/call-session-realtime'
+} from '#lib/conference/call-session-realtime.js'
 import type {
   ConferenceFullscreenChatTab,
   ConferenceFullscreenPanel,
@@ -25,14 +25,14 @@ import type {
   ConferenceViewMode,
   Corner,
   DeviceKind
-} from '$lib/conference/types'
-import { createConferenceCallChatStore } from '$lib/stores/conference/call-chat.svelte'
-import { createConferenceCaptionsStore } from '$lib/stores/conference/captions.svelte'
-import { createConferenceDevicesStore } from '$lib/stores/conference/devices.svelte'
-import { createConferenceRoomStore } from '$lib/stores/conference/room.svelte'
-import { createConferenceStatusStore } from '$lib/stores/conference/status.svelte'
-import { createConferenceViewStore } from '$lib/stores/conference/view.svelte'
-import { toast } from '$lib/stores/shared/toast.svelte'
+} from '#lib/conference/types.js'
+import { createConferenceCallChatStore } from '#lib/stores/conference/call-chat.svelte.js'
+import { createConferenceCaptionsStore } from '#lib/stores/conference/captions.svelte.js'
+import { createConferenceDevicesStore } from '#lib/stores/conference/devices.svelte.js'
+import { createConferenceRoomStore } from '#lib/stores/conference/room.svelte.js'
+import { createConferenceStatusStore } from '#lib/stores/conference/status.svelte.js'
+import { createConferenceViewStore } from '#lib/stores/conference/view.svelte.js'
+import { toast } from '#lib/stores/shared/toast.svelte.js'
 
 const CANVAS_CONFERENCE_CONTEXT = Symbol('canvas-conference-store')
 

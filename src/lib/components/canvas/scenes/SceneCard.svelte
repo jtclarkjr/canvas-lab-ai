@@ -1,11 +1,11 @@
 <script lang="ts">
   import { FileText, Maximize2, NotebookPen, Sparkles } from 'lucide-svelte'
-  import { Card, IconButton } from '$lib/components/ui'
-  import type { Camera } from '$lib/canvas/types'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneActivity } from '$lib/scenes/types'
-  import { getSceneType } from '$lib/scenes/registry'
-  import SceneResizeHandle from '$lib/components/canvas/scenes/SceneResizeHandle.svelte'
+  import { Card, IconButton } from '#lib/components/ui/index.js'
+  import type { Camera } from '#lib/canvas/types.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneActivity } from '#lib/scenes/types.js'
+  import { getSceneType } from '#lib/scenes/registry.js'
+  import SceneResizeHandle from '#lib/components/canvas/scenes/SceneResizeHandle.svelte'
 
   type CardHandlers = {
     pointerDown: (event: PointerEvent, sceneId: string) => void

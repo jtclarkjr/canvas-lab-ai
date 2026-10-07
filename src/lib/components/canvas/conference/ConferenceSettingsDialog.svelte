@@ -1,10 +1,10 @@
 <script lang="ts">
   import { VideoOff } from 'lucide-svelte'
-  import { Dialog as Modal } from '$lib/components/ui'
-  import { BG_PRESETS, bgThumbnailUrl } from '$lib/conference/backgrounds'
-  import type { BgPreset } from '$lib/conference/types'
-  import { attachTrack } from '$lib/components/canvas/conference/media-actions'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { Dialog as Modal } from '#lib/components/ui/index.js'
+  import { BG_PRESETS, bgThumbnailUrl } from '#lib/conference/backgrounds.js'
+  import type { BgPreset } from '#lib/conference/types.js'
+  import { attachTrack } from '#lib/components/canvas/conference/media-actions.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   let { getBackgroundThumbnail = bgThumbnailUrl } = $props<{
     getBackgroundThumbnail?: typeof bgThumbnailUrl

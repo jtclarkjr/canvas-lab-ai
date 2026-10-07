@@ -1,9 +1,9 @@
 <script lang="ts">
   import { X } from 'lucide-svelte'
   import { fly } from 'svelte/transition'
-  import { Button, IconButton } from '$lib/components/ui'
+  import { Button, IconButton } from '#lib/components/ui/index.js'
 
-  import { toast } from '$lib/stores/shared/toast.svelte'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
 </script>
 
 <div

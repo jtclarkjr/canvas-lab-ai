@@ -1,4 +1,4 @@
-import type { WorkflowRow, WorkflowVersionRow } from '$lib/workflows/schema'
+import type { WorkflowRow, WorkflowVersionRow } from '#lib/workflows/schema.js'
 
 export const workflowRowToWorkflow = (row: WorkflowRow) => ({
   id: row.id,

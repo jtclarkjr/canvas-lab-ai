@@ -16,20 +16,20 @@
   import DiagramToolbar from '../toolbars/DiagramToolbar.svelte'
   import DrawingToolbar from '../toolbars/DrawingToolbar.svelte'
   import TextFormattingToolbar from '../toolbars/TextFormattingToolbar.svelte'
-  import MobileTopMenu from '$lib/mobile/components/navigation/MobileTopMenu.svelte'
-  import MobileShareDialog from '$lib/mobile/components/share/MobileShareDialog.svelte'
-  import MobileActionToolbar from '$lib/mobile/components/toolbars/MobileActionToolbar.svelte'
-  import MobileDiagramToolbar from '$lib/mobile/components/toolbars/MobileDiagramToolbar.svelte'
-  import MobileDrawingToolbar from '$lib/mobile/components/toolbars/MobileDrawingToolbar.svelte'
-  import MobileTextFormattingToolbar from '$lib/mobile/components/toolbars/MobileTextFormattingToolbar.svelte'
-  import MobileToolDock from '$lib/mobile/components/toolbars/MobileToolDock.svelte'
+  import MobileTopMenu from '#lib/mobile/components/navigation/MobileTopMenu.svelte'
+  import MobileShareDialog from '#lib/mobile/components/share/MobileShareDialog.svelte'
+  import MobileActionToolbar from '#lib/mobile/components/toolbars/MobileActionToolbar.svelte'
+  import MobileDiagramToolbar from '#lib/mobile/components/toolbars/MobileDiagramToolbar.svelte'
+  import MobileDrawingToolbar from '#lib/mobile/components/toolbars/MobileDrawingToolbar.svelte'
+  import MobileTextFormattingToolbar from '#lib/mobile/components/toolbars/MobileTextFormattingToolbar.svelte'
+  import MobileToolDock from '#lib/mobile/components/toolbars/MobileToolDock.svelte'
   import {
     createCanvasConferenceStore,
     provideCanvasConferenceStoreInstance
-  } from '$lib/stores/conference/index.svelte'
-  import type { Canvas } from '$lib/canvas/schema'
-  import type { DiagramFormatting, Tool } from '$lib/canvas/types'
-  import type { DisplayMember } from '$lib/workspace/types'
+  } from '#lib/stores/conference/index.svelte.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
+  import type { DiagramFormatting, Tool } from '#lib/canvas/types.js'
+  import type { DisplayMember } from '#lib/workspace/types.js'
 
   type Target =
     | 'call-sessions'

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { History } from 'lucide-svelte'
-  import CanvasHistoryDrawer from '$lib/components/canvas/workspace/CanvasHistoryDrawer.svelte'
+  import CanvasHistoryDrawer from '#lib/components/canvas/workspace/CanvasHistoryDrawer.svelte'
 
   let { canvasId } = $props<{
     canvasId: string

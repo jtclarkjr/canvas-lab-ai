@@ -6,18 +6,18 @@
     Scene,
     SceneMessage,
     UpdateSceneInput
-  } from '$lib/scenes/schema'
-  import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
-  import { getSceneType } from '$lib/scenes/registry'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-  import { desktopDeviceProfile } from '$lib/workspace/device-profile.svelte'
-  import type { WorkspaceDeviceProfile } from '$lib/workspace/device-profile/types'
-  import { ConfirmDialog } from '$lib/components/shared/feedback'
-  import MobileDocumentScenePanel from '$lib/mobile/components/scenes/MobileDocumentScenePanel.svelte'
+  } from '#lib/scenes/schema.js'
+  import type { SceneActivity, SceneActivityKind } from '#lib/scenes/types.js'
+  import { getSceneType } from '#lib/scenes/registry.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+  import { desktopDeviceProfile } from '#lib/workspace/device-profile.svelte.js'
+  import type { WorkspaceDeviceProfile } from '#lib/workspace/device-profile/types.js'
+  import { ConfirmDialog } from '#lib/components/shared/feedback/index.js'
+  import MobileDocumentScenePanel from '#lib/mobile/components/scenes/MobileDocumentScenePanel.svelte'
   import MobileSceneEntry, {
     type MobileSceneEntryStart
-  } from '$lib/mobile/components/scenes/MobileSceneEntry.svelte'
+  } from '#lib/mobile/components/scenes/MobileSceneEntry.svelte'
 
   let {
     canvasId,

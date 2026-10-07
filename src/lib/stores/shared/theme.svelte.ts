@@ -1,8 +1,7 @@
-import { browser } from '$app/environment'
-import type { Theme } from '$lib/stores/shared/types'
+import { browser } from '$app/env'
+import type { Theme } from '#lib/stores/shared/types.js'
 
 const STORAGE_KEY = 'theme'
-
 let current = $state<Theme>('system')
 let cleanup: (() => void) | undefined
 

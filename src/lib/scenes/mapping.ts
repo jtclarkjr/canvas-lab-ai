@@ -5,7 +5,7 @@ import type {
   SceneDocumentRow,
   SceneMessageRow,
   SceneRow
-} from '$lib/scenes/schema'
+} from '#lib/scenes/schema.js'
 
 // Row → client shape mappers, shared by the server routes and the client
 // realtime stores (which receive raw rows from postgres_changes payloads).

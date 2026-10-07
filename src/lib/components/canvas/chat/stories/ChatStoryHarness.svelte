@@ -10,7 +10,7 @@
   import CanvasChatLauncher from '../CanvasChatLauncher.svelte'
   import CanvasChatRoomPanel from '../CanvasChatRoomPanel.svelte'
   import CanvasChatWindow from '../CanvasChatWindow.svelte'
-  import { provideCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
+  import { provideCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
   import { storyThreadId, storyUserId } from './chat.msw'
 
   type Target =

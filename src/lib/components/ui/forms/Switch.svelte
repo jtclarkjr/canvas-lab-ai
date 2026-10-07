@@ -15,7 +15,7 @@
 
 <script lang="ts">
   import { Switch as BitsSwitch } from 'bits-ui'
-  import { cn } from '$lib/utils'
+  import { cn } from '#lib/utils.js'
 
   let {
     checked = $bindable(false),

@@ -1,13 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sceneRowToScene } from '$lib/scenes/mapping'
+import { sceneRowToScene } from '#lib/scenes/mapping.js'
 import {
   listScenesResponseSchema,
   sceneRowSchema,
   type ListScenesResponse,
   type Scene,
   type SceneRow
-} from '$lib/scenes/schema'
-import type { Database } from '$lib/server/database.types'
+} from '#lib/scenes/schema.js'
+import type { Database } from '#lib/server/database.types.js'
 
 export function toCanvasScene(row: unknown): Scene {
   return sceneRowToScene(sceneRowSchema.parse(row))

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import SettingsDialog from '../SettingsDialog.svelte'
-  import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
+  import { settingsDialog } from '#lib/stores/shared/settings-dialog.svelte.js'
 
   let { activeTab = 'general' } = $props<{
     activeTab?: 'general' | 'ai-usage'

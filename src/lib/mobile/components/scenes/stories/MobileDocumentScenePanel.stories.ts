@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
 import { http, HttpResponse } from 'msw'
-import SceneStoryHarness from '$lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
-import { draftDocument } from '$lib/components/canvas/scenes/document/stories/fixtures'
+import SceneStoryHarness from '#lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
+import { draftDocument } from '#lib/components/canvas/scenes/document/stories/fixtures.js'
 const meta = {
   title: 'Mobile/Canvas/Scenes/MobileDocumentScenePanel',
   component: SceneStoryHarness,

@@ -1,11 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte'
   import { MessageSquare, Pencil, Plus, Trash2 } from 'lucide-svelte'
-  import { IconButton, Input } from '$lib/components/ui'
+  import { IconButton, Input } from '#lib/components/ui/index.js'
 
-  import { ConfirmDialog } from '$lib/components/shared/feedback'
-  import { useCanvasChatStore } from '$lib/stores/chat/canvas-chat.svelte'
-  import type { AssistantThreadEntry } from '$lib/stores/chat/canvas-assistant/types'
+  import { ConfirmDialog } from '#lib/components/shared/feedback/index.js'
+  import { useCanvasChatStore } from '#lib/stores/chat/canvas-chat.svelte.js'
+  import type { AssistantThreadEntry } from '#lib/stores/chat/canvas-assistant/types.js'
 
   const store = useCanvasChatStore()
 

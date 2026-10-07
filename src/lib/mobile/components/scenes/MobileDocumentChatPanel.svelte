@@ -8,7 +8,7 @@
     LoaderCircle,
     Sparkles
   } from 'lucide-svelte'
-  import { getApiHeaders } from '$lib/api-client'
+  import { getApiHeaders } from '#lib/api-client.js'
   import {
     asParts,
     isWebSearchPart,
@@ -18,17 +18,17 @@
     readContextPart,
     sourceUrlPart,
     writeDocumentPart
-  } from '$lib/scenes/chat-parts'
-  import { renderMarkdown } from '$lib/scenes/markdown'
-  import type { SceneMessage } from '$lib/scenes/schema'
+  } from '#lib/scenes/chat-parts.js'
+  import { renderMarkdown } from '#lib/scenes/markdown.js'
+  import type { SceneMessage } from '#lib/scenes/schema.js'
   import type {
     DisplayMessage,
     DraftToolPart,
     SceneActivity,
     SceneActivityKind
-  } from '$lib/scenes/types'
-  import MobileCanvasChatComposer from '$lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
-  import { VirtualizedMessageList } from '$lib/components/shared/collections'
+  } from '#lib/scenes/types.js'
+  import MobileCanvasChatComposer from '#lib/mobile/components/chat/MobileCanvasChatComposer.svelte'
+  import { VirtualizedMessageList } from '#lib/components/shared/collections/index.js'
 
   let {
     initialMessages,

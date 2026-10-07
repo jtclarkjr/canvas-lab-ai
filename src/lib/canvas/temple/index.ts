@@ -1,11 +1,11 @@
-import { makeAnchorBinding } from '$lib/canvas/diagram-utils'
+import { makeAnchorBinding } from '#lib/canvas/diagram-utils.js'
 import { diagramTemplateSpecs } from './consts'
 import type {
   AnchorPosition,
   DiagramConnector,
   DiagramShape,
   Point
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import type {
   BuildDiagramTemplateOptions,
   BuiltDiagramTemplate,

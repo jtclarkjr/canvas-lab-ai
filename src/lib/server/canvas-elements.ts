@@ -5,10 +5,10 @@ import {
   type CanvasElement,
   type CanvasElementRow,
   type ListElementsResponse
-} from '$lib/workspace/schema'
-import { hasConnectorBindingToAnyScene } from '$lib/canvas/diagram-utils'
-import type { Database } from '$lib/server/database.types'
-import { canvasElementToConnector } from '$lib/workspace/element-mapping'
+} from '#lib/workspace/schema.js'
+import { hasConnectorBindingToAnyScene } from '#lib/canvas/diagram-utils.js'
+import type { Database } from '#lib/server/database.types.js'
+import { canvasElementToConnector } from '#lib/workspace/element-mapping.js'
 
 type ListCanvasElementsOptions = {
   excludeSceneBoundConnectors?: boolean

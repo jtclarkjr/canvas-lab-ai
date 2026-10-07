@@ -1,22 +1,22 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   conferenceRoomName,
   conferenceStatusResponseSchema
-} from '$lib/conference/schema'
+} from '#lib/conference/schema.js'
 import {
   handleApiError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   endOpenCallSessions,
   findOpenCallSession,
   loadCallSessionResponse
-} from '$lib/server/call-sessions'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { getRoomService } from '$lib/server/livekit'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/call-sessions.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { getRoomService } from '#lib/server/livekit.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -53,7 +53,7 @@ export const GET: RequestHandler = async (event) =>
         await endOpenCallSessions(supabase, canvasId)
       }
 
-      return json(
+      return Response.json(
         conferenceStatusResponseSchema.parse({
           active: participants.length > 0,
           count: participants.length,

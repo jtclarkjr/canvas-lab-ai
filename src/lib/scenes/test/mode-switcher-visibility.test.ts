@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test'
 import { render } from 'svelte/server'
-import CanvasWorkspace from '$lib/components/canvas/workspace/CanvasWorkspace.svelte'
-import WorkflowLayer from '$lib/components/canvas/workflows/WorkflowLayer.svelte'
-import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
-import type { CanvasElement } from '$lib/workspace/schema'
-import type { Scene } from '$lib/scenes/schema'
-import type { Workflow } from '$lib/workflows/schema'
+import CanvasWorkspace from '#lib/components/canvas/workspace/CanvasWorkspace.svelte'
+import WorkflowLayer from '#lib/components/canvas/workflows/WorkflowLayer.svelte'
+import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
+import type { CanvasElement } from '#lib/workspace/schema.js'
+import type { Scene } from '#lib/scenes/schema.js'
+import type { Workflow } from '#lib/workflows/schema.js'
 
 // The Editor/Scenes/Workflows mode switcher is navigation: readers can switch
 // modes, while edit affordances stay gated separately.

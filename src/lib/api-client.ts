@@ -1,5 +1,5 @@
 import { z, ZodError } from 'zod'
-import { getAccessToken } from '$lib/auth/session-service'
+import { getAccessToken } from '#lib/auth/session-service.js'
 
 export const apiErrorSchema = z.object({
   message: z.string(),

@@ -5,17 +5,17 @@ import { mount, tick, unmount } from 'svelte'
 import CallSessionsDrawer from '../CallSessionsDrawer.svelte'
 import CanvasHistoryDrawer from '../CanvasHistoryDrawer.svelte'
 
-vi.mock('$lib/auth/session-store', () => ({
+vi.mock('#lib/auth/session-store.js', () => ({
   supabase: null
 }))
 
-vi.mock('$lib/conference/api', () => ({
+vi.mock('#lib/conference/api.js', () => ({
   getCallSession: vi.fn(),
   listCallSessions: vi.fn().mockResolvedValue({ items: [] }),
   reconcileCallSession: vi.fn()
 }))
 
-vi.mock('$lib/workspace/api', () => ({
+vi.mock('#lib/workspace/api.js', () => ({
   listCanvasHistory: vi.fn().mockResolvedValue({
     items: [],
     nextBefore: null

@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vite-plus/test'
-import type { Command } from '$lib/canvas/commands/types'
-import type { DrawFormatting, Path, Point } from '$lib/canvas/types'
-import { createWorkspaceFormattingStore } from '$lib/stores/workspace/formatting.svelte'
-import type { SurfaceCtx } from '$lib/stores/workspace/surface-interactions/context/types'
+import type { Command } from '#lib/canvas/commands/types.js'
+import type { DrawFormatting, Path, Point } from '#lib/canvas/types.js'
+import { createWorkspaceFormattingStore } from '#lib/stores/workspace/formatting.svelte.js'
+import type { SurfaceCtx } from '#lib/stores/workspace/surface-interactions/context/types.js'
 import {
   setDrawColor,
   setDrawWidth,
   setHighlighterOpacity,
   toggleHighlighter
-} from '$lib/stores/workspace/surface-interactions/formatting'
-import type { UpsertElementInput } from '$lib/workspace/schema'
+} from '#lib/stores/workspace/surface-interactions/formatting.js'
+import type { UpsertElementInput } from '#lib/workspace/schema.js'
 
 function makePath(overrides: Partial<Path> = {}): Path {
   return {

@@ -15,26 +15,26 @@
     deleteSceneDocument,
     listSceneMessages,
     updateSceneDocument
-  } from '$lib/scenes/api'
-  import { reconcileActiveDocumentId } from '$lib/scenes/document-selection'
+  } from '#lib/scenes/api.js'
+  import { reconcileActiveDocumentId } from '#lib/scenes/document-selection.js'
   import {
     markdownDocumentContentSchema,
     type Scene,
     type SceneDocumentListItem,
     type SceneMessage
-  } from '$lib/scenes/schema'
-  import { defaultModelId, isKnownModelId } from '$lib/scenes/models'
-  import type { SceneActivity, SceneActivityKind } from '$lib/scenes/types'
-  import type { DraftToolPart } from '$lib/scenes/types'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import { useSceneDocumentsStore } from '$lib/stores/scenes/documents.svelte'
-  import { ConfirmDialog } from '$lib/components/shared/feedback'
-  import DocumentChatPanel from '$lib/components/canvas/scenes/document/DocumentChatPanel.svelte'
-  import DocumentComposer from '$lib/components/canvas/scenes/document/DocumentComposer.svelte'
-  import DocumentEditorView from '$lib/components/canvas/scenes/document/DocumentEditorView.svelte'
-  import DocumentLivePreview from '$lib/components/canvas/scenes/document/DocumentLivePreview.svelte'
-  import DocumentListPanel from '$lib/components/canvas/scenes/document/DocumentListPanel.svelte'
-  import NotesSceneView from '$lib/components/canvas/scenes/notes/NotesSceneView.svelte'
+  } from '#lib/scenes/schema.js'
+  import { defaultModelId, isKnownModelId } from '#lib/scenes/models.js'
+  import type { SceneActivity, SceneActivityKind } from '#lib/scenes/types.js'
+  import type { DraftToolPart } from '#lib/scenes/types.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import { useSceneDocumentsStore } from '#lib/stores/scenes/documents.svelte.js'
+  import { ConfirmDialog } from '#lib/components/shared/feedback/index.js'
+  import DocumentChatPanel from '#lib/components/canvas/scenes/document/DocumentChatPanel.svelte'
+  import DocumentComposer from '#lib/components/canvas/scenes/document/DocumentComposer.svelte'
+  import DocumentEditorView from '#lib/components/canvas/scenes/document/DocumentEditorView.svelte'
+  import DocumentLivePreview from '#lib/components/canvas/scenes/document/DocumentLivePreview.svelte'
+  import DocumentListPanel from '#lib/components/canvas/scenes/document/DocumentListPanel.svelte'
+  import NotesSceneView from '#lib/components/canvas/scenes/notes/NotesSceneView.svelte'
 
   // Module-level cache so reopening a document's chat thread mounts
   // instantly; fresh data still loads in the background for the next mount.

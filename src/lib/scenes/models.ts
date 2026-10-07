@@ -1,4 +1,4 @@
-import type { ModelOption } from '$lib/scenes/types'
+import type { ModelOption } from '#lib/scenes/types.js'
 
 // Model catalog: the single data source for model ids. The client picker
 // renders these options; the server AI registry maps the ids to provider

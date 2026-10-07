@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Ellipsis, FileText, Link, UserPlus } from 'lucide-svelte'
-  import { Popover } from '$lib/components/ui'
-  import { toast } from '$lib/stores/shared/toast.svelte'
-  import { roleAtLeast, type CanvasRole } from '$lib/canvas/roles'
+  import { Popover } from '#lib/components/ui/index.js'
+  import { toast } from '#lib/stores/shared/toast.svelte.js'
+  import { roleAtLeast, type CanvasRole } from '#lib/canvas/roles.js'
 
   let {
     canvasId,

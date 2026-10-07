@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { diagramTemplates } from '$lib/canvas/temple/consts'
-  import type { DiagramTemplateId } from '$lib/canvas/temple/types'
+  import { diagramTemplates } from '#lib/canvas/temple/consts.js'
+  import type { DiagramTemplateId } from '#lib/canvas/temple/types.js'
 
   let { onTemplateInsert, onClose } = $props<{
     onTemplateInsert: (templateId: DiagramTemplateId) => void

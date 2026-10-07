@@ -2,11 +2,11 @@
   import { Database, GitBranch, Minimize2, Trash2 } from 'lucide-svelte'
   import { cubicOut } from 'svelte/easing'
   import { scale } from 'svelte/transition'
-  import type { Workflow, WorkflowDefinition } from '$lib/workflows/schema'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
-  import DatabaseGraph from '$lib/components/canvas/workflows/database/DatabaseGraph.svelte'
-  import WorkflowGraph from '$lib/components/canvas/workflows/WorkflowGraph.svelte'
-  import WorkflowTitleEditor from '$lib/components/canvas/workflows/WorkflowTitleEditor.svelte'
+  import type { Workflow, WorkflowDefinition } from '#lib/workflows/schema.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
+  import DatabaseGraph from '#lib/components/canvas/workflows/database/DatabaseGraph.svelte'
+  import WorkflowGraph from '#lib/components/canvas/workflows/WorkflowGraph.svelte'
+  import WorkflowTitleEditor from '#lib/components/canvas/workflows/WorkflowTitleEditor.svelte'
 
   let {
     workflow,

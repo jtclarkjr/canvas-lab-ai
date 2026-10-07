@@ -1,5 +1,5 @@
 import type { ContextDocumentRef } from '../types'
-import basePromptMarkdown from '$lib/ai/prompts/markdown/canvas-assistant.md?raw'
+import basePromptMarkdown from '#lib/ai/prompts/markdown/canvas-assistant.md?raw'
 
 const basePrompt = basePromptMarkdown.trim()
 

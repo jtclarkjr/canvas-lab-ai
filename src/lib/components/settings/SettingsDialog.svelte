@@ -1,18 +1,21 @@
 <script lang="ts">
   import { page } from '$app/state'
-  import { getSignedInAccountUser } from '$lib/auth/account-user'
-  import { getUserAvatarUrl, getUserDisplayName } from '$lib/auth/user-profile'
-  import SettingsAiUsagePanel from '$lib/components/settings/SettingsAiUsagePanel.svelte'
-  import SettingsGeneralPanel from '$lib/components/settings/SettingsGeneralPanel.svelte'
+  import { getSignedInAccountUser } from '#lib/auth/account-user.js'
+  import {
+    getUserAvatarUrl,
+    getUserDisplayName
+  } from '#lib/auth/user-profile.js'
+  import SettingsAiUsagePanel from '#lib/components/settings/SettingsAiUsagePanel.svelte'
+  import SettingsGeneralPanel from '#lib/components/settings/SettingsGeneralPanel.svelte'
   import {
     getSettingsPanelId,
     getSettingsTabId,
     settingsTabs
-  } from '$lib/components/settings/tabs'
-  import type { SettingsTabId } from '$lib/components/settings/tabs/types'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { settingsDialog } from '$lib/stores/shared/settings-dialog.svelte'
-  import { Dialog } from '$lib/components/ui'
+  } from '#lib/components/settings/tabs.js'
+  import type { SettingsTabId } from '#lib/components/settings/tabs/types.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { settingsDialog } from '#lib/stores/shared/settings-dialog.svelte.js'
+  import { Dialog } from '#lib/components/ui/index.js'
 
   const user = $derived(
     getSignedInAccountUser(session.data?.user ?? null, page.data.user ?? null)

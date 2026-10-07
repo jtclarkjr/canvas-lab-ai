@@ -1,10 +1,10 @@
-import { loadDevicePrefs, saveDevicePrefs } from '$lib/conference/helpers'
+import { loadDevicePrefs, saveDevicePrefs } from '#lib/conference/helpers.js'
 import type {
   ConferenceDevices,
   DeviceKind,
   DevicePrefs
-} from '$lib/conference/types'
-import { toast } from '$lib/stores/shared/toast.svelte'
+} from '#lib/conference/types.js'
+import { toast } from '#lib/stores/shared/toast.svelte.js'
 
 type ConferenceDevicesInput = {
   // Applies a chosen device to the live room, when one exists.

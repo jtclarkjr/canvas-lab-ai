@@ -5,16 +5,16 @@ import {
   promptAiUsageLimits,
   promptAiUnlimitedFeatureLabels,
   type PromptAiUsageResponse
-} from '$lib/ai/usage'
-import type { PromptAiUsageFeature } from '$lib/ai/usage/types'
+} from '#lib/ai/usage.js'
+import type { PromptAiUsageFeature } from '#lib/ai/usage/types.js'
 import {
   isPromptModelLimited,
   isPromptModelUnlimited,
   modelOptions
-} from '$lib/scenes/models'
-import { AppError, internalServerError } from '$lib/server/api-error'
-import type { Database } from '$lib/server/database.types'
-import { logServerError } from '$lib/server/logger'
+} from '#lib/scenes/models.js'
+import { AppError, internalServerError } from '#lib/server/api-error.js'
+import type { Database } from '#lib/server/database.types.js'
+import { logServerError } from '#lib/server/logger.js'
 
 type Supabase = SupabaseClient<Database>
 

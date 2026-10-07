@@ -1,26 +1,25 @@
-import { afterEach, describe, expect, it } from 'vite-plus/test'
-import { env as privateEnv } from '$env/dynamic/private'
+import { beforeEach, describe, expect, it, vi } from 'vite-plus/test'
 import {
   envFlag,
   requireWorkflowsEnabled,
   workflowsEnabled
-} from '$lib/server/features'
+} from '#lib/server/features.js'
 
-const mutableEnv = privateEnv as Record<string, string | undefined>
-const originalWorkflowFlag = mutableEnv.WORKFLOW_ENABLED
+const privateEnv = vi.hoisted(() => ({ WORKFLOW_ENABLED: '' }))
+
+vi.mock('$app/env/private', () => ({
+  get WORKFLOW_ENABLED() {
+    return privateEnv.WORKFLOW_ENABLED
+  }
+}))
 
 function setWorkflowFlag(value: string | undefined) {
-  if (value === undefined) {
-    delete mutableEnv.WORKFLOW_ENABLED
-    return
-  }
-
-  mutableEnv.WORKFLOW_ENABLED = value
+  privateEnv.WORKFLOW_ENABLED = value ?? ''
 }
 
 describe('feature flags', () => {
-  afterEach(() => {
-    setWorkflowFlag(originalWorkflowFlag)
+  beforeEach(() => {
+    setWorkflowFlag(undefined)
   })
 
   it('parses falsey environment flag values', () => {

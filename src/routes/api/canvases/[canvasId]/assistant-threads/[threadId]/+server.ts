@@ -1,11 +1,11 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   assistantThreadResponseSchema,
   assistantThreadRowSchema,
   assistantThreadRowToThread,
   updateAssistantThreadInputSchema
-} from '$lib/chat/schema'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+} from '#lib/chat/schema.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   handleApiError,
   notFound,
@@ -13,9 +13,9 @@ import {
   parseJsonBody,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 export const PATCH: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -60,7 +60,7 @@ export const PATCH: RequestHandler = async (event) =>
         })
       }
 
-      return json(
+      return Response.json(
         assistantThreadResponseSchema.parse({
           item: assistantThreadRowToThread(assistantThreadRowSchema.parse(data))
         })
@@ -107,7 +107,7 @@ export const DELETE: RequestHandler = async (event) =>
         })
       }
 
-      return json({ ok: true })
+      return Response.json({ ok: true })
     } catch (error) {
       return handleApiError(error, event.request)
     }

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Handle, Position, useSvelteFlow } from '@xyflow/svelte'
   import { KeyRound, Table2, Trash2 } from 'lucide-svelte'
-  import { databaseColumnHandleId } from '$lib/workflows/database/definition'
+  import { databaseColumnHandleId } from '#lib/workflows/database/definition.js'
   import type {
     DatabaseFlowEdge,
     DatabaseFlowNode,
     DatabaseTableNodeData
-  } from '$lib/workflows/database/types'
+  } from '#lib/workflows/database/types.js'
 
   let {
     id,

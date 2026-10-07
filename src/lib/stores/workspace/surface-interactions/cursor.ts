@@ -3,12 +3,12 @@ import {
   findConnectorEndpointAtPoint,
   findShapeHandleAtPoint,
   getShapeResizeCursor
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 import {
   findPathHandleAtPoint,
   findTextHandleAtPoint,
   getTextResizeCursor
-} from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/drawing-utils.js'
 import type { ActiveInteraction, HitElement, Point } from './types'
 import type { SurfaceCtx } from './context/types'
 import { findTopElementAtPoint } from './element-utils'

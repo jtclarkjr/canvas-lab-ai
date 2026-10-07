@@ -1,7 +1,7 @@
 <script lang="ts">
   import NotesSceneView from '../NotesSceneView.svelte'
   import NotesToolbar from '../NotesToolbar.svelte'
-  import type { Tool } from '$lib/canvas/types'
+  import type { Tool } from '#lib/canvas/types.js'
   import { draftDocument } from '../../document/stories/fixtures'
 
   let { target } = $props<{ target: 'toolbar' | 'view' }>()

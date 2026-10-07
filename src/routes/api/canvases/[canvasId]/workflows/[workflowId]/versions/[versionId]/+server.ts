@@ -1,21 +1,21 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
-import { requireCanvasRole } from '$lib/server/canvas-access'
-import { toCanvasWorkflow } from '$lib/server/canvas-workflows'
+import type { RequestHandler } from '@sveltejs/kit'
+import { requireCanvasRole } from '#lib/server/canvas-access.js'
+import { toCanvasWorkflow } from '#lib/server/canvas-workflows.js'
 import {
   assertWorkflowModify,
   requireWorkflow,
   requireWorkflowVersion
-} from '$lib/server/workflow-access'
+} from '#lib/server/workflow-access.js'
 import {
   handleApiError,
   requireRouteParam,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { requireWorkflowsEnabled } from '$lib/server/features'
-import { toDbJson } from '$lib/server/json'
-import { workflowResponseSchema } from '$lib/workflows/schema'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { requireWorkflowsEnabled } from '#lib/server/features.js'
+import { toDbJson } from '#lib/server/json.js'
+import { workflowResponseSchema } from '#lib/workflows/schema.js'
 
 export const POST: RequestHandler = async (event) =>
   withRateLimit(async () => {
@@ -69,7 +69,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to restore workflow version')
       }
 
-      return json(
+      return Response.json(
         workflowResponseSchema.parse({ item: toCanvasWorkflow(data) })
       )
     } catch (error) {

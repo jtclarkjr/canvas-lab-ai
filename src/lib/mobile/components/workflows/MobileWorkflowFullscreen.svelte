@@ -7,20 +7,20 @@
     Trash2,
     Workflow
   } from 'lucide-svelte'
-  import { BottomSheet } from '$lib/components/ui'
-  import type { Scene } from '$lib/scenes/schema'
-  import type { SceneDocumentsStore } from '$lib/stores/scenes/documents/types'
+  import { BottomSheet } from '#lib/components/ui/index.js'
+  import type { Scene } from '#lib/scenes/schema.js'
+  import type { SceneDocumentsStore } from '#lib/stores/scenes/documents/types.js'
   import type {
     UpdateWorkflowInput,
     Workflow as CanvasWorkflow,
     WorkflowDefinition,
     WorkflowSettings
-  } from '$lib/workflows/schema'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
-  import { workflowDefinitionToYaml } from '$lib/workflows/definition'
-  import MobileDatabaseGraph from '$lib/mobile/components/workflows/MobileDatabaseGraph.svelte'
-  import MobileWorkflowGraph from '$lib/mobile/components/workflows/MobileWorkflowGraph.svelte'
-  import MobileWorkflowSheet from '$lib/mobile/components/workflows/MobileWorkflowSheet.svelte'
+  } from '#lib/workflows/schema.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
+  import { workflowDefinitionToYaml } from '#lib/workflows/definition.js'
+  import MobileDatabaseGraph from '#lib/mobile/components/workflows/MobileDatabaseGraph.svelte'
+  import MobileWorkflowGraph from '#lib/mobile/components/workflows/MobileWorkflowGraph.svelte'
+  import MobileWorkflowSheet from '#lib/mobile/components/workflows/MobileWorkflowSheet.svelte'
 
   type SheetTab = 'overview' | 'code' | 'notes' | 'versions' | 'assistant'
 

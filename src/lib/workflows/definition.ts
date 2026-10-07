@@ -5,8 +5,11 @@ import {
   type WorkflowGraphDefinition,
   type WorkflowStep,
   type WorkflowStepType
-} from '$lib/workflows/schema'
-import type { WorkflowFlowEdge, WorkflowFlowNode } from '$lib/workflows/types'
+} from '#lib/workflows/schema.js'
+import type {
+  WorkflowFlowEdge,
+  WorkflowFlowNode
+} from '#lib/workflows/types.js'
 
 const DEFAULT_NODE_GAP = 220
 

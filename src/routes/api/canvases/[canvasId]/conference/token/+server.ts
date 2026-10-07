@@ -1,24 +1,24 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import { AccessToken } from 'livekit-server-sdk'
-import { colorFromId } from '$lib/canvas/helpers/color-from-id'
+import { colorFromId } from '#lib/canvas/helpers/color-from-id.js'
 import {
   conferenceRoomName,
   conferenceTokenResponseSchema
-} from '$lib/conference/schema'
+} from '#lib/conference/schema.js'
 import {
   handleApiError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   endOpenCallSessions,
   getOrCreateActiveCallSession,
   loadCallSessionResponse
-} from '$lib/server/call-sessions'
-import { requireCanvasMember } from '$lib/server/canvas-access'
-import { getLiveKitConfig, getRoomService } from '$lib/server/livekit'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/call-sessions.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
+import { getLiveKitConfig, getRoomService } from '#lib/server/livekit.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 // Without explicit creation LiveKit auto-creates rooms with a 5-minute
 // empty timeout, leaving ended calls looking active. Close them shortly
@@ -92,7 +92,7 @@ export const POST: RequestHandler = async (event) =>
         canUpdateOwnMetadata: true
       })
 
-      return json(
+      return Response.json(
         conferenceTokenResponseSchema.parse({
           token: await token.toJwt(),
           url,

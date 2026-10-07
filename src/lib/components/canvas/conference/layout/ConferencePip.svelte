@@ -16,12 +16,12 @@
     anchorFor,
     clampToViewport,
     nearestCorner
-  } from '$lib/conference/helpers'
-  import type { Point } from '$lib/canvas/types'
-  import type { Size } from '$lib/conference/types'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
-  import ConferenceParticipantStrip from '$lib/components/canvas/conference/tiles/ConferenceParticipantStrip.svelte'
-  import { attachTrack } from '$lib/components/canvas/conference/media-actions'
+  } from '#lib/conference/helpers.js'
+  import type { Point } from '#lib/canvas/types.js'
+  import type { Size } from '#lib/conference/types.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
+  import ConferenceParticipantStrip from '#lib/components/canvas/conference/tiles/ConferenceParticipantStrip.svelte'
+  import { attachTrack } from '#lib/components/canvas/conference/media-actions.js'
 
   const store = useCanvasConferenceStore()
 

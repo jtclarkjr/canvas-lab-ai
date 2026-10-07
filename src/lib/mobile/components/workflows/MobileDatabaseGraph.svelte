@@ -10,10 +10,10 @@
   } from '@xyflow/svelte'
   import '@xyflow/svelte/dist/style.css'
   import { Database, Plus } from 'lucide-svelte'
-  import DeletableSmoothStepEdge from '$lib/components/canvas/workflows/DeletableSmoothStepEdge.svelte'
-  import GraphInteractivityStatus from '$lib/components/canvas/workflows/GraphInteractivityStatus.svelte'
-  import MobileDatabaseTableNode from '$lib/mobile/components/workflows/MobileDatabaseTableNode.svelte'
-  import { theme } from '$lib/stores/shared/theme.svelte'
+  import DeletableSmoothStepEdge from '#lib/components/canvas/workflows/DeletableSmoothStepEdge.svelte'
+  import GraphInteractivityStatus from '#lib/components/canvas/workflows/GraphInteractivityStatus.svelte'
+  import MobileDatabaseTableNode from '#lib/mobile/components/workflows/MobileDatabaseTableNode.svelte'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
   import {
     createDatabaseRelation,
     createDatabaseTable,
@@ -22,12 +22,12 @@
     databaseDefinitionToFlow,
     isDatabaseFlowDefinition,
     parseDatabaseColumnHandleId
-  } from '$lib/workflows/database/definition'
+  } from '#lib/workflows/database/definition.js'
   import type {
     DatabaseFlowEdge,
     DatabaseFlowNode
-  } from '$lib/workflows/database/types'
-  import type { Workflow, WorkflowDefinition } from '$lib/workflows/schema'
+  } from '#lib/workflows/database/types.js'
+  import type { Workflow, WorkflowDefinition } from '#lib/workflows/schema.js'
 
   let { workflow, canEdit, lockedLabel, onDefinitionChange } = $props<{
     workflow: Workflow

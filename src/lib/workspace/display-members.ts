@@ -1,5 +1,5 @@
-import type { DisplayMember, WorkspaceMember } from '$lib/workspace/types'
-import { getPresenceIdentity } from '$lib/workspace/presence-identity'
+import type { DisplayMember, WorkspaceMember } from '#lib/workspace/types.js'
+import { getPresenceIdentity } from '#lib/workspace/presence-identity.js'
 
 export function displayMembers(
   members: Record<string, WorkspaceMember>,

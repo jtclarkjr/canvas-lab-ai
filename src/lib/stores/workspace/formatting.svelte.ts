@@ -12,7 +12,7 @@ import type {
   StrokeStyle,
   TextElement,
   TextFormatting
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 
 export function createWorkspaceFormattingStore() {
   let textFormatting = $state<TextFormatting>({

@@ -2,7 +2,7 @@ import {
   textElementToData,
   findTextAtPoint,
   isPointNearPath
-} from '$lib/canvas/drawing-utils'
+} from '#lib/canvas/drawing-utils.js'
 import {
   cloneEndpoint,
   connectorToData,
@@ -11,7 +11,7 @@ import {
   findShapeAtPoint,
   isPointInAnchorTarget,
   shapeToData
-} from '$lib/canvas/diagram-utils'
+} from '#lib/canvas/diagram-utils.js'
 import type {
   CanvasDrawableElement,
   CanvasElementType,

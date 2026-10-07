@@ -9,7 +9,7 @@
     Type
   } from 'lucide-svelte'
   import { slide } from 'svelte/transition'
-  import type { Tool } from '$lib/canvas/types'
+  import type { Tool } from '#lib/canvas/types.js'
 
   let {
     selectedTool,

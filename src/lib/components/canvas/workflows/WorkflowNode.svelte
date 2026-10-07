@@ -13,7 +13,7 @@
     WorkflowFlowEdge,
     WorkflowFlowNode,
     WorkflowNodeData
-  } from '$lib/workflows/types'
+  } from '#lib/workflows/types.js'
 
   let {
     id,

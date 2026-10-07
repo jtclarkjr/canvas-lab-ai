@@ -1,13 +1,13 @@
-import databaseFinalInstructionMarkdown from '$lib/ai/prompts/markdown/workflow/database-final-instruction.md?raw'
-import databaseSystemPromptMarkdown from '$lib/ai/prompts/markdown/workflow/database-system.md?raw'
-import workflowFinalInstructionMarkdown from '$lib/ai/prompts/markdown/workflow/workflow-final-instruction.md?raw'
-import workflowSystemPromptMarkdown from '$lib/ai/prompts/markdown/workflow/workflow-system.md?raw'
-import { defaultDatabaseDefinition } from '$lib/workflows/database/definition'
-import { defaultWorkflowDefinition } from '$lib/workflows/definition'
+import databaseFinalInstructionMarkdown from '#lib/ai/prompts/markdown/workflow/database-final-instruction.md?raw'
+import databaseSystemPromptMarkdown from '#lib/ai/prompts/markdown/workflow/database-system.md?raw'
+import workflowFinalInstructionMarkdown from '#lib/ai/prompts/markdown/workflow/workflow-final-instruction.md?raw'
+import workflowSystemPromptMarkdown from '#lib/ai/prompts/markdown/workflow/workflow-system.md?raw'
+import { defaultDatabaseDefinition } from '#lib/workflows/database/definition.js'
+import { defaultWorkflowDefinition } from '#lib/workflows/definition.js'
 import type {
   WorkflowDefinition,
   WorkflowFlowType
-} from '$lib/workflows/schema'
+} from '#lib/workflows/schema.js'
 
 const workflowSystemPrompt = workflowSystemPromptMarkdown.trim()
 const workflowFinalInstruction = workflowFinalInstructionMarkdown.trim()

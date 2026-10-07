@@ -1,13 +1,13 @@
 <script lang="ts">
   import '../app.css'
-  import favicon from '$lib/assets/favicon.svg'
-  import { dev } from '$app/environment'
+  import favicon from '#lib/assets/favicon.svg'
+  import { dev } from '$app/env'
   import { injectAnalytics } from '@vercel/analytics/sveltekit'
-  import AuthControls from '$lib/components/auth/AuthControls.svelte'
-  import SettingsDialog from '$lib/components/settings/SettingsDialog.svelte'
-  import { ToastViewport } from '$lib/components/shared/feedback'
-  import { session } from '$lib/stores/shared/session.svelte'
-  import { theme } from '$lib/stores/shared/theme.svelte'
+  import AuthControls from '#lib/components/auth/AuthControls.svelte'
+  import SettingsDialog from '#lib/components/settings/SettingsDialog.svelte'
+  import { ToastViewport } from '#lib/components/shared/feedback/index.js'
+  import { session } from '#lib/stores/shared/session.svelte.js'
+  import { theme } from '#lib/stores/shared/theme.svelte.js'
   import { page } from '$app/state'
   import { onMount } from 'svelte'
 
@@ -23,6 +23,7 @@
     '/usage-policy',
     '/privacy-policy'
   ]
+
   const hideHeader = $derived(
     headerlessRoutes.includes(page.url.pathname) ||
       page.url.pathname.startsWith('/canvas/')

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Session, SessionListener, User } from '$lib/auth/types'
-import { getSupabaseAuthCookieName } from '$lib/auth/supabase-cookie'
-import { getSupabaseTokensFromCookieHeader } from '$lib/auth/supabase-token-cookie'
+import type { Session, SessionListener, User } from '#lib/auth/types.js'
+import { getSupabaseAuthCookieName } from '#lib/auth/supabase-cookie.js'
+import { getSupabaseTokensFromCookieHeader } from '#lib/auth/supabase-token-cookie.js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
 const supabasePublishableKey =

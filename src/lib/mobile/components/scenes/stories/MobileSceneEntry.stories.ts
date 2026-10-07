@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/sveltekit'
 import { expect, userEvent, within } from 'storybook/test'
-import SceneStoryHarness from '$lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
+import SceneStoryHarness from '#lib/components/canvas/scenes/stories/SceneStoryHarness.svelte'
 const meta = {
   title: 'Mobile/Canvas/Scenes/MobileSceneEntry',
   component: SceneStoryHarness,

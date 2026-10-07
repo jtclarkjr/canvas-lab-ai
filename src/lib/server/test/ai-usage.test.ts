@@ -1,11 +1,11 @@
 import type { LanguageModelUsage } from 'ai'
 import { describe, expect, it } from 'vite-plus/test'
-import { AppError } from '$lib/server/api-error'
+import { AppError } from '#lib/server/api-error.js'
 import {
   assertPromptAiUsageAvailable,
   buildPromptAiUsageSummary,
   normalizeLanguageModelUsage
-} from '$lib/server/ai-usage'
+} from '#lib/server/ai-usage.js'
 
 function usage(partial: Partial<LanguageModelUsage>): LanguageModelUsage {
   return partial as LanguageModelUsage

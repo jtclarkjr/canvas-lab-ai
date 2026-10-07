@@ -5,10 +5,10 @@ import {
   type CanvasHistoryCommandType,
   type CanvasHistoryElementType,
   type CanvasMutationAuditInput
-} from '$lib/workspace/schema'
-import type { Database } from '$lib/server/database.types'
-import type { RequestUser } from '$lib/server/types'
-import { toDbJson } from '$lib/server/json'
+} from '#lib/workspace/schema.js'
+import type { Database } from '#lib/server/database.types.js'
+import type { RequestUser } from '#lib/server/types.js'
+import { toDbJson } from '#lib/server/json.js'
 
 type ElementMutationAction = Extract<
   CanvasHistoryAction,

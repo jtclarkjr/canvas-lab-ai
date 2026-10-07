@@ -2,12 +2,12 @@
 // typed, but messages arriving over realtime or loaded from the database
 // carry `parts: unknown[]` — these helpers narrow both uniformly.
 
-import type { MessageAuthor } from '$lib/scenes/schema'
+import type { MessageAuthor } from '#lib/scenes/schema.js'
 import type {
   ChatPartLike,
   DisplayMessage,
   DraftToolPart
-} from '$lib/scenes/types'
+} from '#lib/scenes/types.js'
 
 // Author/model attribution rides on message metadata (stamped server-side
 // at persist time; local messages have none and belong to the viewer).

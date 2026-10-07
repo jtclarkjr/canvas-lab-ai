@@ -8,26 +8,26 @@
     RefreshCw,
     VolumeX
   } from 'lucide-svelte'
-  import { supabase } from '$lib/auth/session-store'
+  import { supabase } from '#lib/auth/session-store.js'
   import {
     getCallSession,
     listCallSessions,
     reconcileCallSession
-  } from '$lib/conference/api'
+  } from '#lib/conference/api.js'
   import {
     isTerminalTranscriptStatus,
     mergeCallSessionRealtimeRow,
     transcriptReconciliationDelay,
     transcriptWatchdogKey,
     type CallSessionRealtimeRow
-  } from '$lib/conference/call-session-realtime'
-  import { groupTranscriptSegments } from '$lib/conference/transcript'
+  } from '#lib/conference/call-session-realtime.js'
+  import { groupTranscriptSegments } from '#lib/conference/transcript.js'
   import type {
     CallSession,
     CallTranscriptSegment,
     CallTranscriptStatus
-  } from '$lib/conference/schema'
-  import { Drawer, IconButton } from '$lib/components/ui'
+  } from '#lib/conference/schema.js'
+  import { Drawer, IconButton } from '#lib/components/ui/index.js'
 
   let { open = $bindable(false), canvasId } = $props<{
     open?: boolean

@@ -7,9 +7,9 @@
     Trash2
   } from 'lucide-svelte'
   import { fade, scale } from 'svelte/transition'
-  import CanvasTilePreview from '$lib/components/canvas/home/CanvasTilePreview.svelte'
-  import { Card } from '$lib/components/ui'
-  import type { Canvas } from '$lib/canvas/schema'
+  import CanvasTilePreview from '#lib/components/canvas/home/CanvasTilePreview.svelte'
+  import { Card } from '#lib/components/ui/index.js'
+  import type { Canvas } from '#lib/canvas/schema.js'
 
   let {
     canvas,

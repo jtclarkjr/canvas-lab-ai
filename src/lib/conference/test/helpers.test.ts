@@ -7,7 +7,7 @@ import {
   pickFeatured,
   PIP_MARGIN,
   PIP_TOP_MARGIN
-} from '$lib/conference/helpers'
+} from '#lib/conference/helpers.js'
 
 const viewport = { width: 1280, height: 800 }
 const pip = { width: 288, height: 162 }

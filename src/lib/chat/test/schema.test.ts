@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vite-plus/test'
 import {
   assistantThreadTitleSchema,
   canvasAssistantRequestSchema
-} from '$lib/chat/schema'
+} from '#lib/chat/schema.js'
 
 describe('chat schema', () => {
   it('defaults canvas assistant web search and keeps UI message parts loose', () => {

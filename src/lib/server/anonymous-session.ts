@@ -1,16 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Cookies } from '@sveltejs/kit'
-import { env as privateEnv } from '$env/dynamic/private'
-import { internalServerError } from '$lib/server/api-error'
-import { requestUserFromSupabaseUser } from '$lib/server/session'
-import type { RequestSession } from '$lib/server/types'
-import { setSupabaseSessionCookie } from '$lib/server/session-cookie'
+import { SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY } from '$app/env/private'
+import { internalServerError } from '#lib/server/api-error.js'
+import { requestUserFromSupabaseUser } from '#lib/server/session.js'
+import type { RequestSession } from '#lib/server/types.js'
+import { setSupabaseSessionCookie } from '#lib/server/session-cookie.js'
 
 export async function createAnonymousRequestSession(
   cookies: Cookies
 ): Promise<RequestSession> {
-  const supabaseUrl = privateEnv.SUPABASE_URL
-  const supabasePublishableKey = privateEnv.VITE_SUPABASE_PUBLISHABLE_KEY
+  const supabaseUrl = SUPABASE_URL
+  const supabasePublishableKey = VITE_SUPABASE_PUBLISHABLE_KEY
 
   if (!supabaseUrl || !supabasePublishableKey) {
     throw internalServerError('Supabase auth is not configured.', {

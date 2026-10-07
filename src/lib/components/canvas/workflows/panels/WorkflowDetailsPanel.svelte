@@ -13,19 +13,19 @@
   import {
     createWorkflowVersion,
     listWorkflowVersions
-  } from '$lib/workflows/api'
-  import { workflowDefinitionToYaml } from '$lib/workflows/definition'
-  import { isDatabaseFlowDefinition } from '$lib/workflows/database/definition'
-  import { getWorkflowFlowTypeDefinition } from '$lib/workflows/flow-types'
-  import DatabaseSchemaPanel from '$lib/components/canvas/workflows/database/DatabaseSchemaPanel.svelte'
-  import WorkflowDraggablePanel from '$lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
-  import type { DatabaseFlowDefinition } from '$lib/workflows/database/schema'
+  } from '#lib/workflows/api.js'
+  import { workflowDefinitionToYaml } from '#lib/workflows/definition.js'
+  import { isDatabaseFlowDefinition } from '#lib/workflows/database/definition.js'
+  import { getWorkflowFlowTypeDefinition } from '#lib/workflows/flow-types.js'
+  import DatabaseSchemaPanel from '#lib/components/canvas/workflows/database/DatabaseSchemaPanel.svelte'
+  import WorkflowDraggablePanel from '#lib/components/canvas/workflows/panels/WorkflowDraggablePanel.svelte'
+  import type { DatabaseFlowDefinition } from '#lib/workflows/database/schema.js'
   import type {
     UpdateWorkflowInput,
     Workflow,
     WorkflowDefinition,
     WorkflowVersion
-  } from '$lib/workflows/schema'
+  } from '#lib/workflows/schema.js'
 
   type PanelTab = 'schema' | 'code' | 'notepad' | 'versions'
   type PanelTabOption = {

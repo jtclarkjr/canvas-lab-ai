@@ -13,8 +13,8 @@
     Wrench,
     X
   } from 'lucide-svelte'
-  import { Popover } from '$lib/components/ui'
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { Popover } from '#lib/components/ui/index.js'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
 
   const store = useCanvasConferenceStore()
   let open = $state(false)

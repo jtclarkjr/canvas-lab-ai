@@ -8,7 +8,7 @@ import {
   renumberLines,
   stripLineMarker,
   toggleListStyle
-} from '$lib/canvas/text-lists'
+} from '#lib/canvas/text-lists.js'
 
 describe('line markers', () => {
   it('detects bullet, number, and plain lines', () => {

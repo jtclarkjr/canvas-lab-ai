@@ -7,8 +7,8 @@ import {
   nextTranscriptPosition,
   transcriptFailureMessage,
   type CallSessionRow
-} from '$lib/server/call-transcript-state'
-import type { Database } from '$lib/server/database.types'
+} from '#lib/server/call-transcript-state.js'
+import type { Database } from '#lib/server/database.types.js'
 
 function sessionRow(): CallSessionRow {
   return {

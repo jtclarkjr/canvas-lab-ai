@@ -1,31 +1,31 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   badRequest,
   handleApiError,
   internalServerError,
   requireRouteParam,
   withAuth
-} from '$lib/server/api-error'
+} from '#lib/server/api-error.js'
 import {
   findOpenCallSession,
   loadCallSessionResponse,
   recordCallSessionParticipant
-} from '$lib/server/call-sessions'
+} from '#lib/server/call-sessions.js'
 import {
   claimCallTranscript,
   loadCallTranscriptSession,
   transcriptFailureMessage,
   transitionCallTranscript
-} from '$lib/server/call-transcript-state'
-import { requireCanvasMember } from '$lib/server/canvas-access'
+} from '#lib/server/call-transcript-state.js'
+import { requireCanvasMember } from '#lib/server/canvas-access.js'
 import {
   getAgentDispatchService,
   getLiveKitTranscriptionConfig,
   getRoomService
-} from '$lib/server/livekit'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { startCallTranscriptionResponseSchema } from '$lib/conference/schema'
+} from '#lib/server/livekit.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { startCallTranscriptionResponseSchema } from '#lib/conference/schema.js'
 
 const NON_RETRYABLE_STATUSES = new Set([
   'starting',
@@ -89,7 +89,7 @@ export const POST: RequestHandler = async (event) =>
       })
 
       if (NON_RETRYABLE_STATUSES.has(session.transcript_status)) {
-        return json(
+        return Response.json(
           startCallTranscriptionResponseSchema.parse({
             item: await loadCallSessionResponse(supabase, session)
           })
@@ -106,7 +106,7 @@ export const POST: RequestHandler = async (event) =>
       })
 
       if (!claimed) {
-        return json(
+        return Response.json(
           startCallTranscriptionResponseSchema.parse({
             item: await loadCallSessionResponse(supabase, startingSession)
           })
@@ -145,7 +145,7 @@ export const POST: RequestHandler = async (event) =>
           session.id
         )
 
-        return json(
+        return Response.json(
           startCallTranscriptionResponseSchema.parse({
             item: await loadCallSessionResponse(supabase, dispatchedSession)
           })

@@ -1,25 +1,25 @@
-import { json, type RequestHandler } from '@sveltejs/kit'
+import type { RequestHandler } from '@sveltejs/kit'
 import {
   canvasRowSchema,
   createCanvasInputSchema,
   createCanvasResponseSchema
-} from '$lib/canvas/schema'
+} from '#lib/canvas/schema.js'
 import {
   handleApiError,
   parseInput,
   parseJsonBody,
   withAccountAuth
-} from '$lib/server/api-error'
-import { withRateLimit } from '$lib/server/rate-limit'
-import { getSupabase } from '$lib/server/supabase'
-import { listCanvasesForUser, toCanvas } from '$lib/server/canvas-list'
+} from '#lib/server/api-error.js'
+import { withRateLimit } from '#lib/server/rate-limit.js'
+import { getSupabase } from '#lib/server/supabase.js'
+import { listCanvasesForUser, toCanvas } from '#lib/server/canvas-list.js'
 
 export const GET: RequestHandler = async (event) =>
   withRateLimit(async () => {
     try {
       const supabase = getSupabase()
       const user = withAccountAuth(event.locals.user)
-      return json(await listCanvasesForUser(supabase, user.id))
+      return Response.json(await listCanvasesForUser(supabase, user.id))
     } catch (error) {
       return handleApiError(error, event.request)
     }
@@ -44,7 +44,7 @@ export const POST: RequestHandler = async (event) =>
         throw error ?? new Error('Failed to create canvas')
       }
 
-      return json(
+      return Response.json(
         createCanvasResponseSchema.parse({
           item: toCanvas(canvasRowSchema.parse(data))
         }),

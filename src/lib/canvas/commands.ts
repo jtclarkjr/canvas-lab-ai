@@ -1,4 +1,4 @@
-import { cloneConnector, cloneShape } from '$lib/canvas/diagram-utils'
+import { cloneConnector, cloneShape } from '#lib/canvas/diagram-utils.js'
 import type {
   CanvasDrawableElement,
   CanvasElementType,
@@ -7,7 +7,7 @@ import type {
   Path,
   Point,
   TextElement
-} from '$lib/canvas/types'
+} from '#lib/canvas/types.js'
 import type {
   CreatePathCommand,
   CreateTextCommand,

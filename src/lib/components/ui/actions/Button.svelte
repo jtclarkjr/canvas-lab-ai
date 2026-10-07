@@ -21,7 +21,7 @@
 
 <script lang="ts">
   import { Button as BitsButton } from 'bits-ui'
-  import { cn } from '$lib/utils'
+  import { cn } from '#lib/utils.js'
 
   let {
     variant = 'primary',

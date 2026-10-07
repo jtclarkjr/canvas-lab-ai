@@ -1,10 +1,10 @@
-import { createCreateMultipleCommand } from '$lib/canvas/commands'
-import type { Command } from '$lib/canvas/commands/types'
-import { buildDiagramTemplate } from '$lib/canvas/temple'
+import { createCreateMultipleCommand } from '#lib/canvas/commands.js'
+import type { Command } from '#lib/canvas/commands/types.js'
+import { buildDiagramTemplate } from '#lib/canvas/temple/index.js'
 import type {
   BuiltDiagramTemplate,
   DiagramTemplateId
-} from '$lib/canvas/temple/types'
+} from '#lib/canvas/temple/types.js'
 import type {
   DiagramConnector,
   DiagramFormatting,
@@ -12,8 +12,8 @@ import type {
   EditingText,
   Point,
   Tool
-} from '$lib/canvas/types'
-import type { WorkspaceMode } from '$lib/scenes/types'
+} from '#lib/canvas/types.js'
+import type { WorkspaceMode } from '#lib/scenes/types.js'
 
 type WorkspaceTempleInput = {
   getActiveCanvasId: () => string

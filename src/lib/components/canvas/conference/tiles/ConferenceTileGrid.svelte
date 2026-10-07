@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useCanvasConferenceStore } from '$lib/stores/conference/index.svelte'
+  import { useCanvasConferenceStore } from '#lib/stores/conference/index.svelte.js'
   import ConferenceParticipantTile from './ConferenceParticipantTile.svelte'
   import ConferenceScreenTile from './ConferenceScreenTile.svelte'
 

@@ -1,5 +1,5 @@
-import { BULLET_PREFIX } from '$lib/canvas/consts'
-import type { ListStyle } from '$lib/canvas/types'
+import { BULLET_PREFIX } from '#lib/canvas/consts.js'
+import type { ListStyle } from '#lib/canvas/types.js'
 
 const NUMBER_PREFIX = /^(\d+)\. /
 

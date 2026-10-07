@@ -1,4 +1,4 @@
-import { findTextAtPoint } from '$lib/canvas/drawing-utils'
+import { findTextAtPoint } from '#lib/canvas/drawing-utils.js'
 import type { SurfaceCtx } from './context/types'
 import {
   findTopElementAtPoint,

@@ -11,9 +11,9 @@ import {
   makeShapeFromBounds,
   resizeShapeFromHandle,
   rotateShapeTowardPoint
-} from '$lib/canvas/diagram-utils'
-import type { Scene } from '$lib/scenes/schema'
-import type { DiagramFormatting, DiagramShape } from '$lib/canvas/types'
+} from '#lib/canvas/diagram-utils.js'
+import type { Scene } from '#lib/scenes/schema.js'
+import type { DiagramFormatting, DiagramShape } from '#lib/canvas/types.js'
 
 const formatting: DiagramFormatting = {
   shapeKind: 'rectangle',

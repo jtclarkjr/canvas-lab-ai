@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { UIMessage } from 'ai'
-import type { Database } from '$lib/server/database.types'
-import { toDbJson } from '$lib/server/json'
+import type { Database } from '#lib/server/database.types.js'
+import { toDbJson } from '#lib/server/json.js'
 
 type SceneRow = Database['public']['Tables']['canvas_scenes']['Row']
 

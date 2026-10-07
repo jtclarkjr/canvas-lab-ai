@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Camera } from '$lib/canvas/types'
+  import type { Camera } from '#lib/canvas/types.js'
 
   let { camera, onZoomIn, onZoomOut, onReset } = $props<{
     camera: Camera

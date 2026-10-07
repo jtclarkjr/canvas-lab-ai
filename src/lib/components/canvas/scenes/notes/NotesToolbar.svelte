@@ -10,9 +10,9 @@
     Type,
     Undo2
   } from 'lucide-svelte'
-  import { Button, IconButton } from '$lib/components/ui'
+  import { Button, IconButton } from '#lib/components/ui/index.js'
 
-  import type { Tool } from '$lib/canvas/types'
+  import type { Tool } from '#lib/canvas/types.js'
 
   let {
     selectedTool,

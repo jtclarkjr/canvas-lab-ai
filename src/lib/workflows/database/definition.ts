@@ -1,21 +1,21 @@
 import {
   workflowDefinitionSchema,
   type WorkflowDefinition
-} from '$lib/workflows/schema'
+} from '#lib/workflows/schema.js'
 import {
   workflowDefinitionFromYaml,
   workflowDefinitionToYaml
-} from '$lib/workflows/definition'
+} from '#lib/workflows/definition.js'
 import type {
   DatabaseColumn,
   DatabaseFlowDefinition,
   DatabaseRelation,
   DatabaseTable
-} from '$lib/workflows/database/schema'
+} from '#lib/workflows/database/schema.js'
 import type {
   DatabaseFlowEdge,
   DatabaseFlowNode
-} from '$lib/workflows/database/types'
+} from '#lib/workflows/database/types.js'
 
 const DEFAULT_DATABASE_TABLE_GAP = 300
 

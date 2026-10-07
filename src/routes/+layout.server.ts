@@ -1,13 +1,13 @@
 import type { LayoutServerLoad } from './$types'
-import { isAnonymousUser } from '$lib/auth/anonymous'
-import { CANVASES_DEPENDENCY } from '$lib/canvas/consts'
-import { getAuthConfig } from '$lib/server/auth-config'
+import { isAnonymousUser } from '#lib/auth/anonymous.js'
+import { CANVASES_DEPENDENCY } from '#lib/canvas/consts.js'
+import { getAuthConfig } from '#lib/server/auth-config.js'
 import {
   createEmptyCanvasListData,
   listCanvasesForUser
-} from '$lib/server/canvas-list'
-import type { CanvasListData } from '$lib/server/types'
-import { getSupabase } from '$lib/server/supabase'
+} from '#lib/server/canvas-list.js'
+import type { CanvasListData } from '#lib/server/types.js'
+import { getSupabase } from '#lib/server/supabase.js'
 
 function canvasListError(error: unknown): CanvasListData {
   return {
