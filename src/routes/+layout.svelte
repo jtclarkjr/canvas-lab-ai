@@ -2,7 +2,8 @@
   import '../app.css'
   import favicon from '#lib/assets/favicon.svg'
   import { dev } from '$app/env'
-  import { injectAnalytics } from '@vercel/analytics/sveltekit'
+  import { afterNavigate } from '$app/navigation'
+  import { inject, pageview } from '@vercel/analytics'
   import AuthControls from '#lib/components/auth/AuthControls.svelte'
   import SettingsDialog from '#lib/components/settings/SettingsDialog.svelte'
   import { ToastViewport } from '#lib/components/shared/feedback/index.js'
@@ -11,7 +12,21 @@
   import { page } from '$app/state'
   import { onMount } from 'svelte'
 
-  injectAnalytics({ mode: dev ? 'development' : 'production' })
+  inject(
+    {
+      mode: dev ? 'development' : 'production',
+      framework: 'sveltekit',
+      disableAutoTrack: true,
+      basePath: import.meta.env.VITE_VERCEL_OBSERVABILITY_BASEPATH
+    },
+    import.meta.env.VITE_VERCEL_OBSERVABILITY_CLIENT_CONFIG
+  )
+
+  afterNavigate(() => {
+    if (page.route.id) {
+      pageview({ route: page.route.id, path: page.url.pathname })
+    }
+  })
 
   let { children } = $props<{
     children: () => unknown

@@ -23,14 +23,32 @@ export default defineConfig({
       maxDiffPixels: 0
     }
   },
-  webServer: {
-    command:
-      'node node_modules/sirv-cli/bin.js storybook-static --port 6006 --single --host 127.0.0.1',
-    url: 'http://127.0.0.1:6006',
-    reuseExistingServer: false,
-    timeout: 120_000
-  },
+  webServer: [
+    {
+      command:
+        'node node_modules/sirv-cli/bin.js storybook-static --port 6006 --single --host 127.0.0.1',
+      url: 'http://127.0.0.1:6006',
+      reuseExistingServer: false,
+      timeout: 120_000
+    },
+    {
+      command:
+        'vp build && vp preview --host 127.0.0.1 --port 5174 --strictPort',
+      url: 'http://127.0.0.1:5174',
+      reuseExistingServer: false,
+      timeout: 120_000
+    }
+  ],
   projects: [
+    ...(['chromium', 'firefox', 'webkit'] as const).map((browserName) => ({
+      name: `app-${browserName}`,
+      testDir: './tests/app',
+      testMatch: /hydration\.e2e\.ts/,
+      use: {
+        browserName,
+        baseURL: 'http://127.0.0.1:5174'
+      }
+    })),
     {
       name: 'visual-chromium',
       testMatch: /visual\.e2e\.ts/,
