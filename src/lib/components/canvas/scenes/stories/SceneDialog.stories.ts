@@ -12,7 +12,16 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    await Promise.all(
+      canvasElement
+        .getAnimations({ subtree: true })
+        .map((animation) => animation.finished)
+    )
+    await expect(within(canvasElement).getByRole('dialog')).toBeVisible()
+  }
+}
 export const Minimizes: Story = {
   tags: ['!visual'],
   play: async ({ canvasElement }) => {

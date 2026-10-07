@@ -21,6 +21,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
+      - run: vp exec svelte-kit sync
       - run: vp check
       - run: vp dlx sv check
       - run: vp run check:components
@@ -38,6 +39,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
+      - run: vp exec svelte-kit sync
       - run: vp run storybook:build
       - uses: actions/upload-artifact@v4
         with:
@@ -58,6 +60,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
+      - run: vp exec svelte-kit sync
       - run: vp exec playwright install chromium
       - run: vp run test:stories
 
@@ -78,6 +81,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
+      - run: vp exec svelte-kit sync
       - run: vp exec playwright install chromium firefox webkit
       - uses: actions/download-artifact@v4
         with:
@@ -115,6 +119,7 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install
+      - run: vp exec svelte-kit sync
       - uses: actions/download-artifact@v4
         with:
           pattern: pw-blob-*
