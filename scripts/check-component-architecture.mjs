@@ -241,20 +241,27 @@ for (const file of sourceFiles) {
   ) {
     if (!manualDialogAllowlist.has(relative)) {
       errors.push(
-        `${relative}: manual dialog surfaces must compose Dialog, Drawer, or BottomSheet from $lib/components/ui`
+        `${relative}: manual dialog surfaces must compose Dialog, Drawer, or BottomSheet from #lib/components/ui`
       )
     } else {
       seenManualDialogs.add(relative)
     }
   }
 
-  if (!insideUi && /from\s+['"]\$lib\/components\/ui\//.test(content)) {
+  if (
+    !insideUi &&
+    /from\s+['"]#lib\/components\/ui\/(?!index\.js['"])/.test(content)
+  ) {
     errors.push(
-      `${relative}: cross-layer UI imports must use $lib/components/ui`
+      `${relative}: cross-layer UI imports must use #lib/components/ui`
     )
   }
 
-  if (/from\s+['"]\$lib\/components\/shared\/[^/'"]+\//.test(content)) {
+  if (
+    /from\s+['"]#lib\/components\/shared\/[^/'"]+\/(?!index\.js['"])/.test(
+      content
+    )
+  ) {
     errors.push(
       `${relative}: shared component imports must use a domain index.ts barrel`
     )
@@ -262,13 +269,13 @@ for (const file of sourceFiles) {
 
   if (insideUi && !file.includes(`${path.sep}stories${path.sep}`)) {
     const forbidden = [
-      '$lib/components/shared',
-      '$lib/stores',
-      '$lib/canvas',
-      '$lib/mobile',
-      '$lib/workspace',
-      '$lib/server',
-      '$lib/auth'
+      '#lib/components/shared',
+      '#lib/stores',
+      '#lib/canvas',
+      '#lib/mobile',
+      '#lib/workspace',
+      '#lib/server',
+      '#lib/auth'
     ]
     for (const specifier of forbidden) {
       if (content.includes(specifier)) {
@@ -279,11 +286,11 @@ for (const file of sourceFiles) {
 
   if (insideShared && !file.includes(`${path.sep}stories${path.sep}`)) {
     const forbidden = [
-      '$lib/components/auth',
-      '$lib/components/canvas',
-      '$lib/mobile',
-      '$lib/workspace',
-      '$lib/routes'
+      '#lib/components/auth',
+      '#lib/components/canvas',
+      '#lib/mobile',
+      '#lib/workspace',
+      '#lib/routes'
     ]
     for (const specifier of forbidden) {
       if (content.includes(specifier)) {
