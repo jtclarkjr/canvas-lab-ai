@@ -19,7 +19,7 @@ export function createWorkspaceCanvasesStore({
   let canvases = $state<Canvas[]>(initialCanvases ?? [])
   let error = $state<string | null>(null)
   let isLoading = $state(false)
-  let hasLoadedCanvases = $state(initialCanvases !== undefined)
+  let hasLoadedCanvases = $state((initialCanvases?.length ?? 0) > 0)
 
   function currentCanvas() {
     return canvases.find((canvas) => canvas.id === getActiveCanvasId()) ?? null
@@ -35,7 +35,7 @@ export function createWorkspaceCanvasesStore({
     }
 
     canvases = nextCanvases
-    hasLoadedCanvases = true
+    hasLoadedCanvases = nextCanvases.length > 0
   }
 
   async function loadCanvasesList({ force = false }: { force?: boolean } = {}) {
